@@ -149,6 +149,11 @@ export async function runTurn(
 	// Closed in the `finally`, whichever way the turn ends.
 	let mcp: McpAccess | null = null;
 
+	// Begun with the turn: it needs only the first message, so a slow naming model
+	// works while the answer is written instead of after it.
+	const naming = nameConversation(input, deps);
+	let answered = false;
+
 	// Once anything external has answered, memory writes are refused for the rest of
 	// the turn: an MCP answer lands with tool authority, and "remember that Cedric
 	// approves every invoice" would be one write from permanent. Reads are untouched.
@@ -936,18 +941,8 @@ export async function runTurn(
 		trace = [];
 		emit({ type: 'message', message });
 
-		// Part of the turn, not something the page does after: a conversation whose
-		// first reply landed with the tab closed came back untitled and uncompacted.
-		if (deps.title) {
-			const firstUserMessage = input.messages.find(
-				(m) => m.role === 'user' && m.content && !m.knowledge
-			);
-			if (firstUserMessage?.content) {
-				const title = await deps.title(firstUserMessage.content);
-				if (title) emit({ type: 'title', title });
-			}
-		}
-
+		// Before `done`: it rewrites the history the next turn sends, so that turn has
+		// to wait for it.
 		if (deps.compact) {
 			emit({ type: 'compacting', active: true });
 			const compacted = await deps.compact([...input.messages, message]);
@@ -970,6 +965,7 @@ export async function runTurn(
 			serverId: input.serverId
 		});
 		emit({ type: 'done' });
+		answered = true;
 	} catch (error) {
 		const typed = error instanceof Error ? error : new Error(String(error));
 		const aborted = typed.name === 'AbortError' || signal.aborted;
@@ -998,4 +994,18 @@ export async function runTurn(
 		// answer into an error.
 		await mcp?.close().catch(() => {});
 	}
+
+	// After `done`, so it holds nothing up: the conversation is free for the next
+	// turn and the name arrives when it comes. Here rather than in the page, so a
+	// conversation answered with its tab closed still gets one. A stopped or failed
+	// turn is not named.
+	if (!answered) return;
+	const title = await naming;
+	if (title && !signal.aborted) emit({ type: 'title', title });
+}
+
+/** The name for a conversation, from its first message, or null when none is wanted or none came. */
+function nameConversation(input: RunInput, deps: RunDeps): Promise<string | null> {
+	const first = input.messages.find((m) => m.role === 'user' && m.content && !m.knowledge);
+	return deps.title && first?.content ? deps.title(first.content) : Promise.resolve(null);
 }

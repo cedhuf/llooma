@@ -99,7 +99,8 @@ export class Conversation implements RunSurface {
 	readonly #webFetch = fromStore(webFetchConfig);
 	readonly #chatDefaults = fromStore(chatDefaultsConfig);
 
-	#stopFollowing: (() => void) | null = null;
+	/** Every run still being watched, by id. A finished answer can keep its stream open for what follows it, a title, while the next turn is already running. */
+	readonly #streams = new Map<string, () => void>();
 	#compactAbort: AbortController | null = null;
 
 	/** The last system prompt we auto-resolved, so a model switch can update it without overwriting one somebody wrote. */
@@ -580,7 +581,12 @@ export class Conversation implements RunSurface {
 			runId,
 			from,
 			(event, replay) => {
-				if (event.type === 'done' || event.type === 'error') ended = true;
+				if (event.type === 'done' || event.type === 'error') {
+					ended = true;
+					// The answer is over. What can still arrive on this stream acts on the
+					// conversation, not on a run anybody could stop or approve.
+					if (this.activeRun === runId) this.activeRun = null;
+				}
 				applyRunEvent(event, this, { replay });
 				// The run stored what these three changed, but the lists around the
 				// conversation are drawn from a summary held in memory here.
@@ -595,13 +601,13 @@ export class Conversation implements RunSurface {
 				onCaughtUp: () => void this.#view.scrollToBottom(true)
 			}
 		);
-		this.#stopFollowing = stop;
+		this.#streams.set(runId, stop);
 
 		try {
 			await done;
 		} finally {
-			this.#stopFollowing = null;
-			this.activeRun = null;
+			this.#streams.delete(runId);
+			if (this.activeRun === runId) this.activeRun = null;
 			// Stopped watching without the turn ending, which is what leaving does: give
 			// the composer back rather than look like something is still arriving.
 			if (!ended) this.editor.isCompletionInProgress = false;
@@ -624,7 +630,7 @@ export class Conversation implements RunSurface {
 		const run = await runForSession(sessionId).catch(() => null);
 		// The conversation may have changed under us while that was in flight.
 		if (sessionId !== this.session.id) return;
-		if (!run) return;
+		if (!run || this.#streams.has(run.id)) return;
 
 		// From zero, so a half-written answer is rebuilt as it stands. What landed
 		// before this page opened is applied as history rather than performed, and
@@ -634,8 +640,8 @@ export class Conversation implements RunSurface {
 
 	/** Leaving a server-side turn is not abandoning it: it keeps going and is waiting when the conversation is opened again. */
 	detach = (): void => {
-		this.#stopFollowing?.();
-		this.#stopFollowing = null;
+		for (const stop of this.#streams.values()) stop();
+		this.#streams.clear();
 	};
 
 	/** Only the abort. What to do with a half-written answer is the run's ending, written down once in the reducer. */
