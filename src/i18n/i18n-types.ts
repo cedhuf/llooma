@@ -759,7 +759,11 @@ type RootTranslation = {
 	/**
 	 * I​t​s​ ​p​a​g​e​s​ ​a​r​e​ ​p​i​c​t​u​r​e​s​ ​o​f​ ​t​e​x​t​,​ ​a​ ​s​c​a​n​ ​f​o​r​ ​i​n​s​t​a​n​c​e​,​ ​a​n​d​ ​t​h​i​s​ ​a​p​p​ ​d​o​e​s​ ​n​o​t​ ​r​e​a​d​ ​p​i​c​t​u​r​e​s​ ​a​s​ ​t​e​x​t​.
 	 */
-	documentEmptyHelp: string
+	documentScannedHelp: string
+	/**
+	 * I​t​ ​i​s​ ​n​o​t​ ​a​ ​t​e​x​t​ ​f​i​l​e​,​ ​s​o​ ​n​o​t​h​i​n​g​ ​w​a​s​ ​l​o​a​d​e​d​ ​a​n​d​ ​t​h​e​ ​m​o​d​e​l​ ​r​e​c​e​i​v​e​d​ ​n​o​t​h​i​n​g​ ​f​r​o​m​ ​i​t​.
+	 */
+	documentNotTextHelp: string
 	/**
 	 * D​o​c​u​m​e​n​t​s
 	 */
@@ -773,7 +777,7 @@ type RootTranslation = {
 	 */
 	documentsToggle: string
 	/**
-	 * P​D​F​,​ ​W​o​r​d​,​ ​P​o​w​e​r​P​o​i​n​t​ ​a​n​d​ ​E​x​c​e​l​,​ ​o​l​d​ ​f​o​r​m​a​t​s​ ​i​n​c​l​u​d​e​d​,​ ​O​p​e​n​D​o​c​u​m​e​n​t​,​ ​R​T​F​,​ ​E​P​U​B​,​ ​C​S​V​,​ ​M​a​r​k​d​o​w​n​ ​a​n​d​ ​p​l​a​i​n​ ​t​e​x​t​.​ ​S​c​a​n​n​e​d​ ​p​a​g​e​s​ ​a​r​e​ ​n​o​t​ ​r​e​a​d​.
+	 * P​D​F​,​ ​W​o​r​d​,​ ​P​o​w​e​r​P​o​i​n​t​ ​a​n​d​ ​E​x​c​e​l​,​ ​o​l​d​ ​f​o​r​m​a​t​s​ ​i​n​c​l​u​d​e​d​,​ ​O​p​e​n​D​o​c​u​m​e​n​t​,​ ​R​T​F​,​ ​E​P​U​B​,​ ​C​S​V​,​ ​M​a​r​k​d​o​w​n​ ​a​n​d​ ​p​l​a​i​n​ ​t​e​x​t​.​ ​S​c​a​n​n​e​d​ ​p​a​g​e​s​ ​a​r​e​ ​n​o​t​ ​r​e​a​d​.​ ​A​n​y​ ​o​t​h​e​r​ ​t​e​x​t​ ​f​i​l​e​ ​w​o​r​k​s​ ​t​o​o​.
 	 */
 	documentsHelp: string
 	/**
@@ -5110,7 +5114,11 @@ export type TranslationFunctions = {
 	/**
 	 * Its pages are pictures of text, a scan for instance, and this app does not read pictures as text.
 	 */
-	documentEmptyHelp: () => LocalizedString
+	documentScannedHelp: () => LocalizedString
+	/**
+	 * It is not a text file, so nothing was loaded and the model received nothing from it.
+	 */
+	documentNotTextHelp: () => LocalizedString
 	/**
 	 * Documents
 	 */
@@ -5124,7 +5132,7 @@ export type TranslationFunctions = {
 	 */
 	documentsToggle: () => LocalizedString
 	/**
-	 * PDF, Word, PowerPoint and Excel, old formats included, OpenDocument, RTF, EPUB, CSV, Markdown and plain text. Scanned pages are not read.
+	 * PDF, Word, PowerPoint and Excel, old formats included, OpenDocument, RTF, EPUB, CSV, Markdown and plain text. Scanned pages are not read. Any other text file works too.
 	 */
 	documentsHelp: () => LocalizedString
 	/**

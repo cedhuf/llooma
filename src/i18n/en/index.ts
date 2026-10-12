@@ -201,14 +201,16 @@ const en = {
 	imagesIgnored: '{count:number} {{file|files}} ignored. Only PNG and JPEG images are supported.',
 	documentFailed: '{name:string} could not be read',
 	documentEmpty: 'No text could be read from {name:string}',
-	documentEmptyHelp:
+	documentScannedHelp:
 		'Its pages are pictures of text, a scan for instance, and this app does not read pictures as text.',
+	documentNotTextHelp:
+		'It is not a text file, so nothing was loaded and the model received nothing from it.',
 	documentsTitle: 'Documents',
 	documentsDescription:
 		'Attach a PDF, a Word file or a spreadsheet and its text goes into the conversation.',
 	documentsToggle: 'Read attached documents',
 	documentsHelp:
-		'PDF, Word, PowerPoint and Excel, old formats included, OpenDocument, RTF, EPUB, CSV, Markdown and plain text. Scanned pages are not read.',
+		'PDF, Word, PowerPoint and Excel, old formats included, OpenDocument, RTF, EPUB, CSV, Markdown and plain text. Scanned pages are not read. Any other text file works too.',
 	deleteKnowledge: 'Delete knowledge',
 	deleteServer: 'Delete server',
 	deleteMessage: 'Delete this message',

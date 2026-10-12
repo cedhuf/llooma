@@ -118,10 +118,11 @@ async function attachDocuments(
 				// Said, so the model does not answer about a document it never read. Anything
 				// else, an expired URL or a file the parser gave up on, leaves the line naming it.
 				if (error instanceof DocumentWithoutText) {
-					built[index] = {
-						...built[index],
-						content: `${built[index].content}\n[${name} has no text that could be read: its pages are pictures.]`
-					};
+					const said =
+						error.detail === 'binary'
+							? `${name} is not a text file and was not read`
+							: `${name} has no text that could be read`;
+					built[index] = { ...built[index], content: `${built[index].content}\n[${said}]` };
 				}
 			}
 		}

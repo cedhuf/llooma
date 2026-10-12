@@ -88,9 +88,10 @@
 				];
 			} catch (error) {
 				if (error instanceof DocumentWithoutText) {
-					toast.warning($LL.documentEmpty({ name: file.name }), {
-						description: $LL.documentEmptyHelp()
-					});
+					const description =
+						error.detail &&
+						{ binary: $LL.documentNotTextHelp(), scanned: $LL.documentScannedHelp() }[error.detail];
+					toast.warning($LL.documentEmpty({ name: file.name }), { description });
 					continue;
 				}
 				const message = error instanceof Error ? error.message : String(error);

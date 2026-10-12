@@ -216,14 +216,16 @@ const fr = extendDictionary(en, {
 		'{count:number} fichier{{s}} ignoré{{s}}. Seules les images PNG et JPEG sont acceptées.',
 	documentFailed: '{name:string} n’a pas pu être lu',
 	documentEmpty: 'Aucun texte n’a pu être lu dans {name:string}',
-	documentEmptyHelp:
+	documentScannedHelp:
 		"Ses pages sont des images de texte, un scan par exemple, et l'application ne lit pas le texte des images.",
+	documentNotTextHelp:
+		"Ce n'est pas un fichier texte : rien n'a été chargé, et le modèle n'en a rien reçu.",
 	documentsTitle: 'Documents',
 	documentsDescription:
 		'Joignez un PDF, un fichier Word ou un tableur et son texte entre dans la conversation.',
 	documentsToggle: 'Lire les documents joints',
 	documentsHelp:
-		'PDF, Word, PowerPoint et Excel, anciens formats compris, OpenDocument, RTF, EPUB, CSV, Markdown et texte brut. Les pages scannées ne sont pas lues.',
+		'PDF, Word, PowerPoint et Excel, anciens formats compris, OpenDocument, RTF, EPUB, CSV, Markdown et texte brut. Les pages scannées ne sont pas lues. Tout autre fichier texte fonctionne aussi.',
 	downloadModel: 'Télécharger le modèle',
 	edit: 'Éditer',
 	emptyKnowledge: 'Aucune connaissance',

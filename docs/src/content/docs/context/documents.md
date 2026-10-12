@@ -7,7 +7,8 @@ sidebar:
 
 Attach a file from the composer's _Add context_ menu and its text joins the conversation. PDF,
 Word, PowerPoint and Excel, the old `.doc`, `.ppt` and `.xls` included, OpenDocument, RTF, EPUB,
-CSV, Markdown and plain text.
+CSV, Markdown and plain text. Any other file is read as it is if it turns out to be text, a log, a
+config file or source code; anything else is refused, and nothing of it reaches the model.
 
 ## Nothing is uploaded
 

@@ -1,7 +1,7 @@
 import {
-	documentMarkdown,
 	documentsDisabledByInstance,
 	isDocumentName,
+	readDocument,
 	type Anydoc
 } from '$lib/documents';
 
@@ -28,7 +28,7 @@ export function isReadableDocument(name: string): boolean {
 	return !documentsDisabledByInstance && isDocumentName(name);
 }
 
-/** The server's reading of a document that reached it from elsewhere, a bot's chat room above all. Throws `DocumentWithoutText` for a scan. */
+/** The server's reading of a document that reached it from elsewhere, a bot's chat room above all. Throws `DocumentWithoutText` when nothing readable comes out. */
 export async function extractDocumentText(bytes: Uint8Array, name: string): Promise<string> {
-	return documentMarkdown(await loadOnServer(), bytes, name);
+	return readDocument(bytes, name, loadOnServer);
 }
