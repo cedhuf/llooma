@@ -141,7 +141,6 @@ export type RunEvent =
 	| { type: 'compacting'; active: boolean }
 	/** The conversation was compacted, and this marker replaces what came before it. */
 	| { type: 'compaction'; marker: Message; replacedCount: number }
-	/** The turn is over. Nothing follows. */
 	/** What the provider says the turn consumed, once, at the end. An event like everything else, so a reattaching client gets it on replay. */
 	| {
 			type: 'usage';
@@ -154,9 +153,12 @@ export type RunEvent =
 			model?: string;
 			serverId?: string;
 	  }
+	/** The turn is over: the answer is complete and the conversation is free for the next one. */
 	| { type: 'done' }
 	/** Cancellation is an ending like any other rather than an exception: a reattaching client has to be told why nothing more is coming. */
-	| { type: 'error'; message: string; aborted: boolean };
+	| { type: 'error'; message: string; aborted: boolean }
+	/** Nothing more will arrive for this run, which is what closes a stream. Always last, after `done` or `error`. */
+	| { type: 'end' };
 
 /** An event with its place in the log, which is what resumption is addressed by. */
 export interface SequencedRunEvent {

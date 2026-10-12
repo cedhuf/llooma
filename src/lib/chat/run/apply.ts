@@ -180,6 +180,10 @@ export function applyRunEvent(
 			// through.
 			return;
 
+		case 'end':
+			// The stream's business, closed by whoever follows it.
+			return;
+
 		case 'error':
 			editor.isCompletionInProgress = false;
 			editor.pendingApproval = undefined;

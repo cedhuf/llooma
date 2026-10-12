@@ -64,6 +64,8 @@ export async function POST(event) {
 	const approve = (request: McpApprovalRequest) =>
 		awaitApproval(run, request.id, MCP_LIMITS.approvalTimeoutMs);
 
+	// `end` once the turn has nothing more to do, however it stopped, so every stream
+	// watching it closes exactly once and last.
 	void runSpeakers(
 		input,
 		(pass) => serverDeps(pass, principal, { approve }),
@@ -82,7 +84,7 @@ export async function POST(event) {
 			emitTo(run, ev);
 		},
 		run.controller.signal
-	);
+	).finally(() => emitTo(run, { type: 'end' }));
 
 	return json(summarise(run), { status: 201 });
 }

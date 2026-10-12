@@ -28,6 +28,8 @@ interface Run {
 	status: RunStatus;
 	startedAt: string;
 	finishedAt?: number;
+	/** Set by `end`: whoever subscribes from here on gets the log and a closed stream. */
+	ended: boolean;
 	events: SequencedRunEvent[];
 	controller: AbortController;
 	listeners: Set<(event: SequencedRunEvent) => void>;
@@ -65,6 +67,7 @@ export function createRun(sessionId: string, userId: string | null): Run {
 		userId,
 		status: 'running',
 		startedAt: new Date().toISOString(),
+		ended: false,
 		events: [],
 		controller: new AbortController(),
 		listeners: new Set(),
@@ -81,6 +84,7 @@ export function emitTo(run: Run, event: RunEvent): void {
 
 	if (event.type === 'done') finish(run, 'done');
 	else if (event.type === 'error') finish(run, event.aborted ? 'aborted' : 'error');
+	else if (event.type === 'end') run.ended = true;
 
 	for (const listener of run.listeners) {
 		try {

@@ -11,7 +11,7 @@ import { getRun, subscribe } from '$lib/server/runs';
  * any reverse proxy that can carry a streamed response, and resumption is part
  * of the protocol rather than something we invent.
  *
- * A finished run still answers: its whole log is replayed and the stream closes,
+ * An ended run still answers: its whole log is replayed and the stream closes,
  * which is what makes a reload landing after the model finished collect the
  * answer instead of an empty conversation.
  */
@@ -59,13 +59,12 @@ export async function GET(event) {
 					close();
 					return;
 				}
-				// The last event a client needs is one of these two, so the run's ending is what
-				// closes the stream rather than a timer guessing at it.
-				if (sequenced.event.type === 'done' || sequenced.event.type === 'error') close();
+				// The run says when it has nothing more to send, rather than a timer guessing.
+				if (sequenced.event.type === 'end') close();
 			});
 
-			// A run that had already finished has just had its whole log replayed.
-			if (run.status !== 'running') close();
+			// A run that had already ended has just had its whole log replayed.
+			if (run.ended) close();
 		},
 
 		cancel() {

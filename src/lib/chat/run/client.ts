@@ -84,7 +84,7 @@ export function followRun(
 			onCaughtUp?.();
 		}
 
-		if (event.type === 'done' || event.type === 'error') close();
+		if (event.type === 'end') close();
 	};
 
 	source.onerror = () => {
