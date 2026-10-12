@@ -16,8 +16,8 @@ import { generateRandomId } from '$lib/utils';
  * Nothing here talks to a provider or to the server.
  */
 
-/** The `accept` attribute for a file input, matching `IMAGE_INPUT_TYPES`. */
-export const IMAGE_INPUT_ACCEPT = '.png,.jpg,.jpeg,image/png,image/jpeg';
+/** The `accept` attribute for a file input, matching `IMAGE_INPUT_TYPES`. Media types only: given extensions as well, the system picker lists every format twice. */
+export const IMAGE_INPUT_ACCEPT = 'image/png,image/jpeg';
 
 /** One file read, or nothing when it could not be read. */
 function readOne(file: File, name: string): Promise<ImageAttachment | null> {
