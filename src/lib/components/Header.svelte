@@ -48,7 +48,7 @@
 {#if floating}
 	<!-- The gutter beside the pill belongs to the conversation, not to the bar: it
 	     lets pointer events through, so a message showing there stays reachable. -->
-	<div class="floating-band pointer-events-none flex lg:px-6 lg:pt-4 xl:px-8">
+	<div class="floating-band pointer-events-none flex lg:px-6 lg:pt-2 xl:px-8">
 		{#if compact}
 			<!-- Two objects rather than one bar, pushed to opposite edges: the round one
 			     belongs to the app and opens the column beside it, the pill belongs to this
@@ -65,7 +65,7 @@
 		{/if}
 
 		<header
-			class="surface-floating border-shade-3 pointer-events-auto h-16 w-full items-center justify-between rounded-full border px-5 text-xs shadow-lg [--surface-tint:66%] {compact
+			class="surface-floating border-shade-3 pointer-events-auto h-12 w-full items-center justify-between rounded-full border px-4 text-xs shadow-lg [--surface-tint:66%] {compact
 				? 'hidden lg:flex'
 				: 'flex'}"
 		>
