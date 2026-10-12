@@ -4,8 +4,9 @@ import { effectivePrompts } from '$lib/appPrompts';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { ConnectionType } from '$lib/connections';
 import { resolvePrompt } from '$lib/defaultPrompts';
-import { serversStore, settingsStore } from '$lib/localStorage';
+import { serversStore } from '$lib/localStorage';
 import type { Message, Session } from '$lib/sessions';
+import type { ModelRef } from '$lib/settings';
 
 import type { ChatStrategy } from './index';
 import { messagesInContext } from './notes';
@@ -39,19 +40,11 @@ function transcribe(message: Message): string {
  * The title model is deliberately not reused: a model picked to write six words
  * will quietly drop facts over fifty thousand tokens.
  */
-function resolveCompactModel(session: Session): { name: string; serverId: string } | null {
-	const settings = get(settingsStore);
-	const config = get(chatDefaultsConfig).compact;
-
-	if (config.compactModel) {
-		const known = settings.models.find((m) => m.name === config.compactModel);
-		if (known) return { name: known.name, serverId: known.serverId };
-		// The model may live on a system server the user cannot list, so use the id the
-		// server handed us: the proxy authorises by server.
-		if (config.compactServerId) {
-			return { name: config.compactModel, serverId: config.compactServerId };
-		}
-	}
+function resolveCompactModel(session: Session): ModelRef | null {
+	// Taken as it is, without looking it up: one an administrator shares may live on
+	// a connection this account cannot list, and the proxy authorises by connection.
+	const chosen = get(chatDefaultsConfig).compact.compactModel;
+	if (chosen) return chosen;
 
 	if (session.model?.name && session.model.serverId) {
 		return { name: session.model.name, serverId: session.model.serverId };

@@ -1,4 +1,5 @@
 import type { TranslationFunctions } from '$i18n/i18n-types';
+import { parseModelRef, type ModelRef } from '$lib/settings';
 
 /**
  * Bots living outside Llooma, and what each is configured to be.
@@ -102,9 +103,8 @@ export const POLL_SECONDS_MAX = 120;
 export interface ChattoConfig {
 	/** Where the Chatto server lives, without a trailing slash. */
 	baseUrl: string;
-	/** The connection the model is served from, resolved server-side like any run. */
-	serverId: string;
-	model: string;
+	/** Resolved server-side like any run: the connection's address and key never reach the browser. */
+	model: ModelRef | null;
 	instructionsMode: InstructionsMode;
 	/** A persona contributes its prompt and nothing else: no memory, no library conversation, no knowledge. */
 	personaId?: string;
@@ -142,8 +142,7 @@ export interface IntegrationView {
 export function defaultChattoConfig(): ChattoConfig {
 	return {
 		baseUrl: '',
-		serverId: '',
-		model: '',
+		model: null,
 		instructionsMode: 'default',
 		instructions: '',
 		placement: 'auto',
@@ -181,8 +180,7 @@ export function normaliseConfig(kind: IntegrationKind, raw: unknown): Integratio
 	return {
 		...base,
 		baseUrl: (input.baseUrl ?? '').trim().replace(/\/+$/, ''),
-		serverId: (input.serverId ?? '').trim(),
-		model: (input.model ?? '').trim(),
+		model: parseModelRef(input.model),
 		instructionsMode: oneOf(
 			input.instructionsMode,
 			['default', 'persona', 'custom'] as const,
@@ -216,6 +214,6 @@ export function normaliseConfig(kind: IntegrationKind, raw: unknown): Integratio
 
 /** Whether an integration holds enough to be worth starting. */
 export function isRunnable(view: { config: IntegrationConfig; hasSecret: boolean }): boolean {
-	const { baseUrl, serverId, model } = view.config;
-	return !!baseUrl && !!serverId && !!model && view.hasSecret;
+	const { baseUrl, model } = view.config;
+	return !!baseUrl && !!model && view.hasSecret;
 }

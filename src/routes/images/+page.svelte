@@ -52,11 +52,11 @@
 		imagesLoaded,
 		imagesStore,
 		imageUrl,
-		serverIdFor,
 		titleImages
 	} from '$lib/images';
 	import { serversStore } from '$lib/localStorage';
 	import type { ImageAttachment } from '$lib/promptAttachments';
+	import { findModel, type ModelRef } from '$lib/settings';
 	import { toast } from '$lib/toast';
 
 	/**
@@ -67,7 +67,7 @@
 
 	let prompt = $state(readDraft(IMAGE_DRAFT));
 	let negativePrompt = $state('');
-	let model = $state('');
+	let model = $state<ModelRef | null>(null);
 	let ratio = $state<ImageRatio>('square');
 	let quality = $state<ImageQuality>('standard');
 	let count = $state(1);
@@ -80,16 +80,16 @@
 
 	/** Empty on anything the app has no translation for, which disables both controls rather than offering a choice that becomes a refusal thirty seconds later. */
 	const options = $derived.by(() => {
-		const server = serverFor(serverIdFor(model) ?? '');
-		return server ? imageOptionsFor(server.connectionType, model) : {};
+		const server = model && serverFor(model.serverId);
+		return server && model ? imageOptionsFor(server.connectionType, model.name) : {};
 	});
 
 	/** Held here and nowhere else: they travel with one request and are never stored, so switching to a model that takes none puts them down. */
 	let references = $state<ImageAttachment[]>([]);
 
 	const accepts = $derived.by(() => {
-		const server = serverFor(serverIdFor(model) ?? '');
-		return server ? referencesFor(server.connectionType, model) : undefined;
+		const server = model && serverFor(model.serverId);
+		return server && model ? referencesFor(server.connectionType, model.name) : undefined;
 	});
 
 	const roomLeft = $derived(accepts ? accepts.max - references.length : 0);
@@ -192,9 +192,9 @@
 	// can draw, so the field is never empty on arrival.
 	onMount(() => {
 		if (model) return;
-		const preferred = $chatDefaultsConfig.images.defaultImageModel;
-		model =
-			($imageModels.some((m) => m.name === preferred) ? preferred : $imageModels[0]?.name) ?? '';
+		const preferred = findModel($imageModels, $chatDefaultsConfig.images.defaultImageModel);
+		const chosen = preferred ?? $imageModels[0];
+		model = chosen ? { serverId: chosen.serverId, name: chosen.name } : null;
 	});
 
 	async function rewrite() {
@@ -227,14 +227,13 @@
 	}
 
 	async function generate() {
-		const serverId = serverIdFor(model);
-		if (!serverId || !prompt.trim()) return;
+		if (!model || !prompt.trim()) return;
 
 		busy = true;
 		try {
 			const made = await generateImages({
-				serverId,
-				model,
+				serverId: model.serverId,
+				model: model.name,
 				// Both, always. The typed words are what the gallery shows and what a search
 				// matches; the rewrite is what was actually sent, which is what makes "why does
 				// this not look like what I asked for" a question with an answer.
@@ -293,7 +292,8 @@
 		negativePrompt = image.negativePrompt ?? '';
 		if (image.ratio) ratio = image.ratio;
 		if (image.quality) quality = image.quality;
-		if ($imageModels.some((m) => m.name === image.model)) model = image.model;
+		const drawnWith = { serverId: image.serverId, name: image.model };
+		if (findModel($imageModels, drawnWith)) model = drawnWith;
 		if (image.negativePrompt) showAdvanced = true;
 		opened = null;
 	}

@@ -8,8 +8,10 @@
 	import MultiSelect from '$lib/components/MultiSelect.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
+	import { describeModel } from '$lib/connections';
 	import { GITHUB_RELEASES_URL } from '$lib/github';
-	import { settingsStore } from '$lib/localStorage';
+	import { serversStore, settingsStore } from '$lib/localStorage';
+	import { modelKey, type ModelRef } from '$lib/settings';
 	import { settingsModalOpen, welcomeOpen, welcomeShowAll } from '$lib/stores/modal';
 	import { toast } from '$lib/toast';
 
@@ -74,7 +76,7 @@
 	const hasOwnAppPrompts = $derived(Object.keys($settingsStore.promptOverrides ?? {}).length > 0);
 
 	let defaultModelSharing = $state<'off' | 'locked' | 'overridable'>('off');
-	let defaultModelValue = $state('');
+	let defaultModelValue = $state<ModelRef | null>(null);
 	let titleSharing = $state<'off' | 'locked' | 'overridable'>('off');
 	let titleShareEnabled = $state(false);
 	let compactSharing = $state<'off' | 'locked' | 'overridable'>('off');
@@ -91,10 +93,17 @@
 		samplingCount ? $LL.samplingFieldCount({ count: samplingCount }) : $LL.samplingNothingSet()
 	);
 
-	const sharedModelNames = $derived(
-		Array.from(new Set(servers.flatMap((s) => s.sharedModels))).sort((a, b) =>
-			a.localeCompare(b, undefined, { sensitivity: 'base' })
-		)
+	/** Every model a system connection shares, each with the connection it runs on. */
+	const sharedModelRefs = $derived(
+		servers
+			.flatMap((server) =>
+				server.sharedModels.map((name) => ({
+					serverId: server.id,
+					name,
+					label: `${name} · ${server.label || server.connectionType}`
+				}))
+			)
+			.sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }))
 	);
 
 	function syncShare() {
@@ -149,7 +158,7 @@
 		await api('/api/admin/config', 'PUT', {
 			voiceSharing,
 			voiceInput: $settingsStore.voiceInput,
-			voiceModel: $settingsStore.voiceModel ?? ''
+			voiceModel: $settingsStore.voiceModel
 		});
 	}
 
@@ -200,7 +209,7 @@
 			appPromptsSharing = config.appPromptsSharing ?? 'off';
 			appPromptsShareEnabled = appPromptsSharing !== 'off';
 			defaultModelSharing = config.defaultModelSharing ?? 'off';
-			defaultModelValue = config.defaultModel ?? '';
+			defaultModelValue = config.defaultModel ?? null;
 			titleSharing = config.titleSharing ?? 'off';
 			titleShareEnabled = titleSharing !== 'off';
 			compactSharing = config.compactSharing ?? 'off';
@@ -296,12 +305,10 @@
 	}
 
 	async function saveTitle() {
-		const model = $settingsStore.models.find((m) => m.name === $settingsStore.titleModel);
 		await api('/api/admin/config', 'PUT', {
 			titleSharing,
 			titleEnabled: $settingsStore.generateTitlesWithAI,
-			titleModel: $settingsStore.titleModel ?? '',
-			titleServerId: model?.serverId ?? '',
+			titleModel: $settingsStore.titleModel,
 			// Shared with the rest of it: an admin configures naming for themselves in
 			// Chat, and this decides who else gets it.
 			titleRegenerate: $settingsStore.regenerateTitle,
@@ -321,18 +328,16 @@
 	async function saveImagesSharing() {
 		await api('/api/admin/config', 'PUT', {
 			imagesSharing,
-			defaultImageModel: $settingsStore.defaultImageModel ?? '',
+			defaultImageModel: $settingsStore.defaultImageModel,
 			imagePromptWriter: $settingsStore.imagePromptWriter,
-			imagePromptModel: $settingsStore.imagePromptModel ?? ''
+			imagePromptModel: $settingsStore.imagePromptModel
 		});
 	}
 
 	async function saveCompact() {
-		const model = $settingsStore.models.find((m) => m.name === $settingsStore.compactModel);
 		await api('/api/admin/config', 'PUT', {
 			compactSharing,
-			compactModel: $settingsStore.compactModel ?? '',
-			compactServerId: model?.serverId ?? '',
+			compactModel: $settingsStore.compactModel,
 			compactAuto: $settingsStore.autoCompact,
 			compactThreshold: $settingsStore.compactThreshold
 		});
@@ -668,7 +673,7 @@
 			<Select bind:value={voiceSharing} options={sharingOptions} onChange={saveVoice} />
 			<span class="text-muted text-xs">
 				{$LL.sharingLabel()}: {$settingsStore.voiceInput
-					? ($settingsStore.voiceModel ?? $LL.none())
+					? (describeModel($serversStore, $settingsStore.voiceModel) ?? $LL.none())
 					: $LL.off()}
 			</span>
 		{/if}
@@ -702,9 +707,10 @@
 		{#if imagesShareEnabled}
 			<Select bind:value={imagesSharing} options={sharingOptions} onChange={saveImagesSharing} />
 			<span class="text-muted text-xs">
-				{$LL.sharingLabel()}: {$settingsStore.defaultImageModel || $LL.defaultModel()}
+				{$LL.sharingLabel()}: {describeModel($serversStore, $settingsStore.defaultImageModel) ??
+					$LL.defaultModel()}
 				· {$settingsStore.imagePromptWriter
-					? $settingsStore.imagePromptModel || $LL.defaultModel()
+					? (describeModel($serversStore, $settingsStore.imagePromptModel) ?? $LL.defaultModel())
 					: $LL.imagePromptWriterOff()}
 			</span>
 		{/if}
@@ -742,14 +748,18 @@
 			<span class="text-muted text-sm">{$LL.noSystemServers()}</span>
 		{/if}
 
-		{#if sharedModelNames.length}
+		{#if sharedModelRefs.length}
 			<div class="border-shade-3 flex flex-col gap-2 rounded-md border p-3">
 				<span class="text-sm font-medium">{$LL.defaultModelForUsers()}</span>
 				<Select
-					bind:value={defaultModelValue}
+					value={defaultModelValue ? modelKey(defaultModelValue) : ''}
 					emptyLabel={$LL.none()}
-					options={sharedModelNames.map((name) => ({ value: name, label: name }))}
-					onChange={onDefaultModelChange}
+					options={sharedModelRefs.map((model) => ({ value: modelKey(model), label: model.label }))}
+					onChange={(option) => {
+						const chosen = sharedModelRefs.find((model) => modelKey(model) === option.value);
+						defaultModelValue = chosen ? { serverId: chosen.serverId, name: chosen.name } : null;
+						onDefaultModelChange();
+					}}
 				/>
 				{#if defaultModelValue}
 					<Select

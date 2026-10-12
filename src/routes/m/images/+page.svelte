@@ -6,7 +6,8 @@
 	import Head from '$lib/components/Head.svelte';
 	import ImageViewer from '$lib/components/ImageViewer.svelte';
 	import type { GeneratedImage } from '$lib/generatedImages';
-	import { generateImages, imageModels, imagesStore, imageUrl, serverIdFor } from '$lib/images';
+	import { generateImages, imageModels, imagesStore, imageUrl } from '$lib/images';
+	import { findModel } from '$lib/settings';
 	import { toast } from '$lib/toast';
 	import { VoiceRecorder } from '$lib/voice.svelte';
 
@@ -28,7 +29,7 @@
 
 	/** The instance's default where there is one, the first that draws otherwise. */
 	const model = $derived(
-		$chatDefaultsConfig.images.defaultImageModel || ($imageModels[0]?.name ?? '')
+		findModel($imageModels, $chatDefaultsConfig.images.defaultImageModel) ?? $imageModels[0]
 	);
 
 	const voiceCfg = $derived($chatDefaultsConfig.voice);
@@ -44,12 +45,16 @@
 	}
 
 	async function draw() {
-		const serverId = serverIdFor(model);
-		if (!serverId || !prompt.trim() || busy) return;
+		if (!model || !prompt.trim() || busy) return;
 
 		busy = true;
 		try {
-			await generateImages({ serverId, model, prompt: prompt.trim(), n: 1 });
+			await generateImages({
+				serverId: model.serverId,
+				model: model.name,
+				prompt: prompt.trim(),
+				n: 1
+			});
 			prompt = '';
 		} catch (error) {
 			toast.error($LL.imageGenerationFailed(), {

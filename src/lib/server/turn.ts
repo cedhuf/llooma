@@ -3,7 +3,7 @@ import { runTurn } from '$lib/chat/run/orchestrator';
 import type { RunEvent, RunInput } from '$lib/chat/run/types';
 import type { BotTool } from '$lib/integrations';
 import type { Message } from '$lib/sessions';
-import { effectiveSystemPrompt } from '$lib/settings';
+import { effectiveSystemPrompt, type ModelRef } from '$lib/settings';
 
 import { resolveAppPrompts } from './appPromptsResolver';
 import { getSettings } from './db/collections';
@@ -28,9 +28,8 @@ import { recordRunUsage } from './usageMeter';
 export interface TurnRequest {
 	/** The account this runs as. Its connections, its settings, its policy. */
 	userId: string;
-	/** The connection serving the model, by id. The server resolves address and key. */
-	serverId: string;
-	model: string;
+	/** The connection resolves to an address and a key here, never in the caller. */
+	model: ModelRef;
 	/** Who the answer should sound like. Empty means no instructions at all. */
 	systemPrompt?: string;
 	/** The conversation as the model should receive it, already assembled. */
@@ -49,7 +48,7 @@ export interface TurnResult {
 }
 
 /** Here rather than at the caller, because it is the same answer the page computes for a new conversation: a bot asking for "the usual" should get exactly that. */
-export function defaultSystemPrompt(userId: string, model: string): string {
+export function defaultSystemPrompt(userId: string, model: ModelRef | null): string {
 	const user = getUserById(userId);
 	if (!user) return '';
 	const { prompts } = resolveSystemPrompts(getSettings(userId), user.role === 'admin');
@@ -77,8 +76,8 @@ export async function runTurnOnce(request: TurnRequest): Promise<TurnResult> {
 		// for it to belong to. Named rather than left undefined, since the field is
 		// required and an empty id is clearer than a made-up one in a log.
 		sessionId: '',
-		serverId: request.serverId,
-		model: request.model,
+		serverId: request.model.serverId,
+		model: request.model.name,
 		think: wanted.has('thinking'),
 		systemPrompt: request.systemPrompt?.trim() || undefined,
 		messages: request.messages,
@@ -130,8 +129,8 @@ export async function runTurnOnce(request: TurnRequest): Promise<TurnResult> {
 			// in the same meter. The bot spends real money on somebody's account.
 			recordRunUsage(
 				user.id,
-				event.serverId ?? request.serverId,
-				event.model ?? request.model,
+				event.serverId ?? request.model.serverId,
+				event.model ?? request.model.name,
 				event.used
 			);
 		} else if (event.type === 'error' && !event.aborted) failure = event.message;

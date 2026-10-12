@@ -1,61 +1,61 @@
 import { parseSamplingOptions, type SamplingOptions } from '$lib/chat/options';
-import { getConfig } from '$lib/server/db/config';
+import { getConfig, getModelConfig } from '$lib/server/db/config';
 import { resolveShared, type Sharing } from '$lib/server/sharing';
-import { DEFAULT_SETTINGS, type Settings } from '$lib/settings';
+import { DEFAULT_SETTINGS, type ModelRef, type Settings } from '$lib/settings';
 
 export interface ResolvedChatDefaults {
 	defaultModel: {
-		value: string;
+		value: ModelRef | null;
 		editable: boolean;
 		source: 'admin' | 'user';
-		adminValue: string;
+		adminValue: ModelRef | null;
 	};
 	title: {
 		generateTitlesWithAI: boolean;
-		titleModel: string;
-		titleServerId: string;
+		titleModel: ModelRef | null;
 		regenerateTitle: boolean;
 		regenerateTitleAfter: number;
 		editable: boolean;
 		source: 'admin' | 'user';
 		admin: {
 			generateTitlesWithAI: boolean;
-			titleModel: string;
-			titleServerId: string;
+			titleModel: ModelRef | null;
 			regenerateTitle: boolean;
 			regenerateTitleAfter: number;
 		};
 	};
 	compact: {
-		compactModel: string;
-		compactServerId: string;
+		compactModel: ModelRef | null;
 		autoCompact: boolean;
 		compactThreshold: number;
 		editable: boolean;
 		source: 'admin' | 'user';
 		admin: {
-			compactModel: string;
-			compactServerId: string;
+			compactModel: ModelRef | null;
 			autoCompact: boolean;
 			compactThreshold: number;
 		};
 	};
 	/** In this resolver rather than one of its own: the question is the same one, which model an account uses for a job it did not choose a model for, and who decides. */
 	images: {
-		defaultImageModel: string;
+		defaultImageModel: ModelRef | null;
 		imagePromptWriter: boolean;
-		imagePromptModel: string;
+		imagePromptModel: ModelRef | null;
 		editable: boolean;
 		source: 'admin' | 'user';
-		admin: { defaultImageModel: string; imagePromptWriter: boolean; imagePromptModel: string };
+		admin: {
+			defaultImageModel: ModelRef | null;
+			imagePromptWriter: boolean;
+			imagePromptModel: ModelRef | null;
+		};
 	};
 	/** Same reason as the images group. An administrator who has set up a transcription model is usually the only person who could have, so sharing it is the difference between a feature everybody has and one only they have. */
 	voice: {
 		voiceInput: boolean;
-		voiceModel: string;
+		voiceModel: ModelRef | null;
 		editable: boolean;
 		source: 'admin' | 'user';
-		admin: { voiceInput: boolean; voiceModel: string };
+		admin: { voiceInput: boolean; voiceModel: ModelRef | null };
 	};
 	/**
 	 * The sampling every conversation on this account starts from, shared the same
@@ -94,9 +94,9 @@ export function resolveChatDefaults(
 	}
 
 	const defaultModel = resolveShared({
-		own: userSettings?.defaultModel ?? '',
-		admin: () => getConfig('defaultModel') ?? '',
-		empty: '',
+		own: userSettings?.defaultModel ?? null,
+		admin: () => getModelConfig('defaultModel'),
+		empty: null,
 		sharing: sharingOf('defaultModelSharing'),
 		isAdmin,
 		hasContent: (value) => !!value
@@ -105,16 +105,14 @@ export function resolveChatDefaults(
 	const title = group(
 		{
 			generateTitlesWithAI: userSettings?.generateTitlesWithAI ?? false,
-			titleModel: userSettings?.titleModel ?? '',
-			titleServerId: '',
+			titleModel: userSettings?.titleModel ?? null,
 			regenerateTitle: userSettings?.regenerateTitle ?? DEFAULT_SETTINGS.regenerateTitle,
 			regenerateTitleAfter:
 				userSettings?.regenerateTitleAfter ?? DEFAULT_SETTINGS.regenerateTitleAfter
 		},
 		{
 			generateTitlesWithAI: getConfig('titleEnabled') === 'true',
-			titleModel: getConfig('titleModel') ?? '',
-			titleServerId: getConfig('titleServerId') ?? '',
+			titleModel: getModelConfig('titleModel'),
 			regenerateTitle: getConfig('titleRegenerate') === 'true',
 			regenerateTitleAfter: Number(
 				getConfig('titleRegenerateAfter') ?? DEFAULT_SETTINGS.regenerateTitleAfter
@@ -126,14 +124,12 @@ export function resolveChatDefaults(
 
 	const compact = group(
 		{
-			compactModel: userSettings?.compactModel ?? '',
-			compactServerId: '',
+			compactModel: userSettings?.compactModel ?? null,
 			autoCompact: userSettings?.autoCompact ?? DEFAULT_SETTINGS.autoCompact,
 			compactThreshold: userSettings?.compactThreshold ?? DEFAULT_SETTINGS.compactThreshold
 		},
 		{
-			compactModel: getConfig('compactModel') ?? '',
-			compactServerId: getConfig('compactServerId') ?? '',
+			compactModel: getModelConfig('compactModel'),
 			autoCompact: getConfig('compactAuto') === 'true',
 			compactThreshold: Number(getConfig('compactThreshold') ?? DEFAULT_SETTINGS.compactThreshold)
 		},
@@ -143,14 +139,14 @@ export function resolveChatDefaults(
 
 	const images = group(
 		{
-			defaultImageModel: userSettings?.defaultImageModel ?? '',
+			defaultImageModel: userSettings?.defaultImageModel ?? null,
 			imagePromptWriter: userSettings?.imagePromptWriter ?? DEFAULT_SETTINGS.imagePromptWriter,
-			imagePromptModel: userSettings?.imagePromptModel ?? ''
+			imagePromptModel: userSettings?.imagePromptModel ?? null
 		},
 		{
-			defaultImageModel: getConfig('defaultImageModel') ?? '',
+			defaultImageModel: getModelConfig('defaultImageModel'),
 			imagePromptWriter: getConfig('imagePromptWriter') !== 'false',
-			imagePromptModel: getConfig('imagePromptModel') ?? ''
+			imagePromptModel: getModelConfig('imagePromptModel')
 		},
 		'imagesSharing',
 		'defaultImageModel'
@@ -159,11 +155,11 @@ export function resolveChatDefaults(
 	const voice = group(
 		{
 			voiceInput: userSettings?.voiceInput ?? DEFAULT_SETTINGS.voiceInput,
-			voiceModel: userSettings?.voiceModel ?? ''
+			voiceModel: userSettings?.voiceModel ?? null
 		},
 		{
 			voiceInput: getConfig('voiceInput') === 'true',
-			voiceModel: getConfig('voiceModel') ?? ''
+			voiceModel: getModelConfig('voiceModel')
 		},
 		'voiceSharing',
 		'voiceModel'

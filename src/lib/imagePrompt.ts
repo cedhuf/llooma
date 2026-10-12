@@ -8,6 +8,7 @@ import { chatDefaultsConfig } from '$lib/chatDefaults';
 import { ConnectionType } from '$lib/connections';
 import { resolvePrompt } from '$lib/defaultPrompts';
 import { serversStore, settingsStore } from '$lib/localStorage';
+import { findModel } from '$lib/settings';
 
 /**
  * Turning what somebody typed into something an image model can draw. A text
@@ -68,10 +69,10 @@ async function ask(
 
 	// Blank means the model you normally use, as in every other model field. Turning
 	// the writer off is what the switch is for.
-	const modelName = defaults.images.imagePromptModel || defaults.defaultModel.value;
-	if (!modelName) return null;
-
-	const model = get(settingsStore).models?.find((m) => m.name === modelName);
+	const model = findModel(
+		get(settingsStore).models,
+		defaults.images.imagePromptModel ?? defaults.defaultModel.value
+	);
 	if (!model) return null;
 
 	const server = get(serversStore).find((s) => s.id === model.serverId);
@@ -86,7 +87,7 @@ async function ask(
 	const controller = new AbortController();
 	await strategy.chat(
 		{
-			model: modelName,
+			model: model.name,
 			messages: [
 				{ role: 'system', content: resolvePrompt(instruction, get(effectivePrompts)) },
 				{ role: 'user', content: input.trim() }

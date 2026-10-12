@@ -50,7 +50,7 @@ const personas = bundles('personas').map((bundle, i) => ({
 	avatarGlyph: bundle.persona.avatar?.kind === 'glyph' ? bundle.persona.avatar.id : undefined,
 	systemPrompt: bundle.persona.systemPrompt,
 	greeting: bundle.persona.greeting,
-	modelName: '',
+	model: null,
 	suggestions: bundle.persona.suggestions,
 	tags: bundle.persona.tags,
 	webSearch: bundle.persona.webSearch,
@@ -309,10 +309,9 @@ const pickModel = () => {
 
 const model = pickModel();
 if (model?.name) {
-	for (const session of sessions) session.model = model;
-	// A persona with no model of its own falls back to yours, which is what these
+	// Personas keep no model of their own and fall back to yours, which is what these
 	// are meant to demonstrate.
-	for (const persona of personas) if (persona.modelName) persona.modelName = model.name;
+	for (const session of sessions) session.model = model;
 } else {
 	console.warn(
 		'[seed] No enabled connection with a shared model: conversations are seeded without one, and you will have to pick a model before you can answer in them.'

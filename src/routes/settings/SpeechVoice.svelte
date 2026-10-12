@@ -2,6 +2,7 @@
 	import LL from '$i18n/i18n-svelte';
 	import Select from '$lib/components/Select.svelte';
 	import { settingsStore } from '$lib/localStorage';
+	import type { ModelRef } from '$lib/settings';
 
 	/**
 	 * Which voice reads.
@@ -16,7 +17,7 @@
 	 */
 	interface Props {
 		/** The chosen speech model, or nothing while none is chosen. */
-		model?: string;
+		model?: ModelRef | null;
 	}
 
 	let { model }: Props = $props();
@@ -24,14 +25,9 @@
 	let voices = $state<string[]>([]);
 	let asked = $state<string | null>(null);
 
-	/** The connection the model lives on, which is what the route needs naming. */
-	const serverId = $derived(
-		($settingsStore.models ?? []).find((entry) => entry.name === model)?.serverId
-	);
-
 	$effect(() => {
-		const name = model;
-		const server = serverId;
+		const name = model?.name;
+		const server = model?.serverId;
 		if (!name || !server) {
 			voices = [];
 			asked = null;

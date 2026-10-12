@@ -48,7 +48,7 @@ function shareable(persona: Persona): Persona {
 		avatarGlyph: persona.avatarGlyph,
 		systemPrompt: persona.systemPrompt,
 		greeting: persona.greeting,
-		modelName: persona.modelName,
+		model: persona.model,
 		language: persona.language,
 		params: persona.params,
 		webSearch: persona.webSearch,

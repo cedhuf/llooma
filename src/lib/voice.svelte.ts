@@ -3,6 +3,7 @@ import { get } from 'svelte/store';
 import LL from '$i18n/i18n-svelte';
 import { read, SILENCE, type Reading } from '$lib/audioReading';
 import { settingsStore } from '$lib/localStorage';
+import { findModel } from '$lib/settings';
 import { toast } from '$lib/toast';
 
 /**
@@ -55,11 +56,14 @@ const FLOOR = 0.015;
  */
 function transcriber(): { serverId: string; model: string; language: string } | null {
 	const settings = get(settingsStore);
-	const model = settings.voiceModel;
-	if (!settings.voiceInput || !model) return null;
-	const known = (settings.models ?? []).find((entry) => entry.name === model);
-	return known?.serverId
-		? { serverId: known.serverId, model, language: settings.voiceLanguage?.trim() ?? '' }
+	if (!settings.voiceInput) return null;
+	const known = findModel(settings.models, settings.voiceModel);
+	return known
+		? {
+				serverId: known.serverId,
+				model: known.name,
+				language: settings.voiceLanguage?.trim() ?? ''
+			}
 		: null;
 }
 

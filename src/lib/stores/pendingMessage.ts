@@ -1,11 +1,12 @@
 import { writable } from 'svelte/store';
 
 import type { Attachment } from '$lib/promptAttachments';
+import type { ModelRef } from '$lib/settings';
 
 /** A message composed on the home page, handed off to the new session page. */
 export interface PendingMessage {
 	prompt: string;
-	model?: string;
+	model?: ModelRef;
 	webSearch: boolean;
 	webFetch: boolean;
 	attachments: Attachment[];

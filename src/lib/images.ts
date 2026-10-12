@@ -1,4 +1,4 @@
-import { derived, get, writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 
 import { modelKind, type ImageQuality, type ImageRatio } from '$lib/connections';
 import type { GeneratedImage } from '$lib/generatedImages';
@@ -108,8 +108,3 @@ export const imageModels = derived([settingsStore, serversStore], ([$settings, $
  * shared. An administrator who does not want this offers no image model.
  */
 export const canDrawImages = derived(imageModels, ($models) => $models.length > 0);
-
-/** The connection a model belongs to, which the server needs named explicitly. */
-export function serverIdFor(model: string): string | undefined {
-	return get(settingsStore).models?.find((m) => m.name === model)?.serverId;
-}

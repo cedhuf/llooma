@@ -565,6 +565,160 @@ const migrations: Migration[] = [
 			-- have let every addition a gateway makes in, silently.
 			ALTER TABLE mcp_servers ADD COLUMN disabled_groups TEXT;
 		`
+	},
+	{
+		version: 25,
+		// A model is remembered with the connection that serves it. Each stored name
+		// becomes the pair the app was already resolving it to: the first entry with
+		// that name in the account's stored catalogue, then in what the system
+		// connections share, which covers a copy saved while a provider was not
+		// answering. What an administrator shares is read against the first
+		// administrator's catalogue.
+		run: (db) => {
+			type Ref = { serverId: string; name: string };
+			const MODEL_FIELDS = [
+				'defaultModel',
+				'titleModel',
+				'compactModel',
+				'defaultImageModel',
+				'imagePromptModel',
+				'voiceModel',
+				'speechModel'
+			];
+
+			// In the order the browser lists them: system connections by age, models by name.
+			const systemShared = (
+				db
+					.prepare(
+						`SELECT sm.server_id AS serverId, sm.model_name AS name
+						 FROM shared_models sm JOIN servers s ON s.id = sm.server_id
+						 WHERE s.owner_user_id IS NULL
+						 ORDER BY s.created_at, sm.model_name`
+					)
+					.all() as Ref[]
+			).map(({ serverId, name }) => ({ serverId, name }));
+			const catalogueOf = (settings: { models?: unknown }): Ref[] => [
+				...(Array.isArray(settings.models)
+					? (settings.models as Ref[]).filter(
+							(entry) => typeof entry?.serverId === 'string' && typeof entry?.name === 'string'
+						)
+					: []),
+				...systemShared
+			];
+			const refTo = (catalogue: Ref[], name: unknown): Ref | null => {
+				const found =
+					typeof name === 'string' && name ? catalogue.find((entry) => entry.name === name) : null;
+				return found ? { serverId: found.serverId, name: found.name } : null;
+			};
+			/** An instruction applied to a name on every connection, so it is copied to each that offers it. */
+			const perModelOf = (catalogue: Ref[], byName: Record<string, unknown>) => {
+				const byServer: Record<string, Record<string, unknown>> = {};
+				for (const [name, prompt] of Object.entries(byName ?? {})) {
+					for (const entry of catalogue.filter((model) => model.name === name)) {
+						(byServer[entry.serverId] ??= {})[name] = prompt;
+					}
+				}
+				return byServer;
+			};
+
+			const catalogues = new Map<string, Ref[]>();
+			const settingsRows = db.prepare('SELECT user_id, data FROM settings').all() as {
+				user_id: string;
+				data: string;
+			}[];
+			const updateSettings = db.prepare('UPDATE settings SET data = ? WHERE user_id = ?');
+			for (const row of settingsRows) {
+				const settings = JSON.parse(row.data);
+				const catalogue = catalogueOf(settings);
+				catalogues.set(row.user_id, catalogue);
+				for (const field of MODEL_FIELDS) settings[field] = refTo(catalogue, settings[field]);
+				if (settings.systemPrompts?.perModel) {
+					settings.systemPrompts.perModel = perModelOf(catalogue, settings.systemPrompts.perModel);
+				}
+				updateSettings.run(JSON.stringify(settings), row.user_id);
+			}
+
+			const personaRows = db.prepare('SELECT id, user_id, data FROM personas').all() as {
+				id: string;
+				user_id: string;
+				data: string;
+			}[];
+			const updatePersona = db.prepare('UPDATE personas SET data = ? WHERE id = ?');
+			for (const row of personaRows) {
+				const persona = JSON.parse(row.data);
+				persona.model = refTo(catalogues.get(row.user_id) ?? [], persona.modelName);
+				delete persona.modelName;
+				updatePersona.run(JSON.stringify(persona), row.id);
+			}
+
+			const integrationRows = db.prepare('SELECT id, config FROM integrations').all() as {
+				id: string;
+				config: string;
+			}[];
+			const updateIntegration = db.prepare('UPDATE integrations SET config = ? WHERE id = ?');
+			for (const row of integrationRows) {
+				const config = JSON.parse(row.config);
+				config.model =
+					config.serverId && config.model
+						? { serverId: config.serverId, name: config.model }
+						: null;
+				delete config.serverId;
+				updateIntegration.run(JSON.stringify(config), row.id);
+			}
+
+			const admin = db
+				.prepare("SELECT id FROM users WHERE role = 'admin' ORDER BY created_at LIMIT 1")
+				.get() as { id: string } | undefined;
+			const adminCatalogue = (admin && catalogues.get(admin.id)) || systemShared;
+			const read = (key: string) =>
+				(
+					db.prepare('SELECT value FROM app_config WHERE key = ?').get(key) as
+						{ value: string } | undefined
+				)?.value;
+			const write = db.prepare(
+				`INSERT INTO app_config (key, value) VALUES (?, ?)
+				 ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+			);
+			const asConfig = (ref: Ref | null) => (ref ? JSON.stringify(ref) : '');
+
+			for (const key of ['defaultModel', 'defaultImageModel', 'imagePromptModel', 'voiceModel']) {
+				const name = read(key);
+				if (name !== undefined) write.run(key, asConfig(refTo(adminCatalogue, name)));
+			}
+			// These two already stored their connection beside the name.
+			for (const [key, serverKey] of [
+				['titleModel', 'titleServerId'],
+				['compactModel', 'compactServerId']
+			]) {
+				const name = read(key);
+				const serverId = read(serverKey);
+				if (name !== undefined) {
+					write.run(
+						key,
+						asConfig(serverId && name ? { serverId, name } : refTo(adminCatalogue, name))
+					);
+				}
+				db.prepare('DELETE FROM app_config WHERE key = ?').run(serverKey);
+			}
+
+			const sharedPersonas = read('sharedPersonas');
+			if (sharedPersonas) {
+				const list = JSON.parse(sharedPersonas) as Record<string, unknown>[];
+				for (const persona of list) {
+					persona.model = refTo(adminCatalogue, persona.modelName);
+					delete persona.modelName;
+				}
+				write.run('sharedPersonas', JSON.stringify(list));
+			}
+
+			const sharedPerModel = read('systemPromptsPerModel');
+			if (sharedPerModel) {
+				write.run(
+					'systemPromptsPerModel',
+					JSON.stringify(perModelOf(adminCatalogue, JSON.parse(sharedPerModel)))
+				);
+			}
+		}
 	}
 ];
 

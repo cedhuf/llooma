@@ -5,6 +5,7 @@ import {
 	DEFAULT_BOTS_PER_USER
 } from '$lib/integrations';
 import type { Sharing } from '$lib/server/sharing';
+import { parseModelRef, type ModelRef } from '$lib/settings';
 
 import { getDb } from './index';
 
@@ -22,6 +23,15 @@ export function setConfig(key: string, value: string): void {
 			 ON CONFLICT(key) DO UPDATE SET value = excluded.value`
 		)
 		.run(key, value);
+}
+
+/** A model the administrator shares, stored as the JSON of its reference. */
+export function getModelConfig(key: string): ModelRef | null {
+	return parseModelRef(getConfig(key));
+}
+
+export function setModelConfig(key: string, model: ModelRef | null): void {
+	setConfig(key, model ? JSON.stringify({ serverId: model.serverId, name: model.name }) : '');
 }
 
 /** Whether users may add their own provider connections (default: false). */

@@ -12,10 +12,10 @@ import { defaultSystemPrompt } from '$lib/server/turn';
 import { recordRunUsage, recordVoiceUsage, refuseForCredit } from '$lib/server/usageMeter';
 import { durationMs, wavFromPcm } from '$lib/server/wav';
 import type { Message, Session } from '$lib/sessions';
+import type { ModelRef } from '$lib/settings';
 import { INPUT_SAMPLE_RATE, type ServerMessage, type VoiceState } from '$lib/voice/protocol';
 import { split, spoken } from '$lib/voice/sentences';
 
-import type { VoiceTarget } from './config';
 import type { VoiceGrant } from './tickets';
 
 /**
@@ -210,8 +210,8 @@ export class VoiceExchange {
 		const audio = wavFromPcm(frames, INPUT_SAMPLE_RATE);
 		const file = new File([new Uint8Array(audio)], 'speech.wav', { type: 'audio/wav' });
 
-		const { text, used } = await transcribe(server, listen.model, file, listen.language);
-		recordVoiceUsage(this.#grant.userId, server, listen.model, used);
+		const { text, used } = await transcribe(server, listen.name, file, listen.language);
+		recordVoiceUsage(this.#grant.userId, server, listen.name, used);
 		return text.trim();
 	}
 
@@ -286,11 +286,10 @@ export class VoiceExchange {
 		return {
 			sessionId,
 			serverId: think.serverId,
-			model: think.model,
+			model: think.name,
 			think: false,
 			systemPrompt:
-				stored?.systemPrompt?.content?.trim() ||
-				defaultSystemPrompt(this.#grant.userId, think.model),
+				stored?.systemPrompt?.content?.trim() || defaultSystemPrompt(this.#grant.userId, think),
 			messages: [...history, asked],
 			flags: {
 				webSearch: false,
@@ -319,10 +318,10 @@ export class VoiceExchange {
 			messages: [],
 			systemPrompt: {
 				role: 'system',
-				content: defaultSystemPrompt(this.#grant.userId, think.model)
+				content: defaultSystemPrompt(this.#grant.userId, think)
 			},
 			options: {},
-			model: { serverId: think.serverId, name: think.model },
+			model: { serverId: think.serverId, name: think.name },
 			updatedAt: new Date().toISOString()
 		};
 
@@ -358,12 +357,12 @@ export class VoiceExchange {
 	// --- plumbing ------------------------------------------------------------
 
 	/** The connection behind a target, re-asked rather than remembered. */
-	#reach(target: VoiceTarget): ReturnType<typeof reachableServer> {
+	#reach(target: ModelRef): ReturnType<typeof reachableServer> {
 		const server = reachableServer(this.#grant.userId, target.serverId);
-		if (!isModelShared(server, this.#grant.isAdmin, target.model)) {
-			throw new PolicyError(403, `Model "${target.model}" is not shared on this server`);
+		if (!isModelShared(server, this.#grant.isAdmin, target.name)) {
+			throw new PolicyError(403, `Model "${target.name}" is not shared on this server`);
 		}
-		const refused = refuseForCredit(this.#grant.userId, server, target.model);
+		const refused = refuseForCredit(this.#grant.userId, server, target.name);
 		if (refused) throw new PolicyError(402, 'Over the credit limit');
 		return server;
 	}
@@ -470,17 +469,17 @@ class SpeechQueue {
 
 		const { speak: target } = this.#grant.config;
 		const server = reachableServer(this.#grant.userId, target.serverId);
-		if (!isModelShared(server, this.#grant.isAdmin, target.model)) return;
-		if (refuseForCredit(this.#grant.userId, server, target.model)) return;
+		if (!isModelShared(server, this.#grant.isAdmin, target.name)) return;
+		if (refuseForCredit(this.#grant.userId, server, target.name)) return;
 
-		const { audio, type, generationId } = await speak(server, target.model, target.voice, piece);
+		const { audio, type, generationId } = await speak(server, target.name, target.voice, piece);
 		if (!this.#current()) return;
 
 		// Counted after the fact: a synthesis answers with sound, so its cost has to be
 		// asked for separately, and waiting on that would delay the sentence.
 		void (async () => {
 			const reported = generationId ? await askWhatItCost(server, generationId) : undefined;
-			recordVoiceUsage(this.#grant.userId, server, target.model, {
+			recordVoiceUsage(this.#grant.userId, server, target.name, {
 				input: 0,
 				output: 0,
 				cost: reported

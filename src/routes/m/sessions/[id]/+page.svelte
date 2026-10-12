@@ -64,7 +64,7 @@
 
 		<div class="flex min-w-0 flex-1 justify-center">
 			<span class="glass flex h-10 min-w-0 items-center rounded-full px-3">
-				<ModelSelect bind:value={chat.modelName} variant="ghost" />
+				<ModelSelect bind:value={chat.model} variant="ghost" />
 			</span>
 		</div>
 

@@ -7,8 +7,9 @@
 	import Modal from '$lib/components/Modal.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import { ConnectionType } from '$lib/connections';
-	import { serversStore, settingsStore } from '$lib/localStorage';
+	import { serversStore } from '$lib/localStorage';
 	import { resolveSessionTitle, saveSession, type Session } from '$lib/sessions';
+	import type { ModelRef } from '$lib/settings';
 	import { effectiveSystemPrompt, systemPromptsConfig } from '$lib/systemPrompts';
 
 	import SamplingFields from '../../settings/SamplingFields.svelte';
@@ -20,12 +21,12 @@
 	interface Props {
 		open: boolean;
 		session: Session;
-		modelName: string | undefined;
+		model: ModelRef | null;
 	}
 
-	let { open = $bindable(false), session = $bindable(), modelName = $bindable() }: Props = $props();
+	let { open = $bindable(false), session = $bindable(), model = $bindable() }: Props = $props();
 
-	const resolvedDefault = $derived(effectiveSystemPrompt(modelName, $systemPromptsConfig.prompts));
+	const resolvedDefault = $derived(effectiveSystemPrompt(model, $systemPromptsConfig.prompts));
 	const isOverridden = $derived(
 		!!session.systemPromptEdited && resolvedDefault !== session.systemPrompt.content
 	);
@@ -54,9 +55,7 @@
 
 	/** Read from the connection the chosen model sits on rather than from the conversation's stored model, so switching model relabels the panel straight away. */
 	const isOllama = $derived.by(() => {
-		const serverId =
-			$settingsStore.models?.find((model) => model.name === modelName)?.serverId ??
-			session.model?.serverId;
+		const serverId = model?.serverId ?? session.model?.serverId;
 		return (
 			$serversStore.find((server) => server.id === serverId)?.connectionType ===
 			ConnectionType.Ollama
@@ -105,7 +104,7 @@
 		<div class="min-h-0 flex-1 overflow-auto p-4">
 			<div class="mx-auto flex w-full max-w-[60ch] flex-col gap-3">
 				<SettingsField label={$LL.model()}>
-					<ModelSelect bind:value={modelName} />
+					<ModelSelect bind:value={model} />
 				</SettingsField>
 
 				<!-- The biggest block, for the thing changed least often. Folded, its summary

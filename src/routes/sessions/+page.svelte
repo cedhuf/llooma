@@ -40,7 +40,7 @@
 	const searchAvailable = $derived($searchConfig.available);
 
 	let prompt = $state('');
-	let selectedModel = $state($chatDefaultsConfig.defaultModel.value || undefined);
+	let selectedModel = $state($chatDefaultsConfig.defaultModel.value);
 	let webSearch = $state($searchConfig.available && $settingsStore.webSearchByDefault);
 	let webFetch = $state($webFetchConfig.available && $settingsStore.webFetchByDefault);
 	let interactiveChoices = $state($settingsStore.interactiveChoices);
@@ -60,8 +60,7 @@
 	// Only for backends that support it: Ollama's native `think`, or
 	// `enable_thinking` on OpenAI-compatible and Infomaniak.
 	const supportsReasoning = $derived.by(() => {
-		const model = $settingsStore.models.find((m) => m.name === selectedModel);
-		const ct = model && $serversStore.find((s) => s.id === model.serverId)?.connectionType;
+		const ct = $serversStore.find((s) => s.id === selectedModel?.serverId)?.connectionType;
 		return ct !== undefined && supportsReasoningToggle(ct);
 	});
 
@@ -163,7 +162,7 @@
 		const id = generateRandomId();
 		pendingMessage.set({
 			prompt: content,
-			model: selectedModel,
+			model: selectedModel ?? undefined,
 			webSearch,
 			webFetch,
 			interactiveChoices,

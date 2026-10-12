@@ -3,14 +3,18 @@ import { derived, writable } from 'svelte/store';
 import { parseSamplingOptions, type SamplingOptions } from '$lib/chat/options';
 import { settingsStore } from '$lib/localStorage';
 import type { ServerConfig } from '$lib/serverConfig';
-import { DEFAULT_SETTINGS } from '$lib/settings';
+import { DEFAULT_SETTINGS, type ModelRef } from '$lib/settings';
 
 export interface ChatDefaultsView {
-	defaultModel: { value: string; editable: boolean; source: 'admin' | 'user'; adminValue: string };
+	defaultModel: {
+		value: ModelRef | null;
+		editable: boolean;
+		source: 'admin' | 'user';
+		adminValue: ModelRef | null;
+	};
 	title: {
 		generateTitlesWithAI: boolean;
-		titleModel: string;
-		titleServerId: string;
+		titleModel: ModelRef | null;
 		/** Name the conversation again once it has grown into one. Once, not on a loop. */
 		regenerateTitle: boolean;
 		regenerateTitleAfter: number;
@@ -18,42 +22,43 @@ export interface ChatDefaultsView {
 		source: 'admin' | 'user';
 		admin: {
 			generateTitlesWithAI: boolean;
-			titleModel: string;
-			titleServerId: string;
+			titleModel: ModelRef | null;
 			regenerateTitle: boolean;
 			regenerateTitleAfter: number;
 		};
 	};
 	compact: {
-		compactModel: string;
-		compactServerId: string;
+		compactModel: ModelRef | null;
 		autoCompact: boolean;
 		compactThreshold: number;
 		editable: boolean;
 		source: 'admin' | 'user';
 		admin: {
-			compactModel: string;
-			compactServerId: string;
+			compactModel: ModelRef | null;
 			autoCompact: boolean;
 			compactThreshold: number;
 		};
 	};
 	/** Which model draws, and which one writes the prompt for it. */
 	images: {
-		defaultImageModel: string;
+		defaultImageModel: ModelRef | null;
 		imagePromptWriter: boolean;
-		imagePromptModel: string;
+		imagePromptModel: ModelRef | null;
 		editable: boolean;
 		source: 'admin' | 'user';
-		admin: { defaultImageModel: string; imagePromptWriter: boolean; imagePromptModel: string };
+		admin: {
+			defaultImageModel: ModelRef | null;
+			imagePromptWriter: boolean;
+			imagePromptModel: ModelRef | null;
+		};
 	};
 	/** Speaking instead of typing, and what transcribes it. */
 	voice: {
 		voiceInput: boolean;
-		voiceModel: string;
+		voiceModel: ModelRef | null;
 		editable: boolean;
 		source: 'admin' | 'user';
-		admin: { voiceInput: boolean; voiceModel: string };
+		admin: { voiceInput: boolean; voiceModel: ModelRef | null };
 	};
 	/** See `ResolvedChatDefaults['sampling']`; this is the same shape client-side. */
 	sampling: {
@@ -78,55 +83,51 @@ export const chatDefaultsConfig = derived(
 
 		const own: ChatDefaultsView = {
 			defaultModel: {
-				value: $s.defaultModel ?? '',
+				value: $s.defaultModel,
 				editable: true,
 				source: 'user',
-				adminValue: ''
+				adminValue: null
 			},
 			title: {
 				generateTitlesWithAI: $s.generateTitlesWithAI,
-				titleModel: $s.titleModel ?? '',
-				titleServerId: '',
+				titleModel: $s.titleModel,
 				regenerateTitle: $s.regenerateTitle,
 				regenerateTitleAfter: $s.regenerateTitleAfter,
 				editable: true,
 				source: 'user',
 				admin: {
 					generateTitlesWithAI: false,
-					titleModel: '',
-					titleServerId: '',
+					titleModel: null,
 					regenerateTitle: false,
 					regenerateTitleAfter: 3
 				}
 			},
 			compact: {
-				compactModel: $s.compactModel ?? '',
-				compactServerId: '',
+				compactModel: $s.compactModel,
 				autoCompact: $s.autoCompact,
 				compactThreshold: $s.compactThreshold,
 				editable: true,
 				source: 'user',
 				admin: {
-					compactModel: '',
-					compactServerId: '',
+					compactModel: null,
 					autoCompact: false,
 					compactThreshold: DEFAULT_SETTINGS.compactThreshold
 				}
 			},
 			images: {
-				defaultImageModel: $s.defaultImageModel ?? '',
+				defaultImageModel: $s.defaultImageModel,
 				imagePromptWriter: $s.imagePromptWriter,
-				imagePromptModel: $s.imagePromptModel ?? '',
+				imagePromptModel: $s.imagePromptModel,
 				editable: true,
 				source: 'user',
-				admin: { defaultImageModel: '', imagePromptWriter: true, imagePromptModel: '' }
+				admin: { defaultImageModel: null, imagePromptWriter: true, imagePromptModel: null }
 			},
 			voice: {
 				voiceInput: $s.voiceInput,
-				voiceModel: $s.voiceModel ?? '',
+				voiceModel: $s.voiceModel,
 				editable: true,
 				source: 'user',
-				admin: { voiceInput: false, voiceModel: '' }
+				admin: { voiceInput: false, voiceModel: null }
 			},
 			sampling: { value: ownSampling, editable: true, source: 'user', adminValue: {} }
 		};
@@ -150,7 +151,6 @@ export const chatDefaultsConfig = derived(
 						...$srv.title,
 						generateTitlesWithAI: $s.generateTitlesWithAI,
 						titleModel: $s.titleModel,
-						titleServerId: '',
 						regenerateTitle: $s.regenerateTitle,
 						regenerateTitleAfter: $s.regenerateTitleAfter,
 						source: 'user' as const
@@ -166,7 +166,6 @@ export const chatDefaultsConfig = derived(
 				? {
 						...$srv.compact,
 						compactModel: $s.compactModel,
-						compactServerId: '',
 						autoCompact: $s.autoCompact,
 						compactThreshold: $s.compactThreshold,
 						source: 'user' as const
@@ -183,7 +182,7 @@ export const chatDefaultsConfig = derived(
 						...$srv.images,
 						defaultImageModel: $s.defaultImageModel,
 						imagePromptWriter: $s.imagePromptWriter,
-						imagePromptModel: $s.imagePromptModel ?? '',
+						imagePromptModel: $s.imagePromptModel,
 						source: 'user' as const
 					}
 				: { ...$srv.images, ...$srv.images.admin };

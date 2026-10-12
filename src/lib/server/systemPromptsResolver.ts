@@ -1,11 +1,6 @@
 import { getConfig } from '$lib/server/db/config';
 import { resolveShared, type Sharing } from '$lib/server/sharing';
-import {
-	DEFAULT_SETTINGS,
-	type ModelSystemPrompt,
-	type Settings,
-	type SystemPrompts
-} from '$lib/settings';
+import { DEFAULT_SETTINGS, type Settings, type SystemPrompts } from '$lib/settings';
 
 export interface ResolvedSystemPrompts {
 	prompts: SystemPrompts;
@@ -19,7 +14,7 @@ export interface ResolvedSystemPrompts {
 const EMPTY: SystemPrompts = { global: '', perModel: {} };
 
 function adminSnapshot(): SystemPrompts {
-	let perModel: Record<string, ModelSystemPrompt> = {};
+	let perModel: SystemPrompts['perModel'] = {};
 	try {
 		perModel = JSON.parse(getConfig('systemPromptsPerModel') ?? '{}');
 	} catch {

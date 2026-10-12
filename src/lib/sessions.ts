@@ -12,7 +12,7 @@ import type { AskChoices } from './askChoice';
 import { getLastUsedModels } from './chat';
 import type { Knowledge } from './knowledge';
 import { defaultSystemPrompt, type SessionSummary } from './sessionShape';
-import type { Model } from './settings';
+import { findModel, type Model } from './settings';
 import { formatTimestampToNow } from './utils';
 
 // Re-exported so existing imports keep working. `sessionShape` depends on
@@ -176,10 +176,10 @@ export interface Editor {
 export const newSession = (id: string): Session => {
 	// The default model (an admin-shared one may apply), or the last used.
 	const settings = get(settingsStore);
-	const defaultModelName = get(chatDefaultsConfig).defaultModel.value || settings.defaultModel;
-	const model = defaultModelName
-		? settings.models?.find((m) => m.name === defaultModelName)
-		: undefined;
+	const model = findModel(
+		settings.models,
+		get(chatDefaultsConfig).defaultModel.value ?? settings.defaultModel
+	);
 
 	return {
 		id,

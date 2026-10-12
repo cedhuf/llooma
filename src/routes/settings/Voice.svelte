@@ -3,7 +3,8 @@
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
-	import { settingsStore } from '$lib/localStorage';
+	import { describeModel } from '$lib/connections';
+	import { serversStore, settingsStore } from '$lib/localStorage';
 
 	import SettingsBadge from './SettingsBadge.svelte';
 	import SettingsField from './SettingsField.svelte';
@@ -46,7 +47,7 @@
 				<SettingsField label={$LL.voiceModel()}>
 					<ModelSelect
 						kinds={['audio']}
-						value={$settingsStore.voiceModel ?? undefined}
+						value={$settingsStore.voiceModel}
 						onSelect={(name) => ($settingsStore.voiceModel = name || null)}
 					/>
 				</SettingsField>
@@ -76,7 +77,9 @@
 				<input
 					class="settings-field"
 					disabled
-					value={voiceCfg.voiceInput ? voiceCfg.voiceModel || $LL.none() : $LL.off()}
+					value={voiceCfg.voiceInput
+						? (describeModel($serversStore, voiceCfg.voiceModel) ?? $LL.none())
+						: $LL.off()}
 				/>
 			</SettingsField>
 		{/if}
@@ -97,9 +100,9 @@
 			<SettingsField label={$LL.speechModel()}>
 				<ModelSelect
 					kinds={['speech']}
-					value={$settingsStore.speechModel ?? undefined}
-					onSelect={(name) => {
-						$settingsStore.speechModel = name || null;
+					value={$settingsStore.speechModel}
+					onSelect={(model) => {
+						$settingsStore.speechModel = model;
 						// The names belong to the model, so carrying one across would leave a voice
 						// behind that the new model refuses.
 						$settingsStore.speechVoice = '';

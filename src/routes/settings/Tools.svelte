@@ -4,9 +4,10 @@
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import Select from '$lib/components/Select.svelte';
+	import { describeModel } from '$lib/connections';
 	import { documentsDisabledByInstance } from '$lib/documents';
 	import { canDrawImages } from '$lib/images';
-	import { settingsStore } from '$lib/localStorage';
+	import { serversStore, settingsStore } from '$lib/localStorage';
 	import { personasConfig, saveStoreUrl } from '$lib/personasConfig';
 	import { searchConfig } from '$lib/search';
 	import { DEFAULT_STORE } from '$lib/store';
@@ -245,7 +246,7 @@
 			{#if imagesCfg.editable}
 				<SettingsField label={$LL.defaultImageModel()} hint={$LL.defaultImageModelHelp()}>
 					<ModelSelect
-						value={imagesCfg.defaultImageModel || undefined}
+						value={imagesCfg.defaultImageModel}
 						kinds={['image']}
 						emptyLabel={$LL.defaultModel()}
 						onSelect={(name) => ($settingsStore.defaultImageModel = name || null)}
@@ -269,7 +270,7 @@
 				{#if $settingsStore.imagePromptWriter || $settingsStore.imageAutoTitle}
 					<SettingsField label={$LL.imagePromptWriterModel()}>
 						<ModelSelect
-							value={imagesCfg.imagePromptModel || undefined}
+							value={imagesCfg.imagePromptModel}
 							emptyLabel={$LL.defaultModel()}
 							onSelect={(name) => ($settingsStore.imagePromptModel = name || null)}
 						/>
@@ -280,7 +281,7 @@
 					<input
 						class="settings-field"
 						disabled
-						value={imagesCfg.defaultImageModel || $LL.defaultModel()}
+						value={describeModel($serversStore, imagesCfg.defaultImageModel) ?? $LL.defaultModel()}
 					/>
 				</SettingsField>
 				<SettingsField label={$LL.imagePromptWriter()}>
@@ -288,7 +289,7 @@
 						class="settings-field"
 						disabled
 						value={imagesCfg.imagePromptWriter
-							? imagesCfg.imagePromptModel || $LL.defaultModel()
+							? (describeModel($serversStore, imagesCfg.imagePromptModel) ?? $LL.defaultModel())
 							: $LL.imagePromptWriterOff()}
 					/>
 				</SettingsField>

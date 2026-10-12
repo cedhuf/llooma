@@ -6,6 +6,7 @@ import {
 	type ProviderDescriptor
 } from '$lib/providers';
 
+import type { ModelRef } from './settings';
 import { generateRandomId } from './utils';
 
 export enum ConnectionType {
@@ -225,6 +226,16 @@ export function modelKind(server: Pick<Server, 'modelKinds'> | undefined, name: 
 /** How a model should read on screen: its custom label when set, its id otherwise. */
 export function modelLabel(server: Pick<Server, 'modelLabels'> | undefined, name: string): string {
 	return server?.modelLabels?.[name]?.trim() || name;
+}
+
+/** A remembered model where it is shown rather than chosen: its label, then its connection, since the same id can sit on two. Null for none. */
+export function describeModel(
+	servers: Server[],
+	model: ModelRef | null | undefined
+): string | null {
+	if (!model) return null;
+	const server = servers.find((s) => s.id === model.serverId);
+	return `${modelLabel(server, model.name)} · ${server?.label || server?.connectionType || model.serverId}`;
 }
 
 /** Every connection gets its own colour at creation; the provider default only covers older rows. */

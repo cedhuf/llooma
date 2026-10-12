@@ -11,6 +11,7 @@ import {
 	botRepliesPerHour,
 	botsPerUser,
 	getConfig,
+	getModelConfig,
 	personaAutoUpdateForced,
 	personaMemoryEnabled,
 	personaStoreMode,
@@ -22,6 +23,7 @@ import {
 	setBotRepliesPerHour,
 	setBotsPerUser,
 	setConfig,
+	setModelConfig,
 	setPersonaAutoUpdateForced,
 	setPersonaMemoryEnabled,
 	setPersonaStoreMode,
@@ -36,6 +38,7 @@ import {
 	setInstanceCreditLimit
 } from '$lib/server/db/usage';
 import { WEB_FETCH_DEFAULTS } from '$lib/server/toolsResolver';
+import { parseModelRef } from '$lib/settings';
 
 export async function GET(event) {
 	await requireAdmin(event);
@@ -62,17 +65,17 @@ export async function GET(event) {
 		systemPromptsSharing: getConfig('systemPromptsSharing') ?? 'off',
 		appPromptsSharing: appPromptsSharing(),
 		defaultModelSharing: getConfig('defaultModelSharing') ?? 'off',
-		defaultModel: getConfig('defaultModel') ?? '',
+		defaultModel: getModelConfig('defaultModel'),
 		titleSharing: getConfig('titleSharing') ?? 'off',
 		compactSharing: getConfig('compactSharing') ?? 'off',
 		samplingSharing: getConfig('samplingSharing') ?? 'off',
 		imagesSharing: getConfig('imagesSharing') ?? 'off',
 		voiceSharing: getConfig('voiceSharing') ?? 'off',
 		voiceInput: getConfig('voiceInput') === 'true',
-		voiceModel: getConfig('voiceModel') ?? '',
-		defaultImageModel: getConfig('defaultImageModel') ?? '',
+		voiceModel: getModelConfig('voiceModel'),
+		defaultImageModel: getModelConfig('defaultImageModel'),
 		imagePromptWriter: getConfig('imagePromptWriter') !== 'false',
-		imagePromptModel: getConfig('imagePromptModel') ?? '',
+		imagePromptModel: getModelConfig('imagePromptModel'),
 		webFetchSharing: getConfig('webFetchSharing') ?? 'off',
 		webFetchEnabled: getConfig('webFetchEnabled') !== 'false',
 		webFetchMaxPages: Number(getConfig('webFetchMaxPages') ?? WEB_FETCH_DEFAULTS.maxPages),
@@ -178,15 +181,15 @@ export async function PUT(event) {
 	}
 
 	if (typeof body?.voiceInput === 'boolean') setConfig('voiceInput', String(body.voiceInput));
-	if (typeof body?.voiceModel === 'string') setConfig('voiceModel', body.voiceModel);
-	if (typeof body?.defaultImageModel === 'string') {
-		setConfig('defaultImageModel', body.defaultImageModel);
+	if (body && 'voiceModel' in body) setModelConfig('voiceModel', parseModelRef(body.voiceModel));
+	if (body && 'defaultImageModel' in body) {
+		setModelConfig('defaultImageModel', parseModelRef(body.defaultImageModel));
 	}
 	if (typeof body?.imagePromptWriter === 'boolean') {
 		setConfig('imagePromptWriter', body.imagePromptWriter ? 'true' : 'false');
 	}
-	if (typeof body?.imagePromptModel === 'string') {
-		setConfig('imagePromptModel', body.imagePromptModel);
+	if (body && 'imagePromptModel' in body) {
+		setModelConfig('imagePromptModel', parseModelRef(body.imagePromptModel));
 	}
 
 	// Web fetch: the admin shares their own configuration, and decides who gets it.
@@ -203,25 +206,25 @@ export async function PUT(event) {
 		setConfig('webFetchMaxChars', String(body.webFetchMaxChars));
 	}
 	// Snapshot the admin's chat defaults when (re)sharing.
-	if (typeof body?.defaultModel === 'string') setConfig('defaultModel', body.defaultModel);
+	if (body && 'defaultModel' in body) {
+		setModelConfig('defaultModel', parseModelRef(body.defaultModel));
+	}
 	if (typeof body?.titleEnabled === 'boolean') {
 		setConfig('titleEnabled', body.titleEnabled ? 'true' : 'false');
 	}
-	if (typeof body?.titleModel === 'string') setConfig('titleModel', body.titleModel);
+	if (body && 'titleModel' in body) setModelConfig('titleModel', parseModelRef(body.titleModel));
 	if (typeof body?.titleRegenerate === 'boolean') {
 		setConfig('titleRegenerate', body.titleRegenerate ? 'true' : 'false');
 	}
 	if (Number.isFinite(body?.titleRegenerateAfter)) {
 		setConfig('titleRegenerateAfter', String(body.titleRegenerateAfter));
 	}
-	if (typeof body?.titleServerId === 'string') setConfig('titleServerId', body.titleServerId);
 
 	// Compaction: the model that writes the summaries, plus the automatic trigger
 	// and its ceiling, which matters most for providers that never announce their
 	// context window.
-	if (typeof body?.compactModel === 'string') setConfig('compactModel', body.compactModel);
-	if (typeof body?.compactServerId === 'string') {
-		setConfig('compactServerId', body.compactServerId);
+	if (body && 'compactModel' in body) {
+		setModelConfig('compactModel', parseModelRef(body.compactModel));
 	}
 	if (typeof body?.compactAuto === 'boolean') {
 		setConfig('compactAuto', body.compactAuto ? 'true' : 'false');

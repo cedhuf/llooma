@@ -16,6 +16,7 @@ import { playbookInstructions, playbooksOf } from '$lib/playbooks';
 import { contextMessages, imagesPayload } from '$lib/promptAttachments';
 import { searchConfig } from '$lib/search';
 import { saveSession, type Editor, type Message, type Session } from '$lib/sessions';
+import { findModel, type ModelRef } from '$lib/settings';
 import type { PendingMessage } from '$lib/stores/pendingMessage';
 import { effectiveSystemPrompt, systemPromptsConfig } from '$lib/systemPrompts';
 import { toast } from '$lib/toast';
@@ -47,7 +48,7 @@ export interface ConversationView {
 /** A prompt named in the URL, for a conversation opened with one. */
 export interface QueryEntry {
 	prompt: string;
-	model?: string;
+	model?: ModelRef;
 	search?: boolean;
 }
 
@@ -76,8 +77,8 @@ export class Conversation implements RunSurface {
 	session: Session = $state()!;
 	editor: Editor = $state()!;
 
-	/** The name rather than the model: the picker is a list of names, and a conversation can carry one that no longer resolves. */
-	modelName: string | undefined = $state();
+	/** What the picker holds, which can be a model its connection no longer offers: `session.model` is only ever one that resolves. */
+	model: ModelRef | null = $state(null);
 
 	/** The id of the run being watched, if one is being watched. */
 	activeRun: string | null = $state(null);
@@ -191,7 +192,9 @@ export class Conversation implements RunSurface {
 		this.editor.webSearchInfo = undefined;
 
 		this.session = session;
-		this.modelName = session.model?.name || '';
+		this.model = session.model
+			? { serverId: session.model.serverId, name: session.model.name }
+			: null;
 		this.editor.isNewSession = !session?.messages?.length;
 		this.editor.interactiveChoices = this.#settings.current.interactiveChoices;
 		this.editor.sendCurrentDate = this.#settings.current.sendCurrentDate;
@@ -207,7 +210,7 @@ export class Conversation implements RunSurface {
 		if (boundPersona) {
 			this.editor.webSearch = this.searchAvailable && !!boundPersona.webSearch;
 			// Heal the model if it wasn't resolvable when the conversation was created.
-			if (!this.session.model && boundPersona.modelName) this.modelName = boundPersona.modelName;
+			if (!this.session.model && boundPersona.model) this.model = boundPersona.model;
 		}
 
 		if (entry.pending) {
@@ -235,8 +238,8 @@ export class Conversation implements RunSurface {
 		this.editor.isNewSession = false;
 
 		if (pending.model) {
-			this.modelName = pending.model;
-			const model = this.#settings.current.models.find((m) => m.name === pending.model);
+			this.model = pending.model;
+			const model = findModel(this.#settings.current.models, pending.model);
 			if (model) this.session.model = model;
 		}
 
@@ -264,8 +267,8 @@ export class Conversation implements RunSurface {
 		this.editor.isNewSession = false;
 
 		if (query.model) {
-			this.modelName = query.model;
-			const model = this.#settings.current.models.find((m) => m.name === query.model);
+			this.model = query.model;
+			const model = findModel(this.#settings.current.models, query.model);
 			if (model) this.session.model = model;
 		}
 
@@ -282,7 +285,7 @@ export class Conversation implements RunSurface {
 
 	/** Reads both things it depends on, so a watcher watches a plain call. */
 	syncModel = (): void => {
-		this.session.model = this.#settings.current.models.find((m) => m.name === this.modelName);
+		this.session.model = findModel(this.#settings.current.models, this.model);
 	};
 
 	/** Re-resolve the system prompt when the model changes (new/unedited sessions). */
@@ -291,7 +294,7 @@ export class Conversation implements RunSurface {
 		if (this.session.messages.some((m) => m.role === 'assistant')) return; // conversation already started
 		const current = this.session.systemPrompt.content;
 		if (current && current !== this.#lastAutoSystemPrompt) return; // written by hand: leave it
-		const resolved = effectiveSystemPrompt(this.modelName, get(systemPromptsConfig).prompts);
+		const resolved = effectiveSystemPrompt(this.model, get(systemPromptsConfig).prompts);
 		if (resolved === current) return;
 		this.session.systemPrompt = { ...this.session.systemPrompt, content: resolved };
 		this.#lastAutoSystemPrompt = resolved;
@@ -404,9 +407,7 @@ export class Conversation implements RunSurface {
 
 		for (const persona of named) {
 			// Its own model, and the conversation's when it names one nobody has.
-			const model =
-				this.#settings.current.models.find((m) => m.name === persona.modelName) ??
-				this.session.model;
+			const model = findModel(this.#settings.current.models, persona.model) ?? this.session.model;
 			const server = this.#servers.current.find((srv) => srv.id === model?.serverId);
 			if (!model?.name || !server) continue;
 
@@ -469,23 +470,16 @@ export class Conversation implements RunSurface {
 
 		// The server writes the title and the summary, so it has to be told which model
 		// to use for each: the browser is where that configuration lives.
-		const titleConfig = this.#chatDefaults.current.title;
-		if (wants.title && titleConfig.titleModel) {
-			input.title = {
-				model: titleConfig.titleModel,
-				serverId: this.#connectionFor(titleConfig.titleModel, titleConfig.titleServerId)
-			};
+		const titleModel = this.#chatDefaults.current.title.titleModel;
+		if (wants.title && titleModel) {
+			input.title = { model: titleModel.name, serverId: titleModel.serverId };
 		}
 		if (
 			wants.compact &&
 			contextUsage(this.session, this.compactConfig.compactThreshold, this.options).ratio >= 1
 		) {
-			const model = this.compactConfig.compactModel || this.session.model.name;
-			input.compact = {
-				model,
-				serverId: this.#connectionFor(model, this.compactConfig.compactServerId),
-				keepRecent: 0
-			};
+			const model = this.compactConfig.compactModel ?? this.session.model;
+			input.compact = { model: model.name, serverId: model.serverId, keepRecent: 0 };
 		}
 
 		try {
@@ -500,18 +494,6 @@ export class Conversation implements RunSurface {
 			// The message is still in the conversation and still in the composer.
 			this.#handleError(error instanceof Error ? error : new Error(String(error)));
 		}
-	}
-
-	/**
-	 * Which connection serves a model chosen for an errand. A named connection
-	 * wins, and the catalogue answers otherwise: these settings store a model by
-	 * name alone. Falling back to the conversation's server asked a local Ollama for
-	 * a hosted title model, and the 404 went nowhere, since naming is best-effort.
-	 */
-	#connectionFor(model: string, preferred: string): string {
-		if (preferred) return preferred;
-		const known = this.#settings.current.models.find((entry) => entry.name === model);
-		return known?.serverId ?? this.session.model!.serverId;
 	}
 
 	/** Everything the turn is, gathered from where each part of it is kept. */

@@ -6,8 +6,10 @@
 	import { APP_NAME } from '$lib/brand';
 	import Collapsible from '$lib/components/Collapsible.svelte';
 	import Select from '$lib/components/Select.svelte';
+	import { describeModel } from '$lib/connections';
 	import { DEFAULT_PROMPTS, PROMPT_GROUPS, PROMPT_KEYS, type PromptKey } from '$lib/defaultPrompts';
-	import { settingsStore } from '$lib/localStorage';
+	import { serversStore, settingsStore } from '$lib/localStorage';
+	import { modelKey, type ModelRef, type SystemPrompts } from '$lib/settings';
 	import { systemPromptsConfig } from '$lib/systemPrompts';
 
 	import SettingsBadge from './SettingsBadge.svelte';
@@ -38,7 +40,14 @@
 	const spShared = $derived($systemPromptsConfig.shared);
 	const spSource = $derived($systemPromptsConfig.source);
 	const sharedPrompts = $derived($systemPromptsConfig.prompts);
-	const sharedPerModel = $derived(Object.entries(sharedPrompts.perModel));
+	/** One row per model, from a map kept by connection then by model id. */
+	function entriesOf(perModel: SystemPrompts['perModel']) {
+		return Object.entries(perModel).flatMap(([serverId, byName]) =>
+			Object.entries(byName).map(([name, prompt]) => ({ serverId, name, prompt }))
+		);
+	}
+
+	const sharedPerModel = $derived(entriesOf(sharedPrompts.perModel));
 	const adminPrompts = $derived($systemPromptsConfig.adminPrompts);
 	const adminDefaultExists = $derived(
 		!!adminPrompts.global.trim() || Object.keys(adminPrompts.perModel).length > 0
@@ -49,27 +58,34 @@
 		$settingsStore.systemPrompts = { global: '', perModel: {} };
 	}
 
-	const perModelEntries = $derived(Object.entries($settingsStore.systemPrompts.perModel));
+	const perModelEntries = $derived(entriesOf($settingsStore.systemPrompts.perModel));
 	const availableToAdd = $derived(
-		[...new Set($settingsStore.models.map((m) => m.name))].filter(
-			(name) => !$settingsStore.systemPrompts.perModel[name]
+		$settingsStore.models.filter(
+			(model) => !$settingsStore.systemPrompts.perModel[model.serverId]?.[model.name]
 		)
 	);
 
-	function addModelPrompt(name: string) {
-		if (!name) return;
+	function addModelPrompt(key: string) {
+		const model = availableToAdd.find((entry) => modelKey(entry) === key);
+		if (!model) return;
+		const perModel = $settingsStore.systemPrompts.perModel;
 		$settingsStore.systemPrompts = {
 			...$settingsStore.systemPrompts,
 			perModel: {
-				...$settingsStore.systemPrompts.perModel,
-				[name]: { prompt: '', mode: 'extend' }
+				...perModel,
+				[model.serverId]: {
+					...perModel[model.serverId],
+					[model.name]: { prompt: '', mode: 'extend' }
+				}
 			}
 		};
 	}
 
-	function removeModelPrompt(name: string) {
-		const perModel = { ...$settingsStore.systemPrompts.perModel };
-		delete perModel[name];
+	function removeModelPrompt(model: ModelRef) {
+		const byName = { ...$settingsStore.systemPrompts.perModel[model.serverId] };
+		delete byName[model.name];
+		const perModel = { ...$settingsStore.systemPrompts.perModel, [model.serverId]: byName };
+		if (!Object.keys(byName).length) delete perModel[model.serverId];
 		$settingsStore.systemPrompts = { ...$settingsStore.systemPrompts, perModel };
 	}
 
@@ -157,7 +173,10 @@
 						value=""
 						searchable
 						emptyLabel={$LL.addAModel()}
-						options={availableToAdd.map((name) => ({ value: name, label: name }))}
+						options={availableToAdd.map((model) => ({
+							value: modelKey(model),
+							label: describeModel($serversStore, model) ?? model.name
+						}))}
 						onChange={(option) => option.value && addModelPrompt(option.value)}
 					/>
 				{/if}
@@ -165,15 +184,19 @@
 
 			{#if perModelEntries.length}
 				<div class="flex flex-col gap-2">
-					{#each perModelEntries as [name] (name)}
+					{#each perModelEntries as entry (modelKey(entry))}
 						<div class="border-shade-3 flex flex-col gap-2 rounded-md border p-2.5">
 							<div class="flex items-center justify-between gap-2">
-								<span class="min-w-0 truncate text-sm font-medium" title={name}>{name}</span>
+								<span
+									class="min-w-0 truncate text-sm font-medium"
+									title={describeModel($serversStore, entry)}
+									>{describeModel($serversStore, entry)}</span
+								>
 								<button
 									type="button"
 									class="text-muted hover:text-active transition-colors"
-									onclick={() => removeModelPrompt(name)}
-									aria-label={$LL.removeModelPrompt({ model: name })}
+									onclick={() => removeModelPrompt(entry)}
+									aria-label={$LL.removeModelPrompt({ model: entry.name })}
 								>
 									<Trash2 class="base-icon" />
 								</button>
@@ -181,10 +204,12 @@
 							<textarea
 								class="settings-field"
 								rows="2"
-								bind:value={$settingsStore.systemPrompts.perModel[name].prompt}
-								placeholder={$LL.promptForModel({ model: name })}></textarea>
+								bind:value={
+									$settingsStore.systemPrompts.perModel[entry.serverId][entry.name].prompt
+								}
+								placeholder={$LL.promptForModel({ model: entry.name })}></textarea>
 							<Select
-								bind:value={$settingsStore.systemPrompts.perModel[name].mode}
+								bind:value={$settingsStore.systemPrompts.perModel[entry.serverId][entry.name].mode}
 								options={[
 									{ value: 'extend', label: $LL.extendsGlobalPrompt() },
 									{ value: 'replace', label: $LL.replacesGlobalPrompt() }
@@ -203,15 +228,18 @@
 
 			{#if sharedPerModel.length}
 				<div class="flex flex-col gap-2">
-					{#each sharedPerModel as [name, mp] (name)}
+					{#each sharedPerModel as entry (modelKey(entry))}
 						<div class="border-shade-3 flex flex-col gap-1 rounded-md border p-2.5">
 							<span class="text-sm font-medium">
-								{name}
+								{describeModel($serversStore, entry)}
 								<span class="text-muted text-xs">
-									({mp.mode === 'replace' ? $LL.replacesGlobalShort() : $LL.extendsGlobalShort()})
+									({entry.prompt.mode === 'replace'
+										? $LL.replacesGlobalShort()
+										: $LL.extendsGlobalShort()})
 								</span>
 							</span>
-							<textarea class="settings-field" rows="2" disabled value={mp.prompt}></textarea>
+							<textarea class="settings-field" rows="2" disabled value={entry.prompt.prompt}
+							></textarea>
 						</div>
 					{/each}
 				</div>

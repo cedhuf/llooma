@@ -11,6 +11,7 @@ import {
 	type PersonaParams,
 	type PersonaSource
 } from '$lib/personas';
+import type { ModelRef } from '$lib/settings';
 import { generateRandomId } from '$lib/utils';
 
 /**
@@ -18,7 +19,7 @@ import { generateRandomId } from '$lib/utils';
  * is an account of one install, and its `knowledgeIds` pointed at documents the
  * recipient did not have. A bundle carries what was written, by content.
  *
- * `modelName` is absent on purpose: a model named in a bundle is wrong for
+ * The model is absent on purpose: a model named in a bundle is wrong for
  * almost everyone who reads it. Installing uses your default.
  */
 export const PERSONA_BUNDLE_FORMAT = 'llooma.persona';
@@ -162,9 +163,10 @@ export function avatarFields(
 }
 
 /** The model an installed persona starts on: yours, whichever it is. */
-function defaultModelName(): string {
+function defaultModelRef(): ModelRef | null {
 	const settings = get(settingsStore);
-	return settings.defaultModel || settings.models[0]?.name || '';
+	const first = settings.models[0];
+	return settings.defaultModel ?? (first ? { serverId: first.serverId, name: first.name } : null);
 }
 
 /**
@@ -239,7 +241,7 @@ export function personaFromBundle(bundle: PersonaBundle, source: PersonaSource):
 		...newPersona(),
 		...authored,
 		...avatarFields(avatar, bundle.persona.name),
-		modelName: defaultModelName(),
+		model: defaultModelRef(),
 		// What it said on the way in, so "you edited this" and "the store moved on" can
 		// be told apart. From the bundle rather than the persona just built, so the two
 		// sides hash the same thing.

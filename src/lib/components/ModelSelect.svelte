@@ -5,11 +5,11 @@
 	import Select, { type SelectOptionOrGroup } from '$lib/components/Select.svelte';
 	import { modelKind, modelLabel, serverBadge, type ModelKind } from '$lib/connections';
 	import { serversStore, settingsStore } from '$lib/localStorage';
-	import { type Model } from '$lib/settings';
+	import { findModel, modelKey, sameModel, type Model, type ModelRef } from '$lib/settings';
 
 	/** The single model chooser for the whole app: recently used first, then the rest. Only the trigger changes between contexts. */
 	interface Props {
-		value?: string;
+		value?: ModelRef | null;
 		/**
 		 * `hero`: wide home-screen field. `default`: standard form field.
 		 * `attached`: left half of a joined control, drawing only a divider so the
@@ -22,7 +22,7 @@
 		emptyLabel?: string;
 		/** Text alone by default, which is what every existing caller means: an embedding model in the chat picker is a 400 with no explanation. The drawing page asks for images instead. */
 		kinds?: ModelKind[];
-		onSelect?: (name: string) => void;
+		onSelect?: (model: ModelRef | null) => void;
 	}
 
 	let {
@@ -43,7 +43,7 @@
 		const badge = badgeFor(model.serverId);
 		const server = $serversStore.find((s) => s.id === model.serverId);
 		return {
-			value: model.name,
+			value: modelKey(model),
 			// Display-only: the value stays the real id, which is what gets sent.
 			label: modelLabel(server, model.name),
 			hint: model.parameterSize,
@@ -55,16 +55,16 @@
 	/** A model already chosen stays in the list whatever its kind: filtering it out would empty the field of a conversation running for weeks. */
 	const models = $derived(
 		($settingsStore.models ?? []).filter((model) => {
-			if (model.name === value) return true;
+			if (sameModel(model, value)) return true;
 			const server = $serversStore.find((s) => s.id === model.serverId);
 			return kinds.includes(modelKind(server, model.name));
 		})
 	);
 	// Recently used, restricted to models that still exist in the catalogue.
 	const recent = $derived(
-		($settingsStore.lastUsedModels ?? []).filter((m) => models.some((x) => x.name === m.name))
+		($settingsStore.lastUsedModels ?? []).filter((m) => findModel(models, m))
 	);
-	const rest = $derived(models.filter((m) => !recent.some((r) => r.name === m.name)));
+	const rest = $derived(models.filter((m) => !findModel(recent, m)));
 
 	const options = $derived.by<SelectOptionOrGroup[]>(() =>
 		[
@@ -75,13 +75,19 @@
 </script>
 
 <Select
-	bind:value
+	value={value ? modelKey(value) : ''}
 	{options}
 	{emptyLabel}
 	searchable
 	allowClear
 	placeholder={$LL.availableModels()}
-	onChange={(option) => onSelect?.(option.value)}
+	onChange={(option) => {
+		const chosen = models.find((model) => modelKey(model) === option.value);
+		// The reference alone: the catalogue entry also carries sizes and dates that
+		// would otherwise be saved wherever the choice is.
+		value = chosen ? { serverId: chosen.serverId, name: chosen.name } : null;
+		onSelect?.(value);
+	}}
 >
 	{#snippet trigger({ props, label, hasValue })}
 		<!-- The same bordered control everywhere, only the scale changing, so it reads

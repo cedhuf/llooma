@@ -268,10 +268,11 @@ class ChattoRuntime implements IntegrationRuntime {
 			);
 			const live = config.streaming ? answer : null;
 
+			// Only a runnable integration is started, and a runnable one has a model.
+			const model = config.model!;
 			const { text } = await runTurnOnce({
 				userId: this.#record.ownerUserId,
-				serverId: config.serverId,
-				model: config.model,
+				model,
 				systemPrompt: instructionsFor(this.#record),
 				messages,
 				tools: config.tools,

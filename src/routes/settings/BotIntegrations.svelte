@@ -8,6 +8,7 @@
 	import EmptyMessage from '$lib/components/EmptyMessage.svelte';
 	import NumberField from '$lib/components/NumberField.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
+	import { describeModel } from '$lib/connections';
 	import {
 		BOT_REPLIES_PER_HOUR_MAX,
 		BOTS_PER_USER_MAX,
@@ -21,6 +22,7 @@
 		type IntegrationView
 	} from '$lib/integrations';
 	import { integrationsConfig, loadIntegrationsConfig } from '$lib/integrationsConfig';
+	import { serversStore } from '$lib/localStorage';
 	import { toast } from '$lib/toast';
 
 	import BotIntegration from './BotIntegration.svelte';
@@ -392,7 +394,7 @@
 					<span class="min-w-0 flex-1">
 						<span class="text-active block truncate text-sm">{bot.label || bot.kind}</span>
 						<span class="text-muted block truncate text-xs">
-							{bot.owner} · {bot.config.model || $LL.botNeedsAModel()}
+							{bot.owner} · {describeModel($serversStore, bot.config.model) ?? $LL.botNeedsAModel()}
 							{#if !bot.enabled}· {$LL.offByItsOwner()}{/if}
 						</span>
 					</span>

@@ -20,6 +20,7 @@
 	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { unbindPersonaSession } from '$lib/personas';
 	import { resolveSessionTitle } from '$lib/sessions';
+	import { parseModelRef } from '$lib/settings';
 	import { pendingMessage } from '$lib/stores/pendingMessage';
 	import { formatTimestampToNow, isTouchPrimary } from '$lib/utils';
 
@@ -89,7 +90,7 @@
 
 	// Re-resolve the system prompt when the model changes (new/unedited sessions).
 	$effect(() => {
-		void chat.modelName;
+		void chat.model;
 		untrack(() => chat.autoResolveSystemPrompt());
 	});
 
@@ -155,9 +156,15 @@
 		let query: QueryEntry | null = null;
 		const promptParam = pending ? null : page.url.searchParams.get('q');
 		if (promptParam) {
+			// A model is named with its connection, `server` being the connection's id: the
+			// same model id on two connections is two models.
 			query = {
 				prompt: promptParam,
-				model: page.url.searchParams.get('model') ?? undefined,
+				model:
+					parseModelRef({
+						serverId: page.url.searchParams.get('server'),
+						name: page.url.searchParams.get('model')
+					}) ?? undefined,
 				search: page.url.searchParams.get('search') === '1'
 			};
 
@@ -165,6 +172,7 @@
 			const cleaned = new URL(page.url);
 			cleaned.searchParams.delete('q');
 			cleaned.searchParams.delete('model');
+			cleaned.searchParams.delete('server');
 			cleaned.searchParams.delete('search');
 			history.replaceState(history.state, '', cleaned);
 		}
@@ -323,7 +331,7 @@
 					class="border-shade-3 focus-within:border-accent has-[[data-state=open]]:border-accent mr-1 flex items-center overflow-hidden rounded-md border transition-colors"
 				>
 					<span class="hidden lg:flex">
-						<ModelSelect bind:value={chat.modelName} variant="attached" />
+						<ModelSelect bind:value={chat.model} variant="attached" />
 					</span>
 					<!-- Transparent on the header's background: chrome, not content. -->
 					<button
@@ -501,9 +509,5 @@
 	{/if}
 </div>
 
-<SessionModal
-	bind:open={sessionModalOpen}
-	bind:session={chat.session}
-	bind:modelName={chat.modelName}
-/>
+<SessionModal bind:open={sessionModalOpen} bind:session={chat.session} bind:model={chat.model} />
 <RefusalDialog bind:open={chat.refusalOpen} detail={chat.refusalDetail} />

@@ -15,6 +15,42 @@ export interface Model {
 	modifiedAt?: Date;
 }
 
+/** A model as it is remembered: the connection that serves it and its id there. The same id on two connections is two models. */
+export type ModelRef = Pick<Model, 'serverId' | 'name'>;
+
+/** One string per reference, for lists keyed by string. A newline appears in no connection id and no model id. */
+export function modelKey(model: ModelRef): string {
+	return `${model.serverId}\n${model.name}`;
+}
+
+export function sameModel(a: ModelRef | null | undefined, b: ModelRef | null | undefined): boolean {
+	return !!a && !!b && a.serverId === b.serverId && a.name === b.name;
+}
+
+/** A reference read back from storage or a request, or null for anything that is not one. */
+export function parseModelRef(raw: unknown): ModelRef | null {
+	let value = raw;
+	if (typeof raw === 'string') {
+		try {
+			value = JSON.parse(raw);
+		} catch {
+			return null;
+		}
+	}
+	const { serverId, name } = (value ?? {}) as Partial<ModelRef>;
+	return typeof serverId === 'string' && serverId && typeof name === 'string' && name
+		? { serverId, name }
+		: null;
+}
+
+/** The catalogue entry for a reference, or undefined when that connection no longer offers it. */
+export function findModel<T extends ModelRef>(
+	models: T[] | null | undefined,
+	ref: ModelRef | null | undefined
+): T | undefined {
+	return ref ? models?.find((model) => sameModel(model, ref)) : undefined;
+}
+
 /** A per-model system prompt: extends the global prompt or replaces it entirely. */
 export interface ModelSystemPrompt {
 	prompt: string;
@@ -23,16 +59,17 @@ export interface ModelSystemPrompt {
 
 export interface SystemPrompts {
 	global: string;
-	perModel: Record<string, ModelSystemPrompt>;
+	/** By connection, then by model id. */
+	perModel: Record<string, Record<string, ModelSystemPrompt>>;
 }
 
 /** 'replace' takes over, 'extend' is appended. '' when nothing is configured. */
 export function effectiveSystemPrompt(
-	modelName: string | undefined,
+	modelRef: ModelRef | null | undefined,
 	prompts: SystemPrompts | undefined
 ): string {
 	const global = prompts?.global?.trim() ?? '';
-	const model = modelName ? prompts?.perModel?.[modelName] : undefined;
+	const model = modelRef ? prompts?.perModel?.[modelRef.serverId]?.[modelRef.name] : undefined;
 	const modelPrompt = model?.prompt?.trim() ?? '';
 
 	if (!modelPrompt) return global;
@@ -49,9 +86,9 @@ export interface Settings {
 	autoCheckForUpdates: boolean;
 	/** The version already announced by a toast, so it is only announced once. */
 	notifiedUpdateVersion: string;
-	defaultModel: string | null;
+	defaultModel: ModelRef | null;
 	generateTitlesWithAI: boolean;
-	titleModel: string | null;
+	titleModel: ModelRef | null;
 	/**
 	 * Name the conversation again once it has grown into one: the first title is
 	 * written from a single question. Once only, and never over a typed title,
@@ -61,15 +98,15 @@ export interface Settings {
 	/** How many replies before it is named again. */
 	regenerateTitleAfter: number;
 	/** Model that writes compaction summaries. Empty = the conversation's own model. */
-	compactModel: string | null;
+	compactModel: ModelRef | null;
 	/** The image model the gallery starts on. Empty = the first one available. */
-	defaultImageModel: string | null;
+	defaultImageModel: ModelRef | null;
 	/** Offer to rewrite a description into a fuller image prompt. */
 	imagePromptWriter: boolean;
 	/** On by default, unlike the writer: a title is a handful of tokens, and it is what a list of pictures is read by. */
 	imageAutoTitle: boolean;
 	/** Empty means the default model, as everywhere else. A switch is how it is turned off. */
-	imagePromptModel: string | null;
+	imagePromptModel: ModelRef | null;
 	/** An absent field is the provider deciding, so there is no third answer to represent. A conversation lays its overrides on top. */
 	sampling: SamplingOptions;
 	/** Compact on its own once the conversation crosses `compactThreshold`. */
@@ -183,11 +220,11 @@ export interface Settings {
 	/** Off by default: transcription is a second model on a connection somebody has to set up, and a microphone that fails on first press is worse than none. */
 	voiceInput: boolean;
 	/** Which model transcribes. Null means none has been chosen, and the feature waits. */
-	voiceModel: string | null;
+	voiceModel: ModelRef | null;
 	/** Its own switch rather than a consequence of `voiceInput`: being talked at is a mode, and usually a second model again. */
 	speechOutput: boolean;
 	/** Which model reads aloud. Null means none has been chosen. */
-	speechModel: string | null;
+	speechModel: ModelRef | null;
 	/** A name the provider knows, required by every endpoint that does this, so an empty one fails rather than picking something. */
 	speechVoice: string;
 	/**

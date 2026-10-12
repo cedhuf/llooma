@@ -2,7 +2,7 @@ import type { ErrorResponse, ProgressResponse, PullRequest, StatusResponse } fro
 import { get } from 'svelte/store';
 
 import { sessionsStore, settingsStore } from '$lib/localStorage';
-import type { Model } from '$lib/settings';
+import { findModel, type Model } from '$lib/settings';
 import type { TokenCount } from '$lib/usageCounts';
 
 import { type OllamaOptions } from './ollama';
@@ -126,9 +126,9 @@ export function getLastUsedModels(): Model[] {
 	const lastUsedModels: Model[] = [];
 
 	for (const session of currentSessions) {
-		if (lastUsedModels.find((m) => m.name === session.model?.name)) continue;
+		if (findModel(lastUsedModels, session.model)) continue;
 
-		const model = models.find((model) => model.name === session.model?.name);
+		const model = findModel(models, session.model);
 		if (!model) continue;
 		lastUsedModels.push(model);
 

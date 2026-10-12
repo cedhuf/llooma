@@ -7,7 +7,8 @@
 	import FieldCheckbox from '$lib/components/FieldCheckbox.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import NumberField from '$lib/components/NumberField.svelte';
-	import { settingsStore } from '$lib/localStorage';
+	import { describeModel } from '$lib/connections';
+	import { serversStore, settingsStore } from '$lib/localStorage';
 
 	import SamplingFields from './SamplingFields.svelte';
 	import SettingsBadge from './SettingsBadge.svelte';
@@ -18,11 +19,11 @@
 	import SettingsSlider from './SettingsSlider.svelte';
 
 	const dmEditable = $derived($chatDefaultsConfig.defaultModel.editable);
-	const dmValue = $derived($chatDefaultsConfig.defaultModel.value || undefined);
+	const dmValue = $derived($chatDefaultsConfig.defaultModel.value);
 	const titleCfg = $derived($chatDefaultsConfig.title);
-	const titleModelValue = $derived(titleCfg.titleModel || undefined);
+	const titleModelValue = $derived(titleCfg.titleModel);
 	const compactCfg = $derived($chatDefaultsConfig.compact);
-	const compactModelValue = $derived(compactCfg.compactModel || undefined);
+	const compactModelValue = $derived(compactCfg.compactModel);
 
 	const samplingCfg = $derived($chatDefaultsConfig.sampling);
 	/**
@@ -63,7 +64,11 @@
 				{#snippet badge()}
 					<SettingsBadge>{$LL.setByAdmin()}</SettingsBadge>
 				{/snippet}
-				<input class="settings-field" disabled value={dmValue ?? $LL.none()} />
+				<input
+					class="settings-field"
+					disabled
+					value={describeModel($serversStore, dmValue) ?? $LL.none()}
+				/>
 			</SettingsField>
 		{/if}
 
@@ -110,7 +115,7 @@
 					class="settings-field"
 					disabled
 					value={titleCfg.generateTitlesWithAI
-						? `${$LL.on()}: ${titleCfg.titleModel || $LL.none()}`
+						? `${$LL.on()}: ${describeModel($serversStore, titleCfg.titleModel) ?? $LL.none()}`
 						: $LL.off()}
 				/>
 			</SettingsField>
@@ -201,7 +206,11 @@
 			<SettingsHint>{$LL.compactThresholdHelp()}</SettingsHint>
 		{:else}
 			<SettingsField label={$LL.compactModel()}>
-				<input class="settings-field" disabled value={compactCfg.compactModel || $LL.none()} />
+				<input
+					class="settings-field"
+					disabled
+					value={describeModel($serversStore, compactCfg.compactModel) ?? $LL.none()}
+				/>
 			</SettingsField>
 			<SettingsField label={$LL.autoCompact()}>
 				<input

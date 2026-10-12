@@ -271,9 +271,7 @@ const BASE_SETTINGS = {
 	mobileDefaultApplied: true,
 	/** Set up but never used: otherwise the voice screen photographs its "nothing configured" notice. */
 	voiceInput: true,
-	voiceModel: 'whisper-large-v3',
 	speechOutput: true,
-	speechModel: 'kokoro-82m',
 	speechVoice: 'ff_siwis'
 };
 
@@ -325,7 +323,15 @@ async function configure(page: Page, patch: Record<string, unknown>) {
 	const current = await page.request.get('/api/data/settings');
 	const stored = current.ok() ? ((await current.json()) ?? {}) : {};
 	await page.request.put('/api/data/settings', {
-		data: { ...stored, ...BASE_SETTINGS, models, ...patch }
+		data: {
+			...stored,
+			...BASE_SETTINGS,
+			models,
+			// A model is remembered with its connection, which only exists once seeded.
+			voiceModel: models.find((model) => model.name === 'whisper-large-v3') ?? null,
+			speechModel: models.find((model) => model.name === 'kokoro-82m') ?? null,
+			...patch
+		}
 	});
 }
 

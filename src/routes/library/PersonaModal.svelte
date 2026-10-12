@@ -178,7 +178,7 @@
 			     that travels. Said in the list rather than left as an empty field, which
 			     reads as unfinished. -->
 			<ModelSelect
-				bind:value={persona.modelName}
+				bind:value={persona.model}
 				emptyLabel={$LL.personaDefaultModel()}
 				onSelect={persist}
 			/>

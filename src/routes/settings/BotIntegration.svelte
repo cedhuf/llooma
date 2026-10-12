@@ -23,7 +23,7 @@
 		type BotWarning,
 		type IntegrationView
 	} from '$lib/integrations';
-	import { personasStore, settingsStore } from '$lib/localStorage';
+	import { personasStore } from '$lib/localStorage';
 
 	import SettingsCard from './SettingsCard.svelte';
 	import SettingsField from './SettingsField.svelte';
@@ -111,18 +111,10 @@
 
 	/** What the closed line says, so opening it is a choice rather than a hunt. */
 	const summary = $derived(
-		[integration.config.model || $LL.botNeedsAModel(), integration.config.baseUrl]
+		[integration.config.model?.name || $LL.botNeedsAModel(), integration.config.baseUrl]
 			.filter(Boolean)
 			.join(' · ')
 	);
-
-	/** The same lookup the composer does: the catalogue knows which connection each model came from, and the run needs the connection, not the name. */
-	function pickModel(name: string) {
-		const known = $settingsStore.models.find((entry) => entry.name === name);
-		integration.config.model = name;
-		integration.config.serverId = known?.serverId ?? integration.config.serverId;
-		onChange();
-	}
 
 	/** A green button beside an address that has since been edited is a button claiming something was verified that never was. */
 	function invalidate() {
@@ -274,7 +266,7 @@
 	</SettingsField>
 
 	<SettingsField label={$LL.model()}>
-		<ModelSelect value={integration.config.model} onSelect={pickModel} />
+		<ModelSelect bind:value={integration.config.model} onSelect={onChange} />
 	</SettingsField>
 
 	<!-- Who the bot is. Three sources, one at a time: the account's usual

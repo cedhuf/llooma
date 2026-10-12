@@ -1,7 +1,7 @@
 import { resolveChatDefaults } from '$lib/server/chatDefaultsResolver';
 import { getItem, getSettings } from '$lib/server/db/collections';
 import type { Session } from '$lib/sessions';
-import type { Model, Settings } from '$lib/settings';
+import { findModel, type ModelRef, type Settings } from '$lib/settings';
 
 /**
  * What a spoken conversation needs before anybody opens their mouth.
@@ -15,22 +15,16 @@ import type { Model, Settings } from '$lib/settings';
  * snapshot, so a voice changed halfway through finishes as it started.
  */
 
-/** A model, and the connection that serves it. Everything downstream needs both. */
-export interface VoiceTarget {
-	serverId: string;
-	model: string;
-}
-
 export interface VoiceConfig {
 	/** Turning what was said into words. */
-	listen: VoiceTarget & {
+	listen: ModelRef & {
 		/** ISO 639-1, or empty to leave the model to work it out. */
 		language: string;
 	};
 	/** Reading the answer back. */
-	speak: VoiceTarget & { voice: string };
+	speak: ModelRef & { voice: string };
 	/** Answering. The conversation's own model, or the account's default. */
-	think: VoiceTarget;
+	think: ModelRef;
 }
 
 /** Which half is not configured, in the terms the settings use, so a screen can name the tab somebody has to open. */
@@ -39,17 +33,10 @@ export type VoiceMissing = 'listen' | 'speak' | 'think';
 export type VoiceResolution =
 	{ ok: true; config: VoiceConfig } | { ok: false; missing: VoiceMissing[] };
 
-/**
- * The server-side twin of the lookup the browser does: a name is not enough to
- * reach anything, and the catalogue that turns it into an address is per
- * account. A name with no entry answers nothing rather than guessing.
- */
-function connectionFor(
-	models: Model[] | undefined,
-	name: string | null | undefined
-): string | null {
-	if (!name) return null;
-	return (models ?? []).find((entry) => entry.name === name)?.serverId ?? null;
+/** A model this account can still reach, as a target. One its connection no longer offers answers nothing. */
+function targetFor(settings: Settings | null, model: ModelRef | null | undefined): ModelRef | null {
+	const known = findModel(settings?.models, model);
+	return known ? { serverId: known.serverId, name: known.name } : null;
 }
 
 /** `sessionId` names the conversation being held: its model answers rather than the account's default, since a conversation started with one model and continued in another is two conversations wearing one title. */
@@ -63,31 +50,26 @@ export function resolveVoiceConfig(
 
 	// Transcription, which the administrator may have set up and shared: on most
 	// instances they are the only person who could have.
-	const listenModel = defaults.voice.voiceInput ? defaults.voice.voiceModel : '';
-	const listenServer = connectionFor(settings?.models, listenModel);
-	if (!listenServer) missing.push('listen');
+	const listen = defaults.voice.voiceInput ? targetFor(settings, defaults.voice.voiceModel) : null;
+	if (!listen) missing.push('listen');
 
 	// Reading aloud is the account's own, and needs a voice by name as well as a
 	// model: every one of these endpoints refuses without one.
-	const speakModel = settings?.speechOutput ? settings.speechModel : null;
 	const speakVoice = settings?.speechVoice?.trim() ?? '';
-	const speakServer = speakVoice ? connectionFor(settings?.models, speakModel) : null;
-	if (!speakServer) missing.push('speak');
+	const speak =
+		settings?.speechOutput && speakVoice ? targetFor(settings, settings.speechModel) : null;
+	if (!speak) missing.push('speak');
 
 	const think = thinkTarget(user.id, settings, defaults.defaultModel.value, sessionId);
 	if (!think) missing.push('think');
 
-	if (!listenServer || !speakServer || !think) return { ok: false, missing };
+	if (!listen || !speak || !think) return { ok: false, missing };
 
 	return {
 		ok: true,
 		config: {
-			listen: {
-				serverId: listenServer,
-				model: listenModel,
-				language: settings?.voiceLanguage?.trim() ?? ''
-			},
-			speak: { serverId: speakServer, model: speakModel as string, voice: speakVoice },
+			listen: { ...listen, language: settings?.voiceLanguage?.trim() ?? '' },
+			speak: { ...speak, voice: speakVoice },
 			think
 		}
 	};
@@ -97,16 +79,15 @@ export function resolveVoiceConfig(
 function thinkTarget(
 	userId: string,
 	settings: Settings | null,
-	defaultModel: string,
+	defaultModel: ModelRef | null,
 	sessionId: string | null
-): VoiceTarget | null {
+): ModelRef | null {
 	const stored = sessionId ? getItem<Session>('sessions', userId, sessionId) : null;
 	// A stored conversation carries its connection with it, so it is taken whole:
 	// the model may have left the catalogue, and the conversation is still held on it.
 	if (stored?.model?.serverId && stored.model.name) {
-		return { serverId: stored.model.serverId, model: stored.model.name };
+		return { serverId: stored.model.serverId, name: stored.model.name };
 	}
 
-	const server = connectionFor(settings?.models, defaultModel);
-	return server ? { serverId: server, model: defaultModel } : null;
+	return targetFor(settings, defaultModel);
 }

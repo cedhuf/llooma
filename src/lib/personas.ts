@@ -7,7 +7,7 @@ import { resolvePrompt } from '$lib/defaultPrompts';
 import { LANGUAGE_LABELS } from '$lib/i18n';
 import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
 import { saveSession, type Session, type SessionSummary } from '$lib/sessions';
-import type { Model } from '$lib/settings';
+import { findModel, parseModelRef, type Model, type ModelRef } from '$lib/settings';
 import { generateRandomId } from '$lib/utils';
 
 export interface PersonaParams {
@@ -62,8 +62,8 @@ export interface Persona {
 	systemPrompt: string;
 	/** Opening line, shown as the first assistant bubble when the chat starts. */
 	greeting?: string;
-	/** Model name; resolved to a concrete server when a chat is created. Empty = your default. */
-	modelName: string;
+	/** Null is your default, whichever it is when a chat is created. */
+	model: ModelRef | null;
 	/**
 	 * The language it answers in, whatever language it was written in. Free text
 	 * rather than a list: the locales the app is translated into have nothing to do
@@ -128,7 +128,7 @@ export function newPersona(id: string = generateRandomId()): Persona {
 		tagline: '',
 		avatarColor: pickAvatarColor(id),
 		systemPrompt: '',
-		modelName: '',
+		model: null,
 		createdAt: now,
 		updatedAt: now
 	};
@@ -178,10 +178,9 @@ export async function launchPersona(persona: Persona, models: Model[]): Promise<
 	// A persona names a model, or leaves it empty to mean "whichever is mine". The
 	// fallback has to happen here: a conversation opened directly resolves nothing,
 	// so an empty one arrived with no model at all.
-	const defaultModel = get(chatDefaultsConfig).defaultModel.value;
 	const model =
-		models.find((m) => m.name === persona.modelName) ??
-		(defaultModel ? models.find((m) => m.name === defaultModel) : undefined);
+		findModel(models, persona.model) ??
+		findModel(models, get(chatDefaultsConfig).defaultModel.value);
 	const session: Session = {
 		id,
 		messages: persona.greeting?.trim() ? [{ role: 'assistant', content: persona.greeting }] : [],
@@ -252,6 +251,12 @@ function isOpenWebUIModel(o: Record<string, unknown>): boolean {
 	return 'base_model_id' in o || 'params' in o || 'meta' in o;
 }
 
+/** OpenWebUI names a model without saying which connection serves it, so the first that offers it here is the closest reading. */
+function firstOffering(id: string | undefined): ModelRef | null {
+	const known = get(settingsStore).models.find((model) => model.name === id?.trim());
+	return known ? { serverId: known.serverId, name: known.name } : null;
+}
+
 function fromOpenWebUI(m: OpenWebUIModel): Persona {
 	const id = generateRandomId();
 	const now = new Date().toISOString();
@@ -267,7 +272,7 @@ function fromOpenWebUI(m: OpenWebUIModel): Persona {
 		avatarColor: pickAvatarColor(id),
 		avatarImage: m.meta?.profile_image_url || undefined,
 		systemPrompt: m.params?.system ?? '',
-		modelName: m.base_model_id?.trim() || '',
+		model: firstOffering(m.base_model_id),
 		params: Object.keys(params).length ? params : undefined,
 		webSearch: m.meta?.capabilities?.web_search || undefined,
 		suggestions: (m.meta?.suggestion_prompts ?? [])
@@ -284,6 +289,7 @@ function fromNative(p: Partial<Persona>): Persona {
 	return {
 		...base,
 		...p,
+		model: parseModelRef(p.model),
 		id: base.id, // fresh id so imports never collide with existing personas
 		sessionId: undefined, // don't carry a stale conversation binding
 		source: undefined, // whoever installs it says where it came from
@@ -301,7 +307,7 @@ export function parsePersonasImport(json: unknown): Persona[] {
 	for (const item of items) {
 		if (!item || typeof item !== 'object') continue;
 		const o = item as Record<string, unknown>;
-		if ('systemPrompt' in o || 'modelName' in o) personas.push(fromNative(o as Partial<Persona>));
+		if ('systemPrompt' in o) personas.push(fromNative(o as Partial<Persona>));
 		else if (isOpenWebUIModel(o)) personas.push(fromOpenWebUI(o as OpenWebUIModel));
 	}
 	for (const persona of personas) persona.source = { origin: 'file' };

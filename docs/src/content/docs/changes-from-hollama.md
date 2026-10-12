@@ -87,5 +87,5 @@ see the [roadmap](/roadmap/).
 - Removed the `prefer-writable-derived` anti-pattern across the codebase
 - Replaced hacky `LocalizedString` label casts with proper i18n keys
 - Server-side proxy for OpenAI-compatible providers (CORS bypass)
-- URL param auto-submit (`?q=`, `&model=`)
+- URL param auto-submit (`?q=`, `&model=` with `&server=`)
 - Removed Electron
