@@ -210,7 +210,9 @@
 	{/key}
 {/if}
 
-{#if editor.isCompletionInProgress}
+<!-- Not while compacting: the answer has already landed, and the divider above is
+     what is still in progress. -->
+{#if editor.isCompletionInProgress && !isCompacting}
 	<!-- The stripped text on purpose: a <read> round is not an answer, and treating
 	     it as one collapsed the timeline mid-turn. -->
 	<Article
