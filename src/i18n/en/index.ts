@@ -205,6 +205,11 @@ const en = {
 		'Its pages are pictures of text, a scan for instance, and this app does not read pictures as text.',
 	documentNotTextHelp:
 		'It is not a text file, so nothing was loaded and the model received nothing from it.',
+	searchShortcutTitle: 'Ask from the address bar',
+	searchShortcutDescription:
+		'A link that opens a new conversation with your question already asked, to the model chosen here.',
+	searchShortcutHint:
+		'Add it to your browser as a search engine with a keyword, ll for instance: typing ll and then a question in the address bar opens a conversation with it. %s is where the browser puts what you typed.',
 	documentsTitle: 'Documents',
 	documentsDescription:
 		'Attach a PDF, a Word file or a spreadsheet and its text goes into the conversation.',

@@ -1,13 +1,31 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
+	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
+	import { chatDefaultsConfig } from '$lib/chatDefaults';
+	import ButtonCopy from '$lib/components/ButtonCopy.svelte';
 	import Kbd from '$lib/components/Kbd.svelte';
+	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import { modKey } from '$lib/platform';
 
+	import SettingsField from './SettingsField.svelte';
+	import SettingsHint from './SettingsHint.svelte';
 	import SettingsSection from './SettingsSection.svelte';
 
 	/** Read-only, and written from the handlers rather than from memory: a shortcut list that drifts from the code teaches the wrong thing. Each group names where its keys are handled. */
 
 	const mod = $derived(modKey());
+
+	let searchModel = $state($chatDefaultsConfig.defaultModel.value);
+
+	/** `%s` stays as typed: it is where the browser puts the words. */
+	const searchLink = $derived(
+		searchModel
+			? `${page.url.origin}${resolve('/sessions')}?q=%s` +
+					`&model=${encodeURIComponent(searchModel.name)}` +
+					`&server=${encodeURIComponent(searchModel.serverId)}`
+			: ''
+	);
 
 	interface Shortcut {
 		keys: string[];
@@ -89,4 +107,26 @@
 			</div>
 		{/each}
 	</div>
+</SettingsSection>
+
+<SettingsSection
+	title={$LL.searchShortcutTitle()}
+	description={$LL.searchShortcutDescription()}
+	card
+>
+	<SettingsField label={$LL.model()}>
+		<ModelSelect bind:value={searchModel} />
+	</SettingsField>
+	{#if searchLink}
+		<div class="flex items-center gap-2">
+			<input
+				class="settings-field min-w-0 flex-1 font-mono text-xs"
+				readonly
+				value={searchLink}
+				aria-label={$LL.searchShortcutTitle()}
+			/>
+			<ButtonCopy content={searchLink} />
+		</div>
+	{/if}
+	<SettingsHint>{$LL.searchShortcutHint()}</SettingsHint>
 </SettingsSection>

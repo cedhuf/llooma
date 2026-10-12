@@ -765,6 +765,18 @@ type RootTranslation = {
 	 */
 	documentNotTextHelp: string
 	/**
+	 * A​s​k​ ​f​r​o​m​ ​t​h​e​ ​a​d​d​r​e​s​s​ ​b​a​r
+	 */
+	searchShortcutTitle: string
+	/**
+	 * A​ ​l​i​n​k​ ​t​h​a​t​ ​o​p​e​n​s​ ​a​ ​n​e​w​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​w​i​t​h​ ​y​o​u​r​ ​q​u​e​s​t​i​o​n​ ​a​l​r​e​a​d​y​ ​a​s​k​e​d​,​ ​t​o​ ​t​h​e​ ​m​o​d​e​l​ ​c​h​o​s​e​n​ ​h​e​r​e​.
+	 */
+	searchShortcutDescription: string
+	/**
+	 * A​d​d​ ​i​t​ ​t​o​ ​y​o​u​r​ ​b​r​o​w​s​e​r​ ​a​s​ ​a​ ​s​e​a​r​c​h​ ​e​n​g​i​n​e​ ​w​i​t​h​ ​a​ ​k​e​y​w​o​r​d​,​ ​l​l​ ​f​o​r​ ​i​n​s​t​a​n​c​e​:​ ​t​y​p​i​n​g​ ​l​l​ ​a​n​d​ ​t​h​e​n​ ​a​ ​q​u​e​s​t​i​o​n​ ​i​n​ ​t​h​e​ ​a​d​d​r​e​s​s​ ​b​a​r​ ​o​p​e​n​s​ ​a​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​w​i​t​h​ ​i​t​.​ ​%​s​ ​i​s​ ​w​h​e​r​e​ ​t​h​e​ ​b​r​o​w​s​e​r​ ​p​u​t​s​ ​w​h​a​t​ ​y​o​u​ ​t​y​p​e​d​.
+	 */
+	searchShortcutHint: string
+	/**
 	 * D​o​c​u​m​e​n​t​s
 	 */
 	documentsTitle: string
@@ -5119,6 +5131,18 @@ export type TranslationFunctions = {
 	 * It is not a text file, so nothing was loaded and the model received nothing from it.
 	 */
 	documentNotTextHelp: () => LocalizedString
+	/**
+	 * Ask from the address bar
+	 */
+	searchShortcutTitle: () => LocalizedString
+	/**
+	 * A link that opens a new conversation with your question already asked, to the model chosen here.
+	 */
+	searchShortcutDescription: () => LocalizedString
+	/**
+	 * Add it to your browser as a search engine with a keyword, ll for instance: typing ll and then a question in the address bar opens a conversation with it. %s is where the browser puts what you typed.
+	 */
+	searchShortcutHint: () => LocalizedString
 	/**
 	 * Documents
 	 */

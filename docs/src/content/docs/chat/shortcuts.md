@@ -5,7 +5,7 @@ sidebar:
   order: 1
 ---
 
-The same list lives in the app under _Settings → Shortcuts_, generated from what the code actually
+The same list lives in the app under _Settings → Interface_, generated from what the code actually
 listens for, so it cannot drift from this page without both being wrong.
 
 ## Slash commands
@@ -79,3 +79,19 @@ long message can be written without firing on every return.
 | `Esc`   | Close             |
 
 Customising any of this is not possible yet.
+
+## Asking from the address bar
+
+A question can be sent to Llooma straight from the browser's address bar. Under _Settings →
+Interface_, _Ask from the address bar_ builds the link for a model of your choice:
+
+```
+https://your-instance/sessions?q=%s&model=llama3&server=…
+```
+
+Add it to your browser as a search engine with a keyword, `ll` for instance. Typing `ll` and then a
+question in the address bar opens a new conversation with that question already asked. `%s` is where
+the browser puts what you typed.
+
+The link names the model and the connection it runs on, since the same model can be offered by two
+connections. Each use opens a conversation of its own. `&search=1` turns web search on for it.

@@ -220,6 +220,11 @@ const fr = extendDictionary(en, {
 		"Ses pages sont des images de texte, un scan par exemple, et l'application ne lit pas le texte des images.",
 	documentNotTextHelp:
 		"Ce n'est pas un fichier texte : rien n'a été chargé, et le modèle n'en a rien reçu.",
+	searchShortcutTitle: "Poser une question depuis la barre d'adresse",
+	searchShortcutDescription:
+		'Un lien qui ouvre une nouvelle conversation avec votre question déjà posée, au modèle choisi ici.',
+	searchShortcutHint:
+		"Ajoutez-le à votre navigateur comme moteur de recherche avec un mot-clé, ll par exemple : taper ll puis une question dans la barre d'adresse ouvre une conversation avec elle. %s est l'endroit où le navigateur place ce que vous avez tapé.",
 	documentsTitle: 'Documents',
 	documentsDescription:
 		'Joignez un PDF, un fichier Word ou un tableur et son texte entre dans la conversation.',
