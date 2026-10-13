@@ -38,6 +38,7 @@ export default defineConfig({
 			// there is nothing to put a consent banner in front of. `defer` keeps it out of
 			// the critical path.
 			head: [
+				{ tag: 'meta', attrs: { property: 'og:image', content: 'https://llooma.eu/og.png' } },
 				{
 					tag: 'script',
 					attrs: {

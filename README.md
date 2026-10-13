@@ -1,9 +1,6 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="static/logo-mark-dark.png" />
-  <img src="static/logo-mark.png" alt="Llooma" width="96" />
-</picture>
+<img src="docs/public/og.png" alt="Llooma: every model you use, in an app you host. The phone home screen in front of a desktop conversation." />
 
 # Llooma /ˈluː.mə/
 
