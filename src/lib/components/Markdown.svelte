@@ -242,14 +242,26 @@
 		@apply text-muted mt-4 mb-1 text-sm font-semibold;
 	}
 
+	/* An answer is set in the reading face; its reasoning, a compaction summary and
+	   tables stay in the interface's. */
+	:global(.article--assistant) .markdown {
+		font-family: var(--font-reading);
+	}
+
+	:global(.article--reasoning) .markdown,
+	:global(.markdown--aside) .markdown,
+	.markdown :global(table) {
+		font-family: var(--font-sans);
+	}
+
 	.markdown :global(p) {
 		@apply my-3 leading-relaxed;
 	}
 
 	.markdown :global(p),
 	.markdown :global(li) {
-		@apply max-w-prose text-sm;
-		@apply md:text-base;
+		@apply text-read max-w-prose;
+		@apply md:text-read-lg;
 		/* Break long unbreakable strings (URLs, hashes) instead of overflowing. */
 		overflow-wrap: break-word;
 	}
@@ -265,8 +277,8 @@
 	:global(.markdown--aside) .markdown :global(p),
 	:global(.markdown--aside) .markdown :global(li),
 	:global(.markdown--aside) .markdown :global(strong) {
-		@apply text-xs;
-		@apply md:text-sm;
+		@apply text-aside;
+		@apply md:text-aside-lg;
 		color: hsl(var(--hsl-text-shade-2));
 	}
 
