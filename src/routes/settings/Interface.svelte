@@ -286,11 +286,6 @@
 			bind:checked={$settingsStore.showPinnedPersonas}
 		/>
 		<FieldCheckbox
-			label={$LL.compactSidebarHeader()}
-			bind:checked={$settingsStore.compactSidebarHeader}
-		/>
-		<SettingsHint>{$LL.compactSidebarHeaderHelp()}</SettingsHint>
-		<FieldCheckbox
 			label={$LL.showListQuickActions()}
 			bind:checked={$settingsStore.showListQuickActions}
 		/>

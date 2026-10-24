@@ -3,7 +3,6 @@
 
 	import LL from '$i18n/i18n-svelte';
 	import { serversStore, settingsStore } from '$lib/localStorage';
-	import { currentRole } from '$lib/stores/auth';
 	import { settingsModalOpen } from '$lib/stores/modal';
 
 	interface Props {
@@ -72,8 +71,7 @@
 	</span>
 {/snippet}
 
-<!-- The bottom edge of the column, the same material as the top one. -->
-<div class="surface-chrome flex shrink-0 border-t">
+<div class="surface-column flex shrink-0">
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
 	<div
 		class="w-full shrink-0 p-2 max-lg:w-[var(--drawer-w)] max-lg:pb-[max(0.5rem,var(--safe-bottom))] {rail
@@ -84,7 +82,7 @@
 			<div class="flex justify-center">
 				<button
 					onclick={() => ($settingsModalOpen = true)}
-					class="flex h-12 items-center transition-transform hover:scale-105"
+					class="flex h-11 items-center transition-transform hover:scale-105"
 					title={$LL.settings()}
 					aria-label={$LL.settings()}
 				>
@@ -97,22 +95,15 @@
 			<button
 				onclick={() => ($settingsModalOpen = true)}
 				aria-label={$LL.settings()}
-				class="hover:bg-shade-0 flex h-12 w-full items-center gap-3 rounded-lg px-2 text-left transition-colors"
+				class="group hover:bg-shade-0 flex h-11 w-full items-center gap-3 rounded-lg px-2 text-left transition-colors"
 			>
 				{@render identity()}
-				<span class="flex min-w-0 flex-1 flex-col">
-					<span class="truncate text-sm font-medium">
-						{hasName
-							? `${$settingsStore.profileFirstName} ${$settingsStore.profileLastName}`.trim()
-							: $LL.settings()}
-					</span>
-					<span class="text-muted text-xs">
-						{$currentRole === 'admin' ? $LL.administrator() : $LL.user()}
-					</span>
+				<span class="min-w-0 flex-1 truncate text-sm font-medium">
+					{hasName
+						? `${$settingsStore.profileFirstName} ${$settingsStore.profileLastName}`.trim()
+						: $LL.settings()}
 				</span>
-				<span class="text-muted shrink-0">
-					<Settings2 class="h-5 w-5" />
-				</span>
+				<Settings2 class="text-muted group-hover:text-active h-4 w-4 shrink-0 transition-colors" />
 			</button>
 		{/if}
 	</div>

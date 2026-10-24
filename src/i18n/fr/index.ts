@@ -442,7 +442,6 @@ const fr = extendDictionary(en, {
 	newChat: 'Nouveau chat',
 	home: 'Accueil',
 	library: 'Bibliothèque',
-	searchChatsPersonas: 'Rechercher chats et personas',
 	noMatches: 'Aucun résultat',
 	personas: 'Personas',
 	playbooks: 'Playbooks',
@@ -1041,9 +1040,6 @@ const fr = extendDictionary(en, {
 	floatingChatHeader: 'Barre de conversation flottante',
 	floatingChatHeaderHelp:
 		'Une pastille posée sur la conversation, assortie au composeur à l’autre bout, avec le texte qui passe autour des deux. Désactivée, elle redevient le bord haut de la colonne, où l’image d’arrière-plan l’atteint.',
-	compactSidebarHeader: 'Utiliser l’en-tête réduit',
-	compactSidebarHeaderHelp:
-		'Nouvelle discussion passe sur la ligne de recherche, et les personas deviennent une rangée d’avatars. Plus de place pour la liste, moins de libellés.',
 
 	// --- Paramètres > À propos -------------------------------------------------
 	source: 'Source',

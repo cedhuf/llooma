@@ -448,7 +448,6 @@ const en = {
 	newChat: 'New chat',
 	home: 'Home',
 	library: 'Library',
-	searchChatsPersonas: 'Search chats & personas',
 	noMatches: 'No matches',
 	personas: 'Personas',
 	playbooks: 'Playbooks',
@@ -1014,9 +1013,6 @@ const en = {
 	floatingChatHeader: 'Floating conversation bar',
 	floatingChatHeaderHelp:
 		'A pill hovering over the conversation, matching the composer at the other end, with the text passing around both. Off, it goes back to being the top edge of the column, where a background image reaches it.',
-	compactSidebarHeader: 'Use the compact header',
-	compactSidebarHeaderHelp:
-		'New chat moves onto the search row, and the personas become a row of avatars. More room for the list, fewer labels.',
 
 	// --- Settings > About ------------------------------------------------------
 	source: 'Source',

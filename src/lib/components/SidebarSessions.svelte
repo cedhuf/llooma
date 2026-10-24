@@ -2,11 +2,8 @@
 	import { Archive } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
-	import { serversStore } from '$lib/localStorage';
 	import type { Persona } from '$lib/personas';
-	import type { ScrollDirectionWatcher } from '$lib/scrollDirection';
 	import {
-		formatSessionMetadata,
 		groupSessions,
 		resolveSessionTitle,
 		type SessionGroupKey,
@@ -21,46 +18,16 @@
 
 	interface Props {
 		sessions: SessionSummary[];
-		/** Lower-cased search terms, or empty. Filters titles in place. */
-		q: string;
 		/** A persona's conversation carries its avatar, so it is recognisable as one. */
 		personaById: Record<string, Persona>;
-		/** Whether the header still has a match to show, for the empty state. */
-		hasPersonaMatches: boolean;
-		/** Reports the scroller itself, once per frame. The header decides what to do with it. */
-		onScroll?: ScrollDirectionWatcher;
 	}
 
-	let { sessions, q, personaById, hasPersonaMatches, onScroll }: Props = $props();
-
-	// Collapsing the column takes this list with it, and expanding builds another at
-	// the top. The watcher outlives both, so it is told here that nothing it
-	// remembers describes this scroller. Otherwise the column comes back folded over
-	// a list nobody has scrolled.
-	$effect(() => {
-		onScroll?.reset();
-	});
-
-	// Scroll fires far more often than the screen refreshes, so the read waits for
-	// the next frame.
-	let el: HTMLDivElement | undefined = $state();
-	let queued = false;
-	function handleScroll() {
-		if (!onScroll || queued) return;
-		queued = true;
-		requestAnimationFrame(() => {
-			queued = false;
-			if (el) onScroll?.(el);
-		});
-	}
+	let { sessions, personaById }: Props = $props();
 
 	let archiveOpen = $state(false);
 	const archivedCount = $derived(sessions.filter((s) => s.archived).length);
 
-	const filtered = $derived(
-		q ? sessions.filter((s) => resolveSessionTitle(s).toLowerCase().includes(q)) : sessions
-	);
-	const groups = $derived(groupSessions(filtered));
+	const groups = $derived(groupSessions(sessions));
 
 	function groupLabel(key: SessionGroupKey): string {
 		switch (key) {
@@ -84,8 +51,6 @@
      so no clearance is measured, no padding stands in for a pane, and the
      scrollbar belongs to this box rather than the height of the column. -->
 <div
-	bind:this={el}
-	onscroll={handleScroll}
 	class="surface-column min-h-0 flex-1 overflow-y-auto"
 	style="overscroll-behavior-y: contain; overflow-x: hidden"
 >
@@ -95,7 +60,7 @@
 	<div class="w-full px-2 py-2 max-lg:w-[var(--drawer-w)] lg:w-96">
 		{#each groups as group (group.key)}
 			<div class="mb-2">
-				<p class="text-muted px-2 py-1 text-[11px] font-semibold tracking-wider uppercase">
+				<p class="text-muted px-2.5 pt-2 pb-1 text-xs font-medium">
 					{groupLabel(group.key)}
 				</p>
 				<!-- A hair of space between rows: hovering the neighbour of the active session
@@ -107,13 +72,12 @@
 							sitemap={Sitemap.SESSIONS}
 							id={session.id}
 							title={resolveSessionTitle(session)}
-							subtitle={formatSessionMetadata(session, $serversStore)}
 							pinned={session.pinned}
 							leading={persona ? personaBadge : undefined}
 						/>
 						{#snippet personaBadge()}
 							{#if persona}
-								<PersonaAvatar {persona} size={24} />
+								<PersonaAvatar {persona} size={20} />
 							{/if}
 						{/snippet}
 					{/each}
@@ -121,14 +85,14 @@
 			</div>
 		{/each}
 
-		{#if groups.length === 0 && !hasPersonaMatches}
-			<EmptyMessage>{q ? $LL.noMatches() : $LL.emptySessions()}</EmptyMessage>
+		{#if groups.length === 0}
+			<EmptyMessage>{$LL.emptySessions()}</EmptyMessage>
 		{/if}
 
 		<!-- At the foot of the list, where you are once you have scrolled past
 		     everything. Absent entirely when there is nothing in it: a permanent link to
 		     an empty room teaches nothing. -->
-		{#if archivedCount > 0 && !q}
+		{#if archivedCount > 0}
 			<button
 				type="button"
 				onclick={() => (archiveOpen = true)}

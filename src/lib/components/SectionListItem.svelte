@@ -21,7 +21,7 @@
 		sitemap: Sitemap;
 		id: string;
 		title: string;
-		subtitle: string;
+		subtitle?: string;
 		pinned?: boolean;
 		/** Drawn before the title. A persona's conversation carries its avatar here. */
 		leading?: Snippet;
@@ -62,12 +62,16 @@
 					<span class="mr-2 shrink-0">{@render leading()}</span>
 				{/if}
 				<a
-					class="relative z-0 min-w-0 flex-1 py-2 {isActive ? 'text-active' : 'hover:text-active'}"
+					class="relative z-0 min-w-0 flex-1 {subtitle ? 'py-2' : 'py-1.5'} {isActive
+						? 'text-active'
+						: 'hover:text-active'}"
 					data-testid={isSession ? 'session-item' : 'knowledge-item'}
 					href={generateNewUrl(sitemap, id)}
 				>
-					<p class="truncate text-sm font-medium {isActive ? 'text-active' : ''}">{title}</p>
-					<p class="text-muted truncate text-xs">{subtitle}</p>
+					<p class="truncate text-sm {subtitle || isActive ? 'font-medium' : ''}">{title}</p>
+					{#if subtitle}
+						<p class="text-muted truncate text-xs">{subtitle}</p>
+					{/if}
 				</a>
 
 				<!-- In the flow rather than over the title.

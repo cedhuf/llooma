@@ -6,7 +6,6 @@
 	import { goto } from '$app/navigation';
 	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas } from '$lib/personas';
-	import { watchScrollDirection } from '$lib/scrollDirection';
 	import { Sitemap } from '$lib/sitemap';
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 
@@ -16,30 +15,6 @@
 	import SidebarFooter from './SidebarFooter.svelte';
 	import SidebarRail from './SidebarRail.svelte';
 	import SidebarSessions from './SidebarSessions.svelte';
-
-	let query = $state('');
-
-	const q = $derived(query.trim().toLowerCase());
-
-	/** Matches `duration-300` in the actions block. The lock below and the CSS must agree. */
-	const TRANSITION_MS = 300;
-
-	/**
-	 * The header gives its room back on the way down and takes it back the moment
-	 * you go up, wherever you are. Direction rather than position, which is what
-	 * makes it feel answered rather than triggered.
-	 *
-	 * Safe here in a way it was not before: the actions are a neighbour of the list
-	 * rather than a layer over it, so no padding stands in for them, nothing
-	 * measures their height, and nothing writes the scroll position.
-	 */
-	let scrolledAway = $state(false);
-	const onListScroll = watchScrollDirection((away) => (scrolledAway = away), {
-		settle: TRANSITION_MS
-	});
-
-	/** The header's shape: the setting, or the way you are going through the list. */
-	const compact = $derived($settingsStore.compactSidebarHeader || scrolledAway);
 
 	// Personas you have talked to, above the list unless disabled. Their raw session
 	// row is dropped to avoid showing them twice.
@@ -51,9 +26,6 @@
 	);
 	const visibleSessions = $derived(
 		($sessionsStore ?? []).filter((s) => !launcherSessionIds.includes(s.id))
-	);
-	const filteredPersonas = $derived(
-		q ? personaLaunchers.filter((p) => p.name.toLowerCase().includes(q)) : personaLaunchers
 	);
 	// A persona's conversation is not obviously one when its launcher is off: it
 	// lands among the others with nothing to tell it apart, and its avatar is what
@@ -134,14 +106,8 @@
 			{#if showRail}
 				<SidebarRail personas={personaLaunchers} sessions={visibleSessions} onNewChat={newChat} />
 			{:else}
-				<SidebarActions bind:query personas={filteredPersonas} {compact} onNewChat={newChat} />
-				<SidebarSessions
-					sessions={visibleSessions}
-					{q}
-					{personaById}
-					hasPersonaMatches={filteredPersonas.length > 0}
-					onScroll={onListScroll}
-				/>
+				<SidebarActions personas={personaLaunchers} onNewChat={newChat} />
+				<SidebarSessions sessions={visibleSessions} {personaById} />
 			{/if}
 
 			<SidebarFooter rail={showRail} />

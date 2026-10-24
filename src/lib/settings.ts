@@ -167,8 +167,6 @@ export interface Settings {
 	homeRecentSessionsCount: number;
 	/** Show personas you've talked to as pinned launchers in the sidebar. */
 	showPinnedPersonas: boolean;
-	/** New chat on the search row, personas as avatars. Off by default: the full header names what its controls do. */
-	compactSidebarHeader: boolean;
 
 	/** Off by default: both live in the right-click menu, where they cannot cover a title or be hit by accident. */
 	showListQuickActions: boolean;
@@ -320,7 +318,6 @@ export const DEFAULT_SETTINGS: Settings = {
 	homeShowRecentSessions: true,
 	homeRecentSessionsCount: 4,
 	showPinnedPersonas: true,
-	compactSidebarHeader: false,
 	showListQuickActions: false,
 	floatingChatHeader: true,
 	accentUserMessages: true,

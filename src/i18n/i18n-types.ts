@@ -1660,10 +1660,6 @@ type RootTranslation = {
 	 */
 	library: string
 	/**
-	 * S​e​a​r​c​h​ ​c​h​a​t​s​ ​&​ ​p​e​r​s​o​n​a​s
-	 */
-	searchChatsPersonas: string
-	/**
 	 * N​o​ ​m​a​t​c​h​e​s
 	 */
 	noMatches: string
@@ -3642,14 +3638,6 @@ type RootTranslation = {
 	 * A​ ​p​i​l​l​ ​h​o​v​e​r​i​n​g​ ​o​v​e​r​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​,​ ​m​a​t​c​h​i​n​g​ ​t​h​e​ ​c​o​m​p​o​s​e​r​ ​a​t​ ​t​h​e​ ​o​t​h​e​r​ ​e​n​d​,​ ​w​i​t​h​ ​t​h​e​ ​t​e​x​t​ ​p​a​s​s​i​n​g​ ​a​r​o​u​n​d​ ​b​o​t​h​.​ ​O​f​f​,​ ​i​t​ ​g​o​e​s​ ​b​a​c​k​ ​t​o​ ​b​e​i​n​g​ ​t​h​e​ ​t​o​p​ ​e​d​g​e​ ​o​f​ ​t​h​e​ ​c​o​l​u​m​n​,​ ​w​h​e​r​e​ ​a​ ​b​a​c​k​g​r​o​u​n​d​ ​i​m​a​g​e​ ​r​e​a​c​h​e​s​ ​i​t​.
 	 */
 	floatingChatHeaderHelp: string
-	/**
-	 * U​s​e​ ​t​h​e​ ​c​o​m​p​a​c​t​ ​h​e​a​d​e​r
-	 */
-	compactSidebarHeader: string
-	/**
-	 * N​e​w​ ​c​h​a​t​ ​m​o​v​e​s​ ​o​n​t​o​ ​t​h​e​ ​s​e​a​r​c​h​ ​r​o​w​,​ ​a​n​d​ ​t​h​e​ ​p​e​r​s​o​n​a​s​ ​b​e​c​o​m​e​ ​a​ ​r​o​w​ ​o​f​ ​a​v​a​t​a​r​s​.​ ​M​o​r​e​ ​r​o​o​m​ ​f​o​r​ ​t​h​e​ ​l​i​s​t​,​ ​f​e​w​e​r​ ​l​a​b​e​l​s​.
-	 */
-	compactSidebarHeaderHelp: string
 	/**
 	 * S​o​u​r​c​e
 	 */
@@ -6016,10 +6004,6 @@ export type TranslationFunctions = {
 	 */
 	library: () => LocalizedString
 	/**
-	 * Search chats & personas
-	 */
-	searchChatsPersonas: () => LocalizedString
-	/**
 	 * No matches
 	 */
 	noMatches: () => LocalizedString
@@ -7961,14 +7945,6 @@ export type TranslationFunctions = {
 	 * A pill hovering over the conversation, matching the composer at the other end, with the text passing around both. Off, it goes back to being the top edge of the column, where a background image reaches it.
 	 */
 	floatingChatHeaderHelp: () => LocalizedString
-	/**
-	 * Use the compact header
-	 */
-	compactSidebarHeader: () => LocalizedString
-	/**
-	 * New chat moves onto the search row, and the personas become a row of avatars. More room for the list, fewer labels.
-	 */
-	compactSidebarHeaderHelp: () => LocalizedString
 	/**
 	 * Source
 	 */
