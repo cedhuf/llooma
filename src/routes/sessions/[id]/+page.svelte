@@ -205,7 +205,11 @@
 	 * would have yanked you back reads this and does nothing.
 	 */
 	function detachOnIntent() {
-		userScrolledUp = true;
+		// Nothing to read upwards in a conversation that does not overflow, and no scroll
+		// would follow to clear the flag again.
+		if (!messagesWindow) return;
+		const { scrollHeight, clientHeight } = messagesWindow;
+		if (scrollHeight - clientHeight > SCROLL_BOTTOM_THRESHOLD) userScrolledUp = true;
 	}
 
 	function handleWheel(event: WheelEvent) {
