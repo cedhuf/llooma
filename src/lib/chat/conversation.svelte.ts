@@ -112,7 +112,6 @@ export class Conversation implements RunSurface {
 		this.editor = {
 			prompt: '',
 			messageIndexToEdit: null,
-			isExpanded: false,
 			isCompletionInProgress: false,
 			shouldFocusTextarea: false,
 			isNewSession: true,
@@ -306,7 +305,6 @@ export class Conversation implements RunSurface {
 	submit = (images?: PromptImages): void => {
 		if (!this.editor.prompt && (!images || images.length === 0)) return;
 		if (!this.session.model) return;
-		this.editor.isExpanded = false;
 		this.editor.isNewSession = false;
 		// Sent is no longer a draft, and the composer is already empty.
 		clearDraft(sessionDraft(this.session.id));

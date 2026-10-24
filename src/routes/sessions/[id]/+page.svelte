@@ -57,11 +57,7 @@
 	}
 	let sessionModalOpen = $state(false);
 
-	/** Sticky at the foot of the conversation while you read it, in the column's footer once the editor takes the screen. */
-	const floatingComposer = $derived(!chat.editor.isExpanded);
-
-	/** Reading a conversation is the only view where either has something to float over. */
-	const floatingHeader = $derived($settingsStore.floatingChatHeader !== false && floatingComposer);
+	const floatingHeader = $derived($settingsStore.floatingChatHeader !== false);
 
 	// The composer floats over the message list, so the scroll area reserves matching
 	// bottom space for the last message to clear it.
@@ -459,39 +455,30 @@
 				/>
 			</div>
 
-			{#if floatingComposer}
-				<!-- Sticky rather than laid on top, which is the whole difference: it stays in
-				     the flow, reserves its own room and never covers the last message. The
-				     negative margins undo the transcript's side gutter; there is no vertical one
-				     left, because a stuck element anchors inside the scrollport. -->
-				<div class="sticky bottom-0 z-10 -mx-4 lg:-mx-6 xl:-mx-8">
-					<!-- Scrolling up during a reply opts you out of auto-follow, and without this
-					     nothing says content is still arriving below. Carried by the composer, so it
-					     stands above it without anyone knowing how tall it is. -->
-					{#if userScrolledUp}
-						<button
-							type="button"
-							transition:fly={{ y: 8, duration: 150 }}
-							onclick={() => scrollToBottom(true, true)}
-							aria-label={$LL.scrollToBottom()}
-							title={$LL.scrollToBottom()}
-							class="scroll-to-bottom border-shade-3 bg-shade-0 text-muted hover:text-active absolute -top-11 left-1/2 z-20 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border shadow-md transition-colors"
-						>
-							<ArrowDown class="base-icon" />
-						</button>
-					{/if}
-					{@render composer()}
-				</div>
-			{/if}
+			<!-- Sticky rather than laid on top, which is the whole difference: it stays in
+			     the flow, reserves its own room and never covers the last message. The
+			     negative margins undo the transcript's side gutter; there is no vertical one
+			     left, because a stuck element anchors inside the scrollport. -->
+			<div class="sticky bottom-0 z-10 -mx-4 lg:-mx-6 xl:-mx-8">
+				<!-- Scrolling up during a reply opts you out of auto-follow, and without this
+				     nothing says content is still arriving below. Carried by the composer, so it
+				     stands above it without anyone knowing how tall it is. -->
+				{#if userScrolledUp}
+					<button
+						type="button"
+						transition:fly={{ y: 8, duration: 150 }}
+						onclick={() => scrollToBottom(true, true)}
+						aria-label={$LL.scrollToBottom()}
+						title={$LL.scrollToBottom()}
+						class="scroll-to-bottom border-shade-3 bg-shade-0 text-muted hover:text-active absolute -top-11 left-1/2 z-20 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border shadow-md transition-colors"
+					>
+						<ArrowDown class="base-icon" />
+					</button>
+				{/if}
+				{@render composer()}
+			</div>
 		</div>
 	</div>
-
-	<!-- Drawn in one of two places, never both. -->
-	{#if !floatingComposer}
-		<div class="surface-chrome shrink-0">
-			{@render composer()}
-		</div>
-	{/if}
 </div>
 
 <SessionModal bind:open={sessionModalOpen} bind:session={chat.session} bind:model={chat.model} />

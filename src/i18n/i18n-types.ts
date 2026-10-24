@@ -1510,14 +1510,6 @@ type RootTranslation = {
 	 */
 	collapseSidebar: string
 	/**
-	 * E​x​p​a​n​d​ ​t​h​e​ ​p​r​o​m​p​t
-	 */
-	expandPrompt: string
-	/**
-	 * C​o​l​l​a​p​s​e​ ​t​h​e​ ​p​r​o​m​p​t
-	 */
-	collapsePrompt: string
-	/**
 	 * P​r​o​f​i​l​e
 	 */
 	profile: string
@@ -5851,14 +5843,6 @@ export type TranslationFunctions = {
 	 * Collapse sidebar
 	 */
 	collapseSidebar: () => LocalizedString
-	/**
-	 * Expand the prompt
-	 */
-	expandPrompt: () => LocalizedString
-	/**
-	 * Collapse the prompt
-	 */
-	collapsePrompt: () => LocalizedString
 	/**
 	 * Profile
 	 */

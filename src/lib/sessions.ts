@@ -137,7 +137,6 @@ export interface Session {
 export interface Editor {
 	prompt: string;
 	messageIndexToEdit: number | null;
-	isExpanded: boolean;
 	isCompletionInProgress: boolean;
 	isNewSession: boolean;
 	shouldFocusTextarea: boolean;

@@ -404,8 +404,6 @@ const en = {
 	expandSidebar: 'Expand sidebar',
 	resizeSidebar: 'Resize the sidebar',
 	collapseSidebar: 'Collapse sidebar',
-	expandPrompt: 'Expand the prompt',
-	collapsePrompt: 'Collapse the prompt',
 	profile: 'Profile',
 	goodMorning: 'Good morning',
 	goodAfternoon: 'Good afternoon',

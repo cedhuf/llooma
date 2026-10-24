@@ -714,8 +714,6 @@ const fr = extendDictionary(en, {
 	resizeSidebar: 'Redimensionner la barre latérale',
 	collapseSidebar: 'Replier la barre latérale',
 	profile: 'Profil',
-	expandPrompt: 'Agrandir la zone de saisie',
-	collapsePrompt: 'Réduire la zone de saisie',
 
 	// --- Paramètres > Chat -----------------------------------------------------
 	defaults: 'Valeurs par défaut',

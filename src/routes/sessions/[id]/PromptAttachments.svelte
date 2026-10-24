@@ -27,10 +27,14 @@
 		attachments: Attachment[];
 		/** Per-conversation tool switches shown in the lightning dropdown. */
 		tools?: ToolToggle[];
+		/** The text field, laid out between the two groups of controls. */
+		input: Snippet;
+		/** One row while the text fits beside the controls, the text above them once it does not. */
+		multiline: boolean;
 		actions?: Snippet;
 	}
 
-	let { attachments = $bindable([]), tools = [], actions }: Props = $props();
+	let { attachments = $bindable([]), tools = [], input, multiline, actions }: Props = $props();
 
 	const anyToolOn = $derived(tools.some((t) => t.checked));
 
@@ -112,7 +116,7 @@
 {#if attachments.length || reading.length}
 	<!-- One row of pills, wrapping, whatever the kinds. One full-width control per
 	     attachment stacked in a scroller made two images look like a form. -->
-	<div class="flex max-h-32 flex-wrap gap-1.5 overflow-y-auto px-3 pb-2">
+	<div class="flex max-h-32 flex-wrap gap-1.5 overflow-y-auto px-3 pt-3">
 		{#each attachments as attachment (attachment.id)}
 			<AttachmentPill {attachment} onRemove={() => removeAttachment(attachment.id)} />
 		{/each}
@@ -131,8 +135,8 @@
 	</div>
 {/if}
 
-<div class="flex items-center justify-between px-2 pt-0.5 pb-2">
-	<div class="flex items-center gap-x-0.5">
+<div class="composer-row grid items-center gap-x-1 p-2 {multiline ? 'composer-row--multi' : ''}">
+	<div class="flex items-center [grid-area:left]">
 		<!-- One way in for every kind of context, with the picking inside it rather than
 		     in a select that appeared in the composer. -->
 		<AddContextMenu
@@ -142,11 +146,17 @@
 			onPickImages={pickImages}
 			onPickDocuments={pickDocuments}
 		/>
+	</div>
 
+	<div class="min-w-0 [grid-area:input]">
+		{@render input()}
+	</div>
+
+	<div class="flex items-center gap-x-0.5 [grid-area:right]">
 		{#if tools.length}
 			<!-- Toggles, not one-shot actions: the rows stay plain checkboxes so the menu
 			     survives each click, but the panel is the shared portalled one. -->
-			<Menu side="top" align="start" class="w-60">
+			<Menu side="top" align="end" class="w-60">
 				{#snippet trigger({ props })}
 					<button
 						{...props}
@@ -173,7 +183,20 @@
 				{/each}
 			</Menu>
 		{/if}
+		{@render actions?.()}
 	</div>
-
-	{@render actions?.()}
 </div>
+
+<style>
+	.composer-row {
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		grid-template-areas: 'left input right';
+	}
+
+	.composer-row--multi {
+		grid-template-areas:
+			'input input input'
+			'left . right';
+		row-gap: 0.25rem;
+	}
+</style>

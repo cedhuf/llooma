@@ -210,20 +210,24 @@
 				<div
 					class="border-shade-3 bg-shade-0 hover:border-shade-4 focus-within:border-shade-5 rounded-2xl border shadow-sm transition-all focus-within:shadow-md"
 				>
-					<textarea
-						placeholder={$LL.howCanIHelp()}
-						class="w-full resize-none bg-transparent px-5 pt-4 pb-1 text-base text-sm outline-none"
-						style="field-sizing: content; min-height: 56px; max-height: 200px;"
-						bind:value={prompt}
-						onkeydown={handleKeyDown}
-						enterkeyhint="send"
-						inputmode="text"></textarea>
-					<PromptAttachments bind:attachments {tools}>
+					<!-- Always the text above the controls: the landing has the room, and a field
+					     that starts tall reads as an invitation. -->
+					<PromptAttachments bind:attachments {tools} multiline>
+						{#snippet input()}
+							<textarea
+								placeholder={$LL.howCanIHelp()}
+								class="w-full resize-none bg-transparent px-3 pt-2 pb-1 text-base text-sm outline-none"
+								style="field-sizing: content; min-height: 56px; max-height: 200px;"
+								bind:value={prompt}
+								onkeydown={handleKeyDown}
+								enterkeyhint="send"
+								inputmode="text"></textarea>
+						{/snippet}
 						{#snippet actions()}
 							<button
 								onclick={() => submit(prompt)}
 								disabled={!prompt.trim() && !attachments.length}
-								class="bg-accent text-shade-0 flex h-8 w-8 items-center justify-center rounded-lg transition-opacity disabled:opacity-30"
+								class="bg-accent text-shade-0 ml-1 flex h-8 w-8 items-center justify-center rounded-full transition-opacity disabled:opacity-30"
 							>
 								<ArrowUp class="h-4 w-4" />
 							</button>

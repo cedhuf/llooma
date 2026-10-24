@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CircleStop, FoldVertical, LoaderCircle, Mic, UnfoldVertical } from '@lucide/svelte';
+	import { ArrowUp, LoaderCircle, Mic, Square } from '@lucide/svelte';
 	import { tick } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
@@ -14,7 +14,6 @@
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
 	import { buildChatTools, toolLabels } from '$lib/chatTools';
 	import Button from '$lib/components/Button.svelte';
-	import ButtonSubmit from '$lib/components/ButtonSubmit.svelte';
 	import ImageDrop from '$lib/components/ImageDrop.svelte';
 	import { supportsReasoningToggle } from '$lib/connections';
 	import { readPastedImages, warnRejected } from '$lib/imageFiles';
@@ -228,9 +227,6 @@
 		return ct !== undefined && supportsReasoningToggle(ct);
 	});
 
-	// Persona chats keep the composer minimal: no controls tab, no expand toggle.
-	const isPersona = $derived(!!session.personaId);
-
 	// Per-conversation tool switches surfaced in the composer's lightning dropdown.
 	const tools = $derived(
 		buildChatTools(
@@ -264,10 +260,22 @@
 		}
 	});
 
-	function toggleExpanded() {
-		editor.isExpanded = !editor.isExpanded;
-		editor.promptTextarea?.focus();
-	}
+	/**
+	 * One row until the text needs a second line, then the text above the controls.
+	 * It only folds back once emptied: the wider field would often fit the text on
+	 * one line again, and folding then would narrow it into two, back and forth.
+	 */
+	const ONE_LINE_PX = 40;
+	let multiline = $state(false);
+	let inputHeight = $state(0);
+	$effect(() => {
+		const text = editor.prompt ?? '';
+		if (!text) multiline = false;
+		else if (inputHeight > ONE_LINE_PX || text.includes('\n')) multiline = true;
+	});
+
+	/** The card follows its contents' height with a transition, so it grows a line at a time. */
+	let cardHeight = $state(0);
 
 	function handleKeyDown(event: KeyboardEvent) {
 		// The command menu takes the arrows, Tab and Escape while open, and Enter picks
@@ -321,18 +329,7 @@
 			}
 		}
 
-		if (event.key !== 'Enter') return;
-
-		// Expanded is long-form: Enter breaks the line and Cmd/Ctrl+Enter sends, so
-		// paragraphs can be written without the composer firing on every return.
-		if (editor.isExpanded) {
-			if (!event.metaKey && !event.ctrlKey) return;
-			event.preventDefault();
-			submit();
-			return;
-		}
-
-		if (event.shiftKey) return;
+		if (event.key !== 'Enter' || event.shiftKey) return;
 		event.preventDefault();
 		submit();
 	}
@@ -375,12 +372,10 @@
 </script>
 
 <div
-	class="prompt-editor pointer-events-auto w-full px-4 pt-2 pb-[max(1rem,var(--safe-bottom))] lg:px-6 lg:pb-4 xl:px-8 {editor.isExpanded
-		? 'prompt-editor--fullscreen'
-		: ''}"
+	class="prompt-editor pointer-events-auto w-full px-4 pt-2 pb-[max(1rem,var(--safe-bottom))] lg:px-6 lg:pb-4 xl:px-8"
 >
 	<div class="prompt-editor__form mx-auto flex h-full min-h-0 w-full max-w-[84ch] flex-col gap-y-2">
-		{#if pendingChoice?.choices && !editor.isExpanded && !choiceBypassed}
+		{#if pendingChoice?.choices && !choiceBypassed}
 			{@const choice = pendingChoice}
 			<!-- A quick-choice temporarily takes over the composer: one question at a time,
 			     numbered and scrollable, dismissable to type freely. -->
@@ -411,16 +406,16 @@
 					onHover={(i) => (selectedCommand = i)}
 				/>
 			{/if}
-			<!-- One composer, always: expanding only grows the card, so every control stays
-			     reachable in every state. -->
 			<ImageDrop
 				label={$LL.dropImagesHere()}
 				onImages={(images) => (attachments = [...attachments, ...images])}
-				class="surface-floating border-shade-3 focus-within:border-shade-5 flex flex-col rounded-2xl border shadow-lg transition-colors"
+				class="surface-floating border-shade-3 focus-within:border-shade-5 overflow-hidden rounded-3xl border shadow-lg transition-[border-color,height] duration-150 ease-out"
+				style={cardHeight ? `height: ${cardHeight + 2}px` : undefined}
 			>
-				<!-- The textarea auto-grows (field-sizing); expanding raises its floor and
-				     ceiling, so there is no flex-height chain to depend on. -->
-				<!-- A mention is drawn as a label and a textarea cannot hold one, so the pill is
+				<div bind:offsetHeight={cardHeight}>
+					<PromptAttachments bind:attachments {tools} {multiline}>
+						{#snippet input()}
+							<!-- A mention is drawn as a label and a textarea cannot hold one, so the pill is
 				     painted behind the text: a mirror with the same font, padding and wrapping
 				     renders the prompt, and the textarea sits on top with transparent text and a
 				     visible caret.
@@ -428,127 +423,106 @@
 				     Which is why the highlight has no weight, size or border of its own. Anything
 				     that changed a glyph's metrics would move the mirror out from under the real
 				     text, a character further with every line. -->
-				<div class="relative">
-					<div
-						bind:this={mirror}
-						aria-hidden="true"
-						class="prompt-editor__mirror prompt-editor__textarea base-input pointer-events-none absolute inset-0 px-4 pt-3.5"
-					>
-						<!-- Written on one line, and it has to stay on one line: the mirror renders with
+							<div class="relative" bind:offsetHeight={inputHeight}>
+								<div
+									bind:this={mirror}
+									aria-hidden="true"
+									class="prompt-editor__mirror prompt-editor__textarea pointer-events-none absolute inset-0"
+								>
+									<!-- Written on one line, and it has to stay on one line: the mirror renders with
 						     `pre-wrap`, so the newlines between these tags are characters, and every
 						     segment pushed the next one along. -->
-						<!-- prettier-ignore -->
-						{#each promptSegments as segment, i (i)}{#if segment.kind === 'mention'}<span class="prompt-editor__mention">{segment.text}</span>{:else}{segment.text}{/if}{/each}{trailingPad}
-					</div>
+									<!-- prettier-ignore -->
+									{#each promptSegments as segment, i (i)}{#if segment.kind === 'mention'}<span class="prompt-editor__mention">{segment.text}</span>{:else}{segment.text}{/if}{/each}{trailingPad}
+								</div>
 
-					<textarea
-						name="prompt"
-						class="prompt-editor__textarea prompt-editor__input base-input relative resize-none px-4 pt-3.5 {editor.isExpanded
-							? 'max-h-[70dvh] min-h-[52dvh]'
-							: 'max-h-[40dvh] min-h-14'}"
-						placeholder={$LL.promptPlaceholder()}
-						bind:this={editor.promptTextarea}
-						bind:value={editor.prompt}
-						onkeydown={handleKeyDown}
-						onkeyup={trackCaret}
-						onclick={trackCaret}
-						oninput={trackCaret}
-						onselect={trackCaret}
-						onscroll={syncMirror}
-						onpaste={handlePaste}
-						enterkeyhint={editor.isExpanded ? 'enter' : 'send'}
-						inputmode="text"></textarea>
-				</div>
+								<textarea
+									name="prompt"
+									class="prompt-editor__textarea prompt-editor__input relative block max-h-[40dvh] w-full resize-none"
+									rows="1"
+									placeholder={$LL.promptPlaceholder()}
+									bind:this={editor.promptTextarea}
+									bind:value={editor.prompt}
+									onkeydown={handleKeyDown}
+									onkeyup={trackCaret}
+									onclick={trackCaret}
+									oninput={trackCaret}
+									onselect={trackCaret}
+									onscroll={syncMirror}
+									onpaste={handlePaste}
+									enterkeyhint="send"
+									inputmode="text"></textarea>
+							</div>
+						{/snippet}
 
-				<PromptAttachments bind:attachments {tools}>
-					{#snippet actions()}
-						<div class="flex items-center gap-x-1">
-							{#if session.messages.length}
-								<ContextMeter {session} threshold={contextThreshold} />
-							{/if}
-							{#if !isPersona}
-								<Button
-									variant="icon"
-									class="prompt-editor__toggle hidden lg:inline-flex"
-									title={editor.isExpanded ? $LL.collapsePrompt() : $LL.expandPrompt()}
-									aria-label={editor.isExpanded ? $LL.collapsePrompt() : $LL.expandPrompt()}
-									aria-expanded={editor.isExpanded}
-									isActive={editor.isExpanded}
-									onclick={toggleExpanded}
-								>
-									{#if editor.isExpanded}
-										<FoldVertical class="base-icon" />
-									{:else}
-										<UnfoldVertical class="base-icon" />
-									{/if}
-								</Button>
-							{/if}
+						{#snippet actions()}
+							<div class="flex items-center gap-x-1">
+								{#if session.messages.length}
+									<ContextMeter {session} threshold={contextThreshold} />
+								{/if}
+								{#if editor.messageIndexToEdit !== null}
+									<Button
+										variant="outline"
+										onclick={() => {
+											editor.prompt = '';
+											editor.messageIndexToEdit = null;
+										}}
+									>
+										{$LL.cancel()}
+									</Button>
+								{/if}
 
-							{#if editor.messageIndexToEdit !== null}
-								<Button
-									variant="outline"
-									onclick={() => {
-										editor.prompt = '';
-										editor.messageIndexToEdit = null;
-										editor.isExpanded = false;
-									}}
-								>
-									{$LL.cancel()}
-								</Button>
-							{/if}
-
-							{#if voiceReady}
-								<!-- Dictation, beside the controls that act on what is in the field rather than
+								{#if voiceReady}
+									<!-- Dictation, beside the controls that act on what is in the field rather than
 								     out with the attachments: it writes into the composer, it does not send. -->
-								<Button
-									variant="icon"
-									class={voice.state === 'recording' ? 'text-accent' : ''}
-									title={voice.state === 'transcribing'
-										? $LL.voiceTranscribing()
-										: $LL.voiceInput()}
-									aria-label={$LL.voiceInput()}
-									aria-pressed={voice.state === 'recording'}
-									disabled={voice.state === 'transcribing'}
-									onclick={dictate}
-								>
-									{#if voice.state === 'transcribing'}
-										<LoaderCircle class="base-icon animate-spin" />
-									{:else}
-										<Mic class="base-icon {voice.state === 'recording' ? 'animate-pulse' : ''}" />
-									{/if}
-								</Button>
-							{/if}
+									<Button
+										variant="icon"
+										class={voice.state === 'recording' ? 'text-accent' : ''}
+										title={voice.state === 'transcribing'
+											? $LL.voiceTranscribing()
+											: $LL.voiceInput()}
+										aria-label={$LL.voiceInput()}
+										aria-pressed={voice.state === 'recording'}
+										disabled={voice.state === 'transcribing'}
+										onclick={dictate}
+									>
+										{#if voice.state === 'transcribing'}
+											<LoaderCircle class="base-icon animate-spin" />
+										{:else}
+											<Mic class="base-icon {voice.state === 'recording' ? 'animate-pulse' : ''}" />
+										{/if}
+									</Button>
+								{/if}
 
-							{#if editor.isCompletionInProgress}
-								<Button title={$LL.stopCompletion()} variant="outline" onclick={stopCompletion}>
-									<div class="prompt-editor__stop relative -mx-3 -my-2 h-9 w-9">
-										<span
-											class="prompt-editor__stop-icon absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 hover:opacity-100"
-										>
-											<CircleStop class="base-icon" />
-										</span>
-										<span
-											class="prompt-editor__loading-icon absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-100 hover:opacity-0"
-										>
-											<LoaderCircle class="prompt-editor__loading-icon base-icon animate-spin" />
-										</span>
-									</div>
-								</Button>
-							{:else}
-								<ButtonSubmit
-									handleSubmit={submit}
-									hasMetaKey={editor.isExpanded}
-									disabled={(!editor.prompt &&
-										!attachments.filter((a) => a.type === 'image').length) ||
-										!session.model ||
-										editor.isCompletionInProgress}
-								>
-									{$LL.run()}
-								</ButtonSubmit>
-							{/if}
-						</div>
-					{/snippet}
-				</PromptAttachments>
+								<!-- Round and wordless, like the stop it turns into: the arrow is the label. -->
+								{#if editor.isCompletionInProgress}
+									<button
+										type="button"
+										title={$LL.stopCompletion()}
+										aria-label={$LL.stopCompletion()}
+										onclick={stopCompletion}
+										class="bg-active text-shade-0 ml-1 flex h-8 w-8 items-center justify-center rounded-full transition-opacity hover:opacity-85"
+									>
+										<Square class="h-3 w-3 fill-current" />
+									</button>
+								{:else}
+									<button
+										type="button"
+										title={$LL.run()}
+										aria-label={$LL.run()}
+										onclick={submit}
+										disabled={(!editor.prompt &&
+											!attachments.filter((a) => a.type === 'image').length) ||
+											!session.model}
+										class="bg-accent text-shade-0 disabled:bg-shade-3 disabled:text-muted ml-1 flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:opacity-90 disabled:pointer-events-none"
+									>
+										<ArrowUp class="h-4 w-4" />
+									</button>
+								{/if}
+							</div>
+						{/snippet}
+					</PromptAttachments>
+				</div>
 			</ImageDrop>
 		{/if}
 	</div>
@@ -556,9 +530,17 @@
 
 <style lang="postcss">
 	.prompt-editor__textarea {
-		/* Grows with what's typed, bounded by min/max-height: no manual resize needed. */
+		/* Grows with what's typed, bounded by max-height: no manual resize needed. */
 		field-sizing: content;
 		font-variant-ligatures: none;
+		/* One line is 24px, so one row matches the 36px of the buttons beside it. */
+		padding: 0.375rem 0.5rem;
+		line-height: 1.5rem;
+		outline: none;
+	}
+
+	.prompt-editor__textarea::placeholder {
+		color: var(--color-shade-6);
 	}
 
 	/* Everything that decides where a glyph lands is shared between the two.
@@ -579,14 +561,9 @@
 	/* The mirror is what is read, so it carries the theme's ink; the textarea on top
 	   keeps its caret and its selection.
 
-	   `display: block` is not a detail: it borrows `base-input` for the same padding
-	   as the textarea, and `base-input` is a flex container. Laid out as flex, every
-	   mention became a flex item and the whitespace between them was dropped.
-
 	   `overflow-y: auto` rather than hidden, so a long prompt reserves the same
 	   scrollbar gutter the textarea does and both wrap at the same width. */
 	.prompt-editor__mirror {
-		display: block;
 		overflow-y: auto;
 		color: var(--color-active);
 	}
