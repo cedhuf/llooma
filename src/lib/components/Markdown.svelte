@@ -261,7 +261,6 @@
 	.markdown :global(p),
 	.markdown :global(li) {
 		@apply text-read max-w-prose;
-		@apply md:text-read-lg;
 		/* Break long unbreakable strings (URLs, hashes) instead of overflowing. */
 		overflow-wrap: break-word;
 	}
