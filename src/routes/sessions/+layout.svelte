@@ -42,7 +42,7 @@
 		     it with itself gives that colour back exactly and the panel stays
 		     invisible until there is a picture under it. -->
 		<div
-			class="app-panel surface-pane flex min-w-0 flex-1 flex-col [--surface-color:var(--color-shade-1)] lg:rounded-xl lg:[--surface-color:var(--color-shade-2)]"
+			class="surface-pane flex min-w-0 flex-1 flex-col [--surface-color:var(--color-shade-1)] lg:[--surface-color:var(--color-shade-2)]"
 		>
 			{@render children()}
 		</div>
@@ -57,12 +57,8 @@
 		     make one. Turn the filter off and the composer would have gone looking for
 		     its box somewhere else.
 
-		     `overflow-hidden` for the same reason the sidebar has it: this box draws the
-		     border and the rounded corners, its children paint the fills, and without a
-		     clip a square fill simply hangs out past a round outline. -->
-		<main
-			class="app-panel relative flex min-w-0 flex-1 flex-col overflow-hidden lg:rounded-xl lg:border"
-		>
+		     `overflow-hidden` keeps the scroller below the only one that scrolls. -->
+		<main class="relative flex min-w-0 flex-1 flex-col overflow-hidden">
 			<div class="flex-1 overflow-auto">
 				{@render children()}
 			</div>

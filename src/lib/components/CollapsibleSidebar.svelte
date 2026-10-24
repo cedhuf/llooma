@@ -77,20 +77,19 @@
      Mobile: a fixed drawer pinned under the page, which the page slides aside to
      uncover. Desktop: an in-flow rail or full column. -->
 <nav
-	class="fixed inset-y-0 left-0 h-full w-full shrink-0 transition-[width] duration-300 ease-out motion-reduce:transition-none max-lg:pl-[var(--safe-left)] lg:relative lg:z-30 lg:mr-4 lg:max-w-none lg:translate-x-0
+	class="fixed inset-y-0 left-0 h-full w-full shrink-0 transition-[width] duration-300 ease-out motion-reduce:transition-none max-lg:pl-[var(--safe-left)] lg:relative lg:z-30 lg:max-w-none lg:translate-x-0
 		{$settingsStore.sidebarExpanded ? 'lg:w-96' : 'lg:w-16'}"
 	aria-label="Main navigation"
 	data-testid="sidebar"
 >
 	<!-- The column proper, and the only thing that clips. Its own box so the handle
-	     below can sit astride its edge: rounding a corner cuts off whatever crosses
-	     it.
+	     below can sit astride its edge: the clip would cut off whatever crosses it.
 
 	     It carries the column's material as well as its frame. The blocks inside are
 	     laid out at the width the column is going to, so while it narrows there is a
 	     strip between them and the border: painted, that strip is the column still
 	     closing; bare, it was a lit window showing the wallpaper straight through. -->
-	<div class="app-panel flex h-full overflow-hidden lg:rounded-xl lg:border">
+	<div class="flex h-full overflow-hidden lg:border-r">
 		<!-- The blocks fill this, each holding its contents at the width the column is
 		     going to.
 

@@ -452,7 +452,7 @@
 	     The wallpaper is painted by this box's own backdrop layer and handed over as
 	     a custom property: a `filter` here would blur the application with it. -->
 		<div
-			class="app-shell bg-shade-1 lg:bg-shade-2 relative flex w-full overflow-hidden lg:p-4 lg:pt-4 lg:pb-4"
+			class="app-shell bg-shade-1 lg:bg-shade-2 relative flex w-full overflow-hidden"
 			style={wallpaper ? `--wallpaper: ${wallpaper}` : ''}
 		>
 			<CollapsibleSidebar />
@@ -494,8 +494,6 @@
 
 <style lang="postcss">
 	:global(html) {
-		/* Desktop: match bg-shade-2, so the rounded-corner margins share one
-	   seamless background. */
 		background-color: var(--color-shade-2);
 		font-size: 1rem;
 		line-height: 1.5rem;

@@ -205,7 +205,7 @@
 <!-- Frameless like the sessions landing, and carrying a surface for the same
      reason. -->
 <div
-	class="app-panel surface-pane flex h-full flex-col [--surface-color:var(--color-shade-1)] lg:rounded-xl lg:[--surface-color:var(--color-shade-2)]"
+	class="surface-pane flex h-full flex-col [--surface-color:var(--color-shade-1)] lg:[--surface-color:var(--color-shade-2)]"
 >
 	<div class="min-h-0 flex-1 overflow-auto">
 		<MobileMenuBar />
