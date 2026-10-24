@@ -120,7 +120,7 @@
 	     laid out at the width the column is going to, so while it narrows there is a
 	     strip between them and the border: painted, that strip is the column still
 	     closing; bare, it was a lit window showing the wallpaper straight through. -->
-	<div class="border-shade-3/50 flex h-full overflow-hidden lg:border-r">
+	<div class="border-shade-3/50 flex h-full overflow-hidden lg:border-r-[0.5px]">
 		<!-- The blocks fill this, each holding its contents at the width the column is
 		     going to.
 
