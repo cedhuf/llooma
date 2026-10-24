@@ -133,7 +133,12 @@
 		<div class="flex h-full w-full flex-col">
 			<SidebarBrand rail={showRail} onCollapse={collapseOrClose} onExpand={expandSidebar} />
 
-			<SidebarActions personas={personaLaunchers} rail={showRail} onNewChat={newChat} />
+			<SidebarActions
+				personas={personaLaunchers}
+				sessions={visibleSessions}
+				rail={showRail}
+				onNewChat={newChat}
+			/>
 			{#if showRail}
 				<div class="surface-column flex-1"></div>
 			{:else}

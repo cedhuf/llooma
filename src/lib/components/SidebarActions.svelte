@@ -1,22 +1,31 @@
 <script lang="ts">
-	import { ImageIcon, Library, SquarePen } from '@lucide/svelte';
+	import { ImageIcon, Library, MessagesSquare, Search, SquarePen } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { canDrawImages } from '$lib/images';
 	import type { Persona } from '$lib/personas';
+	import { resolveSessionTitle, type SessionSummary } from '$lib/sessions';
+	import { openSearch } from '$lib/stores/modal';
 
+	import Popover from './Popover.svelte';
 	import SidebarPersonas from './SidebarPersonas.svelte';
 
 	interface Props {
 		personas: Persona[];
+		/** The folded column lists the latest of them in a menu, having no room for the list. */
+		sessions: SessionSummary[];
 		/** The folded desktop column: the same entries, icons only. */
 		rail: boolean;
 		onNewChat: () => void;
 	}
 
-	let { personas, rail, onNewChat }: Props = $props();
+	let { personas, sessions, rail, onNewChat }: Props = $props();
+
+	const RECENT_COUNT = 10;
+	const recent = $derived(sessions.filter((s) => !s.archived).slice(0, RECENT_COUNT));
+	let recentOpen = $state(false);
 
 	const pathname = $derived(page.url.pathname);
 	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
@@ -47,6 +56,53 @@
 				<SquarePen class="text-accent h-4 w-4 shrink-0" />
 				<span class={label}>{$LL.newChat()}</span>
 			</button>
+
+			<!-- Open, both live elsewhere: the search in the brand bar, the conversations
+			     in the list below. -->
+			{#if rail}
+				<button
+					type="button"
+					onclick={() => openSearch()}
+					title={$LL.search()}
+					class="{item} {idle}"
+				>
+					<Search class="text-muted h-4 w-4 shrink-0" />
+					<span class={label}>{$LL.search()}</span>
+				</button>
+
+				{#if recent.length > 0}
+					<Popover side="right" align="start" class="w-64 p-1.5" bind:open={recentOpen}>
+						{#snippet trigger({ props })}
+							<button
+								{...props}
+								type="button"
+								title={$LL.recentSessions()}
+								class="{item} {recentOpen ? current : idle}"
+							>
+								<MessagesSquare class="text-muted h-4 w-4 shrink-0" />
+								<span class={label}>{$LL.recentSessions()}</span>
+							</button>
+						{/snippet}
+
+						<p class="text-muted px-2 pt-1 pb-1.5 text-xs font-medium">
+							{$LL.recentSessions()}
+						</p>
+						{#each recent as session (session.id)}
+							<a
+								href={resolve('/sessions/[id]', { id: session.id })}
+								onclick={() => (recentOpen = false)}
+								class="block truncate rounded-lg px-2 py-1.5 text-sm transition-colors {pathname.includes(
+									session.id
+								)
+									? current
+									: idle}"
+							>
+								{resolveSessionTitle(session) || $LL.untitled()}
+							</a>
+						{/each}
+					</Popover>
+				{/if}
+			{/if}
 
 			<a
 				href={resolve('/library')}
