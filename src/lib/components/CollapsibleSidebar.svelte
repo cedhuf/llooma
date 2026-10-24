@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { ChevronsRight } from '@lucide/svelte';
-
 	import LL from '$i18n/i18n-svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
@@ -134,7 +132,7 @@
 		     opening. Separated, each block paints out to the edge at every frame while
 		     its contents stay put. -->
 		<div class="flex h-full w-full flex-col">
-			<SidebarBrand rail={showRail} onCollapse={collapseOrClose} />
+			<SidebarBrand rail={showRail} onCollapse={collapseOrClose} onExpand={expandSidebar} />
 
 			{#if showRail}
 				<SidebarRail personas={personaLaunchers} sessions={visibleSessions} onNewChat={newChat} />
@@ -171,20 +169,5 @@
 					: ''}"
 			></span>
 		</div>
-	{/if}
-
-	<!-- Astride the edge, level with the brand: half belongs to the column and half
-	     to what is beside it, which is the whole of what it does. Its position comes
-	     from the header's own height rather than a number kept in step with it. -->
-	{#if showRail}
-		<button
-			onclick={expandSidebar}
-			aria-label={$LL.expandSidebar()}
-			title={$LL.expandSidebar()}
-			style="top: calc(var(--app-header-h) / 2)"
-			class="border-shade-3 bg-shade-1 text-muted hover:border-accent hover:text-active absolute right-0 hidden translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border p-1 shadow-sm transition-colors lg:flex"
-		>
-			<ChevronsRight class="h-3.5 w-3.5" />
-		</button>
 	{/if}
 </nav>

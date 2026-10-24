@@ -1,15 +1,12 @@
 <script lang="ts">
-	import { ImageIcon, Library, Search, SquarePen } from '@lucide/svelte';
+	import { ImageIcon, Library, SquarePen } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { canDrawImages } from '$lib/images';
 	import type { Persona } from '$lib/personas';
-	import { modKey } from '$lib/platform';
-	import { openSearch } from '$lib/stores/modal';
 
-	import Kbd from './Kbd.svelte';
 	import SidebarPersonas from './SidebarPersonas.svelte';
 
 	interface Props {
@@ -19,7 +16,6 @@
 
 	let { personas, onNewChat }: Props = $props();
 
-	const mod = $derived(modKey());
 	const pathname = $derived(page.url.pathname);
 	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
 	const onImages = $derived(pathname.startsWith('/images'));
@@ -36,16 +32,6 @@
 			<button type="button" onclick={onNewChat} class="{item} {idle} font-medium">
 				<SquarePen class="text-accent h-4 w-4 shrink-0" />
 				{$LL.newChat()}
-			</button>
-
-			<button type="button" onclick={() => openSearch()} class="group {item} {idle}">
-				<Search class="text-muted h-4 w-4 shrink-0" />
-				<span class="flex-1 text-left">{$LL.search()}</span>
-				<span
-					class="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100"
-				>
-					<Kbd>{mod}</Kbd><Kbd>K</Kbd>
-				</span>
 			</button>
 
 			<a href={resolve('/library')} class="{item} {onLibrary ? current : idle}">
