@@ -443,7 +443,7 @@
 			<!-- Grows to fill whatever the conversation does not, which puts the composer at
 			     the foot of a short exchange rather than halfway up: a sticky element only
 			     sticks once there is something to scroll. -->
-			<div class="grow">
+			<div class="grow pt-6">
 				<Messages
 					bind:session={chat.session}
 					bind:editor={chat.editor}
