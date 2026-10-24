@@ -106,7 +106,7 @@
 						class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors
 							{selected
 							? 'border-accent bg-accent/10 text-active font-medium'
-							: 'border-shade-3 hover:bg-shade-1 text-base'}
+							: 'border-shade-3 hover:bg-shade-1 text-body'}
 							{answered && !selected ? 'opacity-40' : ''}
 							{answered || disabled ? 'cursor-default' : ''}"
 					>

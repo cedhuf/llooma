@@ -216,7 +216,7 @@
 						{#snippet input()}
 							<textarea
 								placeholder={$LL.howCanIHelp()}
-								class="w-full resize-none bg-transparent px-3 pt-2 pb-1 text-base text-sm outline-none"
+								class="text-body w-full resize-none bg-transparent px-3 pt-2 pb-1 text-sm outline-none"
 								style="field-sizing: content; min-height: 56px; max-height: 200px;"
 								bind:value={prompt}
 								onkeydown={handleKeyDown}
@@ -285,7 +285,7 @@
 											<button
 												type="button"
 												onclick={() => submit(suggestion)}
-												class="group hover:bg-shade-1 flex w-full items-center gap-2 px-4 py-2.5 text-left text-base text-sm transition-colors"
+												class="group hover:bg-shade-1 text-body flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm transition-colors"
 											>
 												<span class="flex-1">{suggestion}</span>
 												<ArrowRight
@@ -413,7 +413,7 @@
 						{#each recentSessions as session (session.id)}
 							<a
 								href={resolve('/sessions/[id]', { id: session.id })}
-								class="hover:bg-shade-1 flex items-center gap-3 px-4 py-3 text-base text-sm transition-colors first:rounded-t-xl last:rounded-b-xl"
+								class="hover:bg-shade-1 text-body flex items-center gap-3 px-4 py-3 text-sm transition-colors first:rounded-t-xl last:rounded-b-xl"
 							>
 								<MessageSquareText class="text-muted h-4 w-4 flex-shrink-0" />
 								<span class="flex-1 truncate"

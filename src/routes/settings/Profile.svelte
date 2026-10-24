@@ -75,7 +75,7 @@
 		/>
 
 		<div class="flex min-w-0 flex-col">
-			<span class="text-active truncate text-base font-semibold">{displayName}</span>
+			<span class="text-active text-body truncate font-semibold">{displayName}</span>
 			<span class="text-muted text-xs">{roleLabels[$currentRole]}</span>
 			{#if email}
 				<span class="text-muted mt-0.5 truncate text-xs">{email}</span>

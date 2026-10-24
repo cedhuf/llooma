@@ -382,7 +382,7 @@
 							rows="3"
 							maxlength={IMAGE_LIMITS.prompt}
 							placeholder={$LL.imagePromptPlaceholder()}
-							class="placeholder:text-muted w-full resize-none border-0 bg-transparent pt-4 pr-11 pb-2 pl-4 text-base leading-relaxed outline-none"
+							class="placeholder:text-muted text-body w-full resize-none border-0 bg-transparent pt-4 pr-11 pb-2 pl-4 leading-relaxed outline-none"
 						></textarea>
 						{#if composerFilled}
 							<!-- Only while there is something to undo. Fading in keeps it from flicking on

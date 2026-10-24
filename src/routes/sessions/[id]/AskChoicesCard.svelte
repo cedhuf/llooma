@@ -86,7 +86,7 @@
 			{#if questions.length > 1}
 				<span class="text-muted text-xs font-medium">{current + 1} / {questions.length}</span>
 			{/if}
-			<p class="text-active text-base leading-snug font-medium">{question.question}</p>
+			<p class="text-active text-body leading-snug font-medium">{question.question}</p>
 			{#if multi}
 				<span class="text-muted text-xs">{$LL.multipleAllowed()}</span>
 			{/if}
@@ -126,7 +126,7 @@
 						{oi + 1}
 					{/if}
 				</span>
-				<span class="min-w-0 flex-1 {selected ? 'text-active font-medium' : 'text-base'}">
+				<span class="min-w-0 flex-1 {selected ? 'text-active font-medium' : 'text-body'}">
 					{option}
 				</span>
 			</button>

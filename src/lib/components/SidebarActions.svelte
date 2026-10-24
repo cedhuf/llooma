@@ -37,7 +37,7 @@
 	// `pl-4` inside `px-2` puts every icon on the folded column's centre line, so
 	// folding moves nothing.
 	const item = 'flex h-9 w-full items-center gap-3 rounded-lg pr-2 pl-4 text-sm transition-colors';
-	const idle = 'text-base hover:bg-shade-0 hover:text-active';
+	const idle = 'text-body hover:bg-shade-0 hover:text-active';
 	const current = 'bg-shade-0 text-active';
 	const label = $derived(rail ? 'sr-only' : 'truncate');
 	const layoutWidth = $derived(

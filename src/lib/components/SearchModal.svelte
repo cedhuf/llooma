@@ -143,7 +143,7 @@
 				spellcheck="false"
 				aria-label={$LL.searchConversations()}
 				placeholder={$LL.searchConversationsPlaceholder()}
-				class="placeholder:text-muted w-full bg-transparent text-base outline-none"
+				class="placeholder:text-muted text-body w-full bg-transparent outline-none"
 			/>
 			{#if loading}
 				<div

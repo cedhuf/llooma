@@ -143,7 +143,7 @@
 						onclick={() => (activeTab = tab.id)}
 						class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors {active
 							? 'bg-accent/10 text-accent font-medium'
-							: 'hover:bg-shade-2 text-base'}"
+							: 'hover:bg-shade-2 text-body'}"
 					>
 						<Icon class="h-4 w-4 shrink-0" />
 						{tab.label}
