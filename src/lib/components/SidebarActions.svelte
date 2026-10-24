@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ImageIcon, Library, MessagesSquare, Search, SquarePen } from '@lucide/svelte';
+	import type { Snippet } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { resolve } from '$app/paths';
@@ -19,9 +20,11 @@
 		/** The folded desktop column: the same entries, icons only. */
 		rail: boolean;
 		onNewChat: () => void;
+		/** The conversation list, scrolling with the entries above it. */
+		children?: Snippet;
 	}
 
-	let { personas, sessions, rail, onNewChat }: Props = $props();
+	let { personas, sessions, rail, onNewChat, children }: Props = $props();
 
 	const RECENT_COUNT = 10;
 	const recent = $derived(sessions.filter((s) => !s.archived).slice(0, RECENT_COUNT));
@@ -37,16 +40,16 @@
 	const idle = 'text-base hover:bg-shade-0 hover:text-active';
 	const current = 'bg-shade-0 text-active';
 	const label = $derived(rail ? 'sr-only' : 'truncate');
+	const layoutWidth = $derived(
+		`w-full shrink-0 max-lg:w-[var(--drawer-w)] ${rail ? 'lg:w-16' : 'lg:w-[var(--sidebar-w)]'}`
+	);
 </script>
 
+<!-- New chat stays put; everything under it scrolls as one list. -->
 <div class="surface-column shrink-0">
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
-	<div
-		class="w-full shrink-0 max-lg:w-[var(--drawer-w)] {rail
-			? 'lg:w-16'
-			: 'lg:w-[var(--sidebar-w)]'}"
-	>
-		<div class="flex flex-col gap-0.5 px-2 pt-1 pb-2">
+	<div class={layoutWidth}>
+		<div class="px-2 pt-1 pb-1">
 			<button
 				type="button"
 				onclick={onNewChat}
@@ -56,7 +59,18 @@
 				<SquarePen class="text-accent h-4 w-4 shrink-0" />
 				<span class={label}>{$LL.newChat()}</span>
 			</button>
+		</div>
+	</div>
+</div>
 
+<!-- Sideways overflow is hidden rather than scrolled, since while the column
+     narrows this box is wider than what holds it. -->
+<div
+	class="surface-column min-h-0 flex-1 overflow-y-auto"
+	style="overscroll-behavior-y: contain; overflow-x: hidden"
+>
+	<div class={layoutWidth}>
+		<div class="flex flex-col gap-0.5 px-2 pb-2">
 			<!-- Open, both live elsewhere: the search in the brand bar, the conversations
 			     in the list below. -->
 			{#if rail}
@@ -127,4 +141,6 @@
 
 		<SidebarPersonas {personas} {rail} />
 	</div>
+
+	{@render children?.()}
 </div>

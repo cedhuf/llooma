@@ -138,12 +138,11 @@
 				sessions={visibleSessions}
 				rail={showRail}
 				onNewChat={newChat}
-			/>
-			{#if showRail}
-				<div class="surface-column flex-1"></div>
-			{:else}
-				<SidebarSessions sessions={visibleSessions} {personaById} />
-			{/if}
+			>
+				{#if !showRail}
+					<SidebarSessions sessions={visibleSessions} {personaById} />
+				{/if}
+			</SidebarActions>
 
 			<SidebarFooter rail={showRail} />
 		</div>

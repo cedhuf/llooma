@@ -47,16 +47,9 @@
 	}
 </script>
 
-<!-- Between the panes rather than under them: nothing passes beneath anything,
-     so no clearance is measured, no padding stands in for a pane, and the
-     scrollbar belongs to this box rather than the height of the column. -->
-<div
-	class="surface-column min-h-0 flex-1 overflow-y-auto"
-	style="overscroll-behavior-y: contain; overflow-x: hidden"
->
-	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`.
-	     Sideways overflow is hidden rather than scrolled, since while the column
-	     narrows this box is wider than what holds it. -->
+<!-- Inside the actions' scroller: see `SidebarActions`. -->
+<div>
+	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
 	<div class="w-full px-2 py-2 max-lg:w-[var(--drawer-w)] lg:w-[var(--sidebar-w)]">
 		{#each groups as group (group.key)}
 			<div class="mb-2">
