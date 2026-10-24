@@ -77,7 +77,7 @@
 	     status bar and its height grows by as much, rather than the whole thing
 	     being pushed down. -->
 	<header
-		class="surface-chrome border-shade-3 flex h-[var(--app-header-h)] shrink-0 items-center justify-between border-b px-3 text-xs max-lg:h-[calc(var(--app-header-h)+var(--safe-top))] max-lg:pt-[var(--safe-top)]"
+		class="surface-chrome border-shade-3/50 flex h-[var(--app-header-h)] shrink-0 items-center justify-between border-b px-3 text-xs max-lg:h-[calc(var(--app-header-h)+var(--safe-top))] max-lg:pt-[var(--safe-top)]"
 	>
 		{@render contents()}
 	</header>
