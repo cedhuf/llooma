@@ -5,14 +5,16 @@
 	import { page } from '$app/state';
 	import { sessionsStore, settingsStore } from '$lib/localStorage';
 	import { launchPersona, unbindPersonaSession, type Persona } from '$lib/personas';
+	import { formatTimestampToNow } from '$lib/utils';
 
 	import ContextMenu from './ContextMenu.svelte';
 	import PersonaAvatar from './PersonaAvatar.svelte';
+	import Popover from './Popover.svelte';
 	import SessionMenu from './SessionMenu.svelte';
 
 	interface Props {
 		personas: Persona[];
-		/** The folded column: one avatar under the other, names in the tooltip. Open, a group of rows like the conversations under it. */
+		/** The folded column: one avatar under the other, names in the tooltip. Open, the shape the settings ask for. */
 		rail?: boolean;
 	}
 
@@ -22,12 +24,20 @@
 	const isActive = (persona: Persona) =>
 		!!persona.sessionId && pathname.includes(persona.sessionId);
 
+	const stack = $derived($settingsStore.sidebarPersonasStyle !== 'list');
+
+	/** Faces in the stack before it says how many more there are. */
+	const STACKED = 5;
+	const stacked = $derived(personas.slice(0, STACKED));
+	let panelOpen = $state(false);
+
 	/** Rows shown before the group folds the rest behind a toggle. */
 	const SHOWN = 5;
 	let showAll = $state(false);
 	const listed = $derived(showAll ? personas : personas.slice(0, SHOWN));
 
 	async function launch(persona: Persona) {
+		panelOpen = false;
 		const id = await launchPersona(persona, $settingsStore.models);
 		goto(resolve('/sessions/[id]', { id }));
 	}
@@ -100,6 +110,88 @@
 			{#each personas as persona (persona.id)}
 				{@render launcher(persona)}
 			{/each}
+		</div>
+	{:else if stack}
+		<div class="px-2 pb-2">
+			<Popover side="right" align="start" class="w-80 p-1.5" bind:open={panelOpen}>
+				{#snippet trigger({ props })}
+					<button
+						{...props}
+						type="button"
+						class="flex h-10 w-full items-center gap-3 rounded-lg pr-2 pl-3 text-sm transition-colors {panelOpen
+							? 'bg-shade-0 text-active'
+							: 'hover:bg-shade-0 hover:text-active'}"
+					>
+						<!-- Each face is ringed in the column's own colour, which is what separates
+						     one from the next where they overlap. -->
+						<span class="flex shrink-0 -space-x-2">
+							{#each stacked as persona (persona.id)}
+								<span
+									class="inline-flex rounded-full ring-2 {isActive(persona)
+										? 'ring-accent'
+										: 'ring-shade-1'}"
+								>
+									<PersonaAvatar {persona} size={24} />
+								</span>
+							{/each}
+						</span>
+						<span class="truncate">{$LL.personas()}</span>
+						{#if personas.length > STACKED}
+							<span class="text-muted ml-auto shrink-0 text-xs">+{personas.length - STACKED}</span>
+						{/if}
+					</button>
+				{/snippet}
+
+				<p class="text-muted px-2 pt-1 pb-1.5 text-xs font-medium">
+					{$LL.personas()} · {personas.length}
+				</p>
+				<!-- Who they are and when you last spoke, so the panel answers "which one" before
+				     the click rather than after. -->
+				<div class="flex max-h-[60vh] flex-col gap-0.5 overflow-y-auto">
+					{#each personas as persona (persona.id)}
+						{@const session = sessionOf(persona)}
+						<ContextMenu>
+							{#snippet trigger({ props })}
+								<button
+									{...props}
+									type="button"
+									onclick={() => launch(persona)}
+									class="persona-launcher flex w-full items-start gap-3 rounded-lg px-2 py-2 text-left transition-colors {isActive(
+										persona
+									)
+										? 'bg-shade-1'
+										: 'hover:bg-shade-1'}"
+								>
+									<PersonaAvatar {persona} size={32} />
+									<span class="flex min-w-0 flex-1 flex-col">
+										<span class="flex items-baseline gap-2">
+											<span class="text-active truncate text-sm font-medium">{persona.name}</span>
+											{#if session?.updatedAt}
+												<span class="text-muted ml-auto shrink-0 text-[11px]">
+													{formatTimestampToNow(session.updatedAt)}
+												</span>
+											{/if}
+										</span>
+										{#if persona.tagline}
+											<span class="text-muted line-clamp-2 text-xs">{persona.tagline}</span>
+										{/if}
+									</span>
+								</button>
+							{/snippet}
+
+							{#if session}
+								<SessionMenu
+									id={session.id}
+									pinned={session.pinned}
+									archived={session.archived}
+									onClose={() => endConversation(persona)}
+									onDelete={() => deleteConversation(persona)}
+								/>
+							{/if}
+						</ContextMenu>
+					{/each}
+				</div>
+			</Popover>
 		</div>
 	{:else}
 		<!-- People you talk to rather than things you launch: one row each, read like

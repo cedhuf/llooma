@@ -285,6 +285,19 @@
 			label={$LL.pinPersonasInSidebar()}
 			bind:checked={$settingsStore.showPinnedPersonas}
 		/>
+		{#if $settingsStore.showPinnedPersonas}
+			<SettingsField label={$LL.sidebarPersonasStyle()}>
+				<Select
+					id="sidebar-personas-style"
+					name="sidebar-personas-style"
+					bind:value={$settingsStore.sidebarPersonasStyle}
+					options={[
+						{ value: 'stack', label: $LL.sidebarPersonasStack() },
+						{ value: 'list', label: $LL.sidebarPersonasList() }
+					]}
+				/>
+			</SettingsField>
+		{/if}
 		<FieldCheckbox
 			label={$LL.showListQuickActions()}
 			bind:checked={$settingsStore.showListQuickActions}

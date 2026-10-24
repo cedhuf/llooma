@@ -169,6 +169,8 @@ export interface Settings {
 	homeRecentSessionsCount: number;
 	/** Show personas you've talked to as pinned launchers in the sidebar. */
 	showPinnedPersonas: boolean;
+	/** A stack of faces opening a panel, or one row each like the conversations. */
+	sidebarPersonasStyle: 'stack' | 'list';
 
 	/** Off by default: both live in the right-click menu, where they cannot cover a title or be hit by accident. */
 	showListQuickActions: boolean;
@@ -322,6 +324,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	homeShowRecentSessions: true,
 	homeRecentSessionsCount: 4,
 	showPinnedPersonas: true,
+	sidebarPersonasStyle: 'stack',
 	showListQuickActions: false,
 	floatingChatHeader: true,
 	accentUserMessages: true,

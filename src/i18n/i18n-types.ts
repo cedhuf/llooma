@@ -3575,6 +3575,18 @@ type RootTranslation = {
 	 */
 	pinPersonasInSidebar: string
 	/**
+	 * S​h​o​w​ ​p​e​r​s​o​n​a​s​ ​a​s
+	 */
+	sidebarPersonasStyle: string
+	/**
+	 * A​ ​s​t​a​c​k​ ​o​f​ ​f​a​c​e​s
+	 */
+	sidebarPersonasStack: string
+	/**
+	 * O​n​e​ ​r​o​w​ ​e​a​c​h
+	 */
+	sidebarPersonasList: string
+	/**
 	 * B​a​c​k​g​r​o​u​n​d
 	 */
 	background: string
@@ -7869,6 +7881,18 @@ export type TranslationFunctions = {
 	 * Pin personas you talk to at the top of the sidebar
 	 */
 	pinPersonasInSidebar: () => LocalizedString
+	/**
+	 * Show personas as
+	 */
+	sidebarPersonasStyle: () => LocalizedString
+	/**
+	 * A stack of faces
+	 */
+	sidebarPersonasStack: () => LocalizedString
+	/**
+	 * One row each
+	 */
+	sidebarPersonasList: () => LocalizedString
 	/**
 	 * Background
 	 */
