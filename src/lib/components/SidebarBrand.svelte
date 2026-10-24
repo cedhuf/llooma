@@ -57,7 +57,7 @@
 				<span class="flex h-10 w-10 shrink-0 items-center justify-center">
 					<Logo class="h-7 w-7" />
 				</span>
-				<span class="text-body truncate font-semibold tracking-tight">{APP_NAME}</span>
+				<span class="truncate text-base font-semibold tracking-tight">{APP_NAME}</span>
 			</a>
 			<div class="ml-auto flex shrink-0 items-center">
 				<button

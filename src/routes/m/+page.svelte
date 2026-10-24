@@ -100,7 +100,7 @@
 	     the bar at the foot, so the screen is bracketed by one material. -->
 	<header class="flex items-center gap-2.5">
 		<Logo class="h-7 w-7" />
-		<span class="text-active text-body flex-1 font-semibold tracking-tight">{APP_NAME}</span>
+		<span class="text-active flex-1 text-base font-semibold tracking-tight">{APP_NAME}</span>
 
 		<button
 			type="button"

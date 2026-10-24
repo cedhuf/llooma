@@ -227,11 +227,11 @@
 	}
 
 	.markdown :global(h3) {
-		@apply text-body mt-5 mb-2 font-semibold md:text-lg;
+		@apply mt-5 mb-2 text-base font-semibold md:text-lg;
 	}
 
 	.markdown :global(h4) {
-		@apply text-body mt-4 mb-1 font-semibold;
+		@apply mt-4 mb-1 text-base font-semibold;
 	}
 
 	.markdown :global(h5) {

@@ -285,7 +285,7 @@
 				<p
 					class="text-center leading-relaxed {line.role === 'user'
 						? 'text-muted text-sm'
-						: 'text-active text-body'}"
+						: 'text-active text-base'}"
 				>
 					{line.text}
 				</p>
