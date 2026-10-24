@@ -442,9 +442,8 @@
 			{/if}
 			<!-- Grows to fill whatever the conversation does not, which puts the composer at
 			     the foot of a short exchange rather than halfway up: a sticky element only
-			     sticks once there is something to scroll. The messages sit at its foot too,
-			     so a short exchange rises from the composer like any chat. -->
-			<div class="flex grow flex-col justify-end">
+			     sticks once there is something to scroll. -->
+			<div class="grow">
 				<Messages
 					bind:session={chat.session}
 					bind:editor={chat.editor}
