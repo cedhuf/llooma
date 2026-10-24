@@ -19,7 +19,7 @@
 	let { rail, onCollapse, onExpand }: Props = $props();
 
 	const iconButton =
-		'text-muted hover:bg-shade-0 hover:text-active rounded-lg p-2 transition-colors';
+		'text-muted hover:bg-shade-0 hover:text-active flex h-10 w-10 items-center justify-center rounded-lg transition-colors';
 </script>
 
 <div
@@ -36,7 +36,8 @@
 			: 'lg:w-[var(--sidebar-w)]'}"
 	>
 		<!-- The mark keeps one box, size and colour in both states. Folded, it gives way
-		     to the sidebar icon under the pointer and opens the column. -->
+		     to the sidebar icon under the pointer and opens the column, in the same 40px
+		     box and at the same size as the button that folds it. -->
 		{#if rail}
 			<button
 				type="button"
@@ -46,7 +47,7 @@
 				class="group hover:bg-shade-0 relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors"
 			>
 				<Logo
-					class="h-7 w-7 transition-opacity group-hover:opacity-0 group-focus-visible:opacity-0"
+					class="h-8 w-8 transition-opacity group-hover:opacity-0 group-focus-visible:opacity-0"
 				/>
 				<PanelLeft
 					class="text-muted group-hover:text-active absolute h-[18px] w-[18px] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
@@ -55,9 +56,9 @@
 		{:else}
 			<a href={resolve('/sessions')} class="flex min-w-0 items-center">
 				<span class="flex h-10 w-10 shrink-0 items-center justify-center">
-					<Logo class="h-7 w-7" />
+					<Logo class="h-8 w-8" />
 				</span>
-				<span class="truncate text-base font-semibold tracking-tight">{APP_NAME}</span>
+				<span class="truncate text-lg font-semibold tracking-tight">{APP_NAME}</span>
 			</a>
 			<div class="ml-auto flex shrink-0 items-center">
 				<button
