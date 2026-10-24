@@ -8,7 +8,6 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { Conversation, type QueryEntry } from '$lib/chat/conversation.svelte';
-	import Button from '$lib/components/Button.svelte';
 	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import Header from '$lib/components/Header.svelte';
@@ -285,38 +284,24 @@
 	<Header {floating}>
 		{#snippet headline()}
 			{#if persona}
-				<!-- Persona identity, laid out like the title/meta pair: avatar, name, tagline. -->
-				<div class="flex min-w-0 items-center gap-2.5" title={persona.tagline}>
-					<PersonaAvatar {persona} size={32} />
-					<div class="flex min-w-0 flex-col gap-0.5">
-						<p class="text-active truncate text-sm leading-tight font-bold">{persona.name}</p>
-						{#if persona.tagline}
-							<p class="text-muted truncate text-xs leading-tight">{persona.tagline}</p>
-						{/if}
-					</div>
+				<div class="flex min-w-0 items-center gap-2" title={persona.tagline}>
+					<PersonaAvatar {persona} size={24} />
+					<p class="text-active shrink-0 text-sm font-semibold">{persona.name}</p>
+					{#if persona.tagline}
+						<p class="text-muted min-w-0 truncate text-xs">{persona.tagline}</p>
+					{/if}
 				</div>
 			{:else}
-				<!-- Once there is a title it becomes the headline, with the id as a
-				     parenthesised link so it stays copyable. -->
-				<!-- leading-tight, not leading-none: `truncate` hides overflow, so a line box
-				     the exact height of the font clips descenders. -->
-				<p data-testid="session-id" class="truncate leading-tight font-bold">
-					{#if sessionTitle}
-						{sessionTitle}
-						<span class="text-muted">
-							(<Button variant="link" href={`/sessions/${chat.session.id}`}
-								>#{chat.session.id}</Button
-							>)
+				<!-- The title gives way first: the time beside it is short and never truncates. -->
+				<div class="flex min-w-0 items-baseline gap-2">
+					<p class="text-active min-w-0 truncate text-sm font-semibold">
+						{sessionTitle || (chat.editor.isNewSession ? $LL.newSession() : $LL.untitled())}
+					</p>
+					{#if !chat.editor.isNewSession}
+						<span class="text-muted shrink-0 text-xs">
+							{formatTimestampToNow(chat.session.updatedAt ?? '')}
 						</span>
-					{:else}
-						{$LL.session()}
-						<Button variant="link" href={`/sessions/${chat.session.id}`}>#{chat.session.id}</Button>
 					{/if}
-				</p>
-				<div class="text-muted flex items-center gap-1.5 text-xs">
-					{chat.editor.isNewSession
-						? $LL.newSession()
-						: formatTimestampToNow(chat.session.updatedAt ?? '')}
 				</div>
 			{/if}
 		{/snippet}

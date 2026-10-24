@@ -57,7 +57,7 @@
 				<SidebarToggle variant="floating" />
 
 				<div
-					class="surface-floating border-shade-3 pointer-events-auto flex h-12 items-center gap-1 rounded-full border px-1.5 shadow-lg [--surface-tint:66%]"
+					class="surface-floating border-shade-3 pointer-events-auto flex h-10 items-center gap-1 rounded-full border px-1.5 shadow-lg [--surface-tint:66%]"
 				>
 					{@render compact()}
 				</div>
@@ -65,7 +65,7 @@
 		{/if}
 
 		<header
-			class="surface-floating border-shade-3 pointer-events-auto h-12 w-full items-center justify-between rounded-full border px-4 text-xs shadow-lg [--surface-tint:66%] {compact
+			class="surface-floating border-shade-3 pointer-events-auto h-10 w-full items-center justify-between rounded-full border px-3 text-xs shadow-lg [--surface-tint:66%] {compact
 				? 'hidden lg:flex'
 				: 'flex'}"
 		>
