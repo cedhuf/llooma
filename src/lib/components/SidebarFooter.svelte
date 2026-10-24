@@ -78,33 +78,23 @@
 			? 'lg:w-16'
 			: 'lg:w-[var(--sidebar-w)]'}"
 	>
-		{#if rail}
-			<div class="flex justify-center">
-				<button
-					onclick={() => ($settingsModalOpen = true)}
-					class="flex h-11 items-center transition-transform hover:scale-105"
-					title={$LL.settings()}
-					aria-label={$LL.settings()}
-				>
-					{@render identity()}
-				</button>
-			</div>
-		{:else}
-			<!-- Labelled explicitly, or the accessible name is whatever its children happen
-			     to concatenate to, which announces badly and is unusable as a handle. -->
-			<button
-				onclick={() => ($settingsModalOpen = true)}
-				aria-label={$LL.settings()}
-				class="group hover:bg-shade-0 flex h-11 w-full items-center gap-3 rounded-lg px-2 text-left transition-colors"
-			>
-				{@render identity()}
+		<!-- Labelled explicitly, or the accessible name is whatever its children happen
+		     to concatenate to, which announces badly and is unusable as a handle. -->
+		<button
+			onclick={() => ($settingsModalOpen = true)}
+			aria-label={$LL.settings()}
+			title={rail ? $LL.settings() : undefined}
+			class="group hover:bg-shade-0 flex h-11 w-full items-center gap-3 rounded-lg px-2 text-left transition-colors"
+		>
+			{@render identity()}
+			{#if !rail}
 				<span class="min-w-0 flex-1 truncate text-sm font-medium">
 					{hasName
 						? `${$settingsStore.profileFirstName} ${$settingsStore.profileLastName}`.trim()
 						: $LL.settings()}
 				</span>
 				<Settings2 class="text-muted group-hover:text-active h-4 w-4 shrink-0 transition-colors" />
-			</button>
-		{/if}
+			{/if}
+		</button>
 	</div>
 </div>

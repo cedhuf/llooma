@@ -440,7 +440,6 @@ const fr = extendDictionary(en, {
 
 	// Sidebar / navigation chrome
 	newChat: 'Nouveau chat',
-	home: 'Accueil',
 	library: 'Bibliothèque',
 	noMatches: 'Aucun résultat',
 	personas: 'Personas',
@@ -508,7 +507,6 @@ const fr = extendDictionary(en, {
 	connected: 'Connecté',
 	noServerConnected: 'Aucun serveur connecté',
 	untitled: 'Sans titre',
-	allConversations: 'Toutes les conversations',
 	moreOptions: 'Plus d’options',
 	installApp: 'Installer l’application',
 	offerInstall: 'Proposer d’installer l’application de temps en temps',

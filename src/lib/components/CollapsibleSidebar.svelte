@@ -12,7 +12,6 @@
 	import SidebarActions from './SidebarActions.svelte';
 	import SidebarBrand from './SidebarBrand.svelte';
 	import SidebarFooter from './SidebarFooter.svelte';
-	import SidebarRail from './SidebarRail.svelte';
 	import SidebarSessions from './SidebarSessions.svelte';
 
 	// Personas you have talked to, above the list unless disabled. Their raw session
@@ -134,10 +133,10 @@
 		<div class="flex h-full w-full flex-col">
 			<SidebarBrand rail={showRail} onCollapse={collapseOrClose} onExpand={expandSidebar} />
 
+			<SidebarActions personas={personaLaunchers} rail={showRail} onNewChat={newChat} />
 			{#if showRail}
-				<SidebarRail personas={personaLaunchers} sessions={visibleSessions} onNewChat={newChat} />
+				<div class="surface-column flex-1"></div>
 			{:else}
-				<SidebarActions personas={personaLaunchers} onNewChat={newChat} />
 				<SidebarSessions sessions={visibleSessions} {personaById} />
 			{/if}
 

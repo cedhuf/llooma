@@ -1656,10 +1656,6 @@ type RootTranslation = {
 	 */
 	newChat: string
 	/**
-	 * H​o​m​e
-	 */
-	home: string
-	/**
 	 * L​i​b​r​a​r​y
 	 */
 	library: string
@@ -1898,10 +1894,6 @@ type RootTranslation = {
 	 * U​n​t​i​t​l​e​d
 	 */
 	untitled: string
-	/**
-	 * A​l​l​ ​c​o​n​v​e​r​s​a​t​i​o​n​s
-	 */
-	allConversations: string
 	/**
 	 * M​o​r​e​ ​o​p​t​i​o​n​s
 	 */
@@ -6004,10 +5996,6 @@ export type TranslationFunctions = {
 	 */
 	newChat: () => LocalizedString
 	/**
-	 * Home
-	 */
-	home: () => LocalizedString
-	/**
 	 * Library
 	 */
 	library: () => LocalizedString
@@ -6241,10 +6229,6 @@ export type TranslationFunctions = {
 	 * Untitled
 	 */
 	untitled: () => LocalizedString
-	/**
-	 * All conversations
-	 */
-	allConversations: () => LocalizedString
 	/**
 	 * More options
 	 */

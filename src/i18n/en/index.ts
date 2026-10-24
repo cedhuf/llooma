@@ -447,7 +447,6 @@ const en = {
 
 	// Sidebar / navigation chrome
 	newChat: 'New chat',
-	home: 'Home',
 	library: 'Library',
 	noMatches: 'No matches',
 	personas: 'Personas',
@@ -512,7 +511,6 @@ const en = {
 	connected: 'Connected',
 	noServerConnected: 'No server connected',
 	untitled: 'Untitled',
-	allConversations: 'All conversations',
 	moreOptions: 'More options',
 	installApp: 'Install the app',
 	offerInstall: 'Offer to install the app now and then',

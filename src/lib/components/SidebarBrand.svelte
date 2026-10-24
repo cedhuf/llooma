@@ -35,25 +35,28 @@
 			? 'lg:w-16'
 			: 'lg:w-[var(--sidebar-w)]'}"
 	>
+		<!-- The mark keeps one box, size and colour in both states. Folded, it gives way
+		     to the sidebar icon under the pointer and opens the column. -->
 		{#if rail}
-			<!-- The mark until the pointer reaches it, then the sidebar icon it opens with. -->
 			<button
 				type="button"
 				onclick={onExpand}
 				aria-label={$LL.expandSidebar()}
 				title={$LL.expandSidebar()}
-				class="group text-muted hover:bg-shade-0 hover:text-active relative mx-auto flex h-10 w-10 items-center justify-center rounded-lg transition-colors"
+				class="group hover:bg-shade-0 relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors"
 			>
 				<Logo
-					class="h-8 w-8 shrink-0 transition-opacity group-hover:opacity-0 group-focus-visible:opacity-0"
+					class="h-7 w-7 transition-opacity group-hover:opacity-0 group-focus-visible:opacity-0"
 				/>
 				<PanelLeft
-					class="absolute h-5 w-5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+					class="text-muted group-hover:text-active absolute h-[18px] w-[18px] opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
 				/>
 			</button>
 		{:else}
-			<a href={resolve('/sessions')} class="flex min-w-0 items-center gap-2 px-1">
-				<Logo class="h-7 w-7 shrink-0" />
+			<a href={resolve('/sessions')} class="flex min-w-0 items-center">
+				<span class="flex h-10 w-10 shrink-0 items-center justify-center">
+					<Logo class="h-7 w-7" />
+				</span>
 				<span class="truncate text-base font-semibold tracking-tight">{APP_NAME}</span>
 			</a>
 			<div class="ml-auto flex shrink-0 items-center">

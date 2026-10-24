@@ -11,9 +11,11 @@
 
 	interface Props {
 		personas: Persona[];
+		/** The folded column: one avatar under the other, names in the tooltip. */
+		rail?: boolean;
 	}
 
-	let { personas }: Props = $props();
+	let { personas, rail = false }: Props = $props();
 
 	const pathname = $derived(page.url.pathname);
 	const isActive = (persona: Persona) =>
@@ -52,7 +54,10 @@
 {#if personas.length > 0}
 	<!-- One row that scrolls sideways once it is full. The vertical padding leaves
 	     room for the ring, drawn outside the avatar, which overflow would clip. -->
-	<div class="flex gap-1 overflow-x-auto px-2 pt-1 pb-2" style="scrollbar-width: none">
+	<div
+		class="flex gap-1 px-2 pt-1 pb-2 {rail ? 'flex-col items-center' : 'overflow-x-auto'}"
+		style="scrollbar-width: none"
+	>
 		{#each personas as persona (persona.id)}
 			{@const session = sessionOf(persona)}
 			<ContextMenu>
@@ -61,8 +66,11 @@
 						{...props}
 						type="button"
 						onclick={() => launch(persona)}
-						title={persona.tagline || persona.name}
-						class="persona-launcher group flex w-16 shrink-0 flex-col items-center gap-1 rounded-xl px-1 py-1.5 outline-none"
+						title={rail ? persona.name : persona.tagline || persona.name}
+						aria-label={persona.name}
+						class="persona-launcher group flex shrink-0 flex-col items-center gap-1 rounded-xl px-1 py-1.5 outline-none {rail
+							? ''
+							: 'w-16'}"
 					>
 						<span
 							class="ring-offset-shade-1 relative inline-flex rounded-full ring-offset-2 transition duration-150 group-hover:scale-105 motion-reduce:transition-none {isActive(
@@ -71,9 +79,10 @@
 								? 'ring-accent ring-2'
 								: 'group-hover:ring-shade-4 group-focus-visible:ring-accent group-hover:ring-2 group-focus-visible:ring-2'}"
 						>
-							<PersonaAvatar {persona} size={40} />
+							<PersonaAvatar {persona} size={rail ? 32 : 40} />
 						</span>
 						<span
+							hidden={rail}
 							class="w-full truncate text-center text-[11px] transition-colors {isActive(persona)
 								? 'text-active font-medium'
 								: 'text-muted group-hover:text-active'}"
