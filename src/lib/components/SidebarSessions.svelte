@@ -57,7 +57,7 @@
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`.
 	     Sideways overflow is hidden rather than scrolled, since while the column
 	     narrows this box is wider than what holds it. -->
-	<div class="w-full px-2 py-2 max-lg:w-[var(--drawer-w)] lg:w-96">
+	<div class="w-full px-2 py-2 max-lg:w-[var(--drawer-w)] lg:w-[var(--sidebar-w)]">
 		{#each groups as group (group.key)}
 			<div class="mb-2">
 				<p class="text-muted px-2.5 pt-2 pb-1 text-xs font-medium">

@@ -76,7 +76,7 @@
 	<div
 		class="w-full shrink-0 p-2 max-lg:w-[var(--drawer-w)] max-lg:pb-[max(0.5rem,var(--safe-bottom))] {rail
 			? 'lg:w-16'
-			: 'lg:w-96'}"
+			: 'lg:w-[var(--sidebar-w)]'}"
 	>
 		{#if rail}
 			<div class="flex justify-center">

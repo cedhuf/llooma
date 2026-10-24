@@ -77,6 +77,8 @@ export function effectiveSystemPrompt(
 	return [global, modelPrompt].filter(Boolean).join('\n\n');
 }
 
+export const SIDEBAR_WIDTH = { min: 240, default: 288, max: 480 } as const;
+
 export interface Settings {
 	models: Model[];
 	lastUsedModels: Model[];
@@ -196,6 +198,8 @@ export interface Settings {
 	backgroundImage: string;
 	userLanguage: Locales | null;
 	sidebarExpanded: boolean;
+	/** Pixels, the open desktop column. Dragged on its edge, reset by a double click. */
+	sidebarWidth: number;
 	/**
 	 * Send this account to the mobile-first interface under `/m`.
 	 *
@@ -334,6 +338,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	backgroundImage: '',
 	userLanguage: null,
 	sidebarExpanded: true,
+	sidebarWidth: SIDEBAR_WIDTH.default,
 	simplifiedMobileUI: true,
 	mobileDefaultApplied: false,
 	voiceInput: false,

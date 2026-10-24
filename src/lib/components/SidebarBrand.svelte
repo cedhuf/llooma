@@ -27,7 +27,7 @@
 	<div
 		class="flex h-full w-full shrink-0 items-center px-4 max-lg:w-[var(--drawer-w)] max-lg:pt-[var(--safe-top)] {rail
 			? 'lg:w-16'
-			: 'lg:w-96'}"
+			: 'lg:w-[var(--sidebar-w)]'}"
 	>
 		{#if rail}
 			<!-- The mark holds the corner at the same size it does at full width, so the

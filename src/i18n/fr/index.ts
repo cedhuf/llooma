@@ -713,6 +713,7 @@ const fr = extendDictionary(en, {
 		'Historique complet des conversations, pièces jointes et réglages personnalisés des modèles',
 	knowledgeDescription: 'Ensemble de la base de connaissances',
 	expandSidebar: 'Déplier la barre latérale',
+	resizeSidebar: 'Redimensionner la barre latérale',
 	collapseSidebar: 'Replier la barre latérale',
 	profile: 'Profil',
 	expandPrompt: 'Agrandir la zone de saisie',

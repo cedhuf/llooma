@@ -1502,6 +1502,10 @@ type RootTranslation = {
 	 */
 	expandSidebar: string
 	/**
+	 * R​e​s​i​z​e​ ​t​h​e​ ​s​i​d​e​b​a​r
+	 */
+	resizeSidebar: string
+	/**
 	 * C​o​l​l​a​p​s​e​ ​s​i​d​e​b​a​r
 	 */
 	collapseSidebar: string
@@ -5847,6 +5851,10 @@ export type TranslationFunctions = {
 	 * Expand sidebar
 	 */
 	expandSidebar: () => LocalizedString
+	/**
+	 * Resize the sidebar
+	 */
+	resizeSidebar: () => LocalizedString
 	/**
 	 * Collapse sidebar
 	 */

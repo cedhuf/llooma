@@ -31,7 +31,7 @@
 
 <div class="surface-column shrink-0">
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
-	<div class="w-full shrink-0 max-lg:w-[var(--drawer-w)] lg:w-96">
+	<div class="w-full shrink-0 max-lg:w-[var(--drawer-w)] lg:w-[var(--sidebar-w)]">
 		<div class="flex flex-col gap-0.5 px-2 pt-1 pb-2">
 			<button type="button" onclick={onNewChat} class="{item} {idle} font-medium">
 				<SquarePen class="text-accent h-4 w-4 shrink-0" />

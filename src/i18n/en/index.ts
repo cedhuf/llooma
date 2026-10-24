@@ -402,6 +402,7 @@ const en = {
 	sessionsDescription: 'Entire session history, attachments and custom model settings',
 	knowledgeDescription: 'Entire knowledge base',
 	expandSidebar: 'Expand sidebar',
+	resizeSidebar: 'Resize the sidebar',
 	collapseSidebar: 'Collapse sidebar',
 	expandPrompt: 'Expand the prompt',
 	collapsePrompt: 'Collapse the prompt',

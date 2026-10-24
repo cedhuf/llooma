@@ -6,6 +6,7 @@
 	import { goto } from '$app/navigation';
 	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas } from '$lib/personas';
+	import { SIDEBAR_WIDTH } from '$lib/settings';
 	import { Sitemap } from '$lib/sitemap';
 	import { mobileDrawerOpen } from '$lib/stores/sidebar';
 
@@ -57,6 +58,36 @@
 		if (isMobile) mobileDrawerOpen.set(false);
 		else $settingsStore.sidebarExpanded = false;
 	}
+	// Followed locally while dragging and saved once on release: the settings go to
+	// the server, which should not hear about every pixel.
+	let dragWidth = $state<number | null>(null);
+	const width = $derived(dragWidth ?? $settingsStore.sidebarWidth ?? SIDEBAR_WIDTH.default);
+	const clampWidth = (px: number) =>
+		Math.round(Math.min(SIDEBAR_WIDTH.max, Math.max(SIDEBAR_WIDTH.min, px)));
+
+	let navEl: HTMLElement | undefined = $state();
+	function startResize(event: PointerEvent) {
+		if (event.button !== 0 || !navEl) return;
+		const handle = event.currentTarget as HTMLElement;
+		handle.setPointerCapture(event.pointerId);
+		const left = navEl.getBoundingClientRect().left;
+		dragWidth = width;
+		const move = (e: PointerEvent) => (dragWidth = clampWidth(e.clientX - left));
+		const end = () => {
+			handle.removeEventListener('pointermove', move);
+			if (dragWidth !== null) $settingsStore.sidebarWidth = dragWidth;
+			dragWidth = null;
+		};
+		handle.addEventListener('pointermove', move);
+		handle.addEventListener('lostpointercapture', end, { once: true });
+	}
+	function resizeByKey(event: KeyboardEvent) {
+		const step = event.key === 'ArrowLeft' ? -16 : event.key === 'ArrowRight' ? 16 : 0;
+		if (!step) return;
+		event.preventDefault();
+		$settingsStore.sidebarWidth = clampWidth(width + step);
+	}
+
 	function newChat() {
 		goto(generateNewUrl(Sitemap.SESSIONS));
 	}
@@ -77,8 +108,11 @@
      Mobile: a fixed drawer pinned under the page, which the page slides aside to
      uncover. Desktop: an in-flow rail or full column. -->
 <nav
-	class="fixed inset-y-0 left-0 h-full w-full shrink-0 transition-[width] duration-300 ease-out motion-reduce:transition-none max-lg:pl-[var(--safe-left)] lg:relative lg:z-30 lg:max-w-none lg:translate-x-0
-		{$settingsStore.sidebarExpanded ? 'lg:w-96' : 'lg:w-16'}"
+	bind:this={navEl}
+	style="--sidebar-w: {width}px"
+	class="fixed inset-y-0 left-0 h-full w-full shrink-0 ease-out motion-reduce:transition-none max-lg:pl-[var(--safe-left)] lg:relative lg:z-30 lg:max-w-none lg:translate-x-0
+		{dragWidth === null ? 'transition-[width] duration-300' : 'select-none'}
+		{$settingsStore.sidebarExpanded ? 'lg:w-[var(--sidebar-w)]' : 'lg:w-16'}"
 	aria-label="Main navigation"
 	data-testid="sidebar"
 >
@@ -112,6 +146,32 @@
 			<SidebarFooter rail={showRail} />
 		</div>
 	</div>
+
+	<!-- Over the border, wider than it so it can be caught. A focusable separator
+	     is a widget in ARIA, which Svelte's check does not know. -->
+	{#if !showRail && !isMobile}
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
+		<div
+			role="separator"
+			aria-orientation="vertical"
+			aria-label={$LL.resizeSidebar()}
+			aria-valuemin={SIDEBAR_WIDTH.min}
+			aria-valuemax={SIDEBAR_WIDTH.max}
+			aria-valuenow={width}
+			tabindex="0"
+			onpointerdown={startResize}
+			ondblclick={() => ($settingsStore.sidebarWidth = SIDEBAR_WIDTH.default)}
+			onkeydown={resizeByKey}
+			class="group absolute inset-y-0 -right-1.5 z-40 w-3 cursor-col-resize outline-none"
+		>
+			<span
+				class="bg-accent absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 {dragWidth !==
+				null
+					? 'opacity-100'
+					: ''}"
+			></span>
+		</div>
+	{/if}
 
 	<!-- Astride the edge, level with the brand: half belongs to the column and half
 	     to what is beside it, which is the whole of what it does. Its position comes
