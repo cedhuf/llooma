@@ -82,6 +82,18 @@
 			<ThemePicker />
 		{/if}
 
+		<SettingsField label={$LL.readingFont()}>
+			<Select
+				id="reading-font"
+				name="reading-font"
+				bind:value={$settingsStore.readingFont}
+				options={[
+					{ value: 'interface', label: $LL.readingFontInterface() },
+					{ value: 'serif', label: $LL.readingFontSerif() }
+				]}
+			/>
+		</SettingsField>
+
 		<!-- Set apart from the theme picker: same section, different question. -->
 		<div class="mt-2">
 			<FieldCheckbox

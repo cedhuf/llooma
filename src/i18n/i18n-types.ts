@@ -3575,6 +3575,18 @@ type RootTranslation = {
 	 */
 	pinPersonasInSidebar: string
 	/**
+	 * A​n​s​w​e​r​s​ ​f​o​n​t
+	 */
+	readingFont: string
+	/**
+	 * I​n​t​e​r​f​a​c​e​ ​(​I​n​t​e​r​)
+	 */
+	readingFontInterface: string
+	/**
+	 * S​e​r​i​f​ ​(​S​o​u​r​c​e​ ​S​e​r​i​f​)
+	 */
+	readingFontSerif: string
+	/**
 	 * S​h​o​w​ ​p​e​r​s​o​n​a​s​ ​a​s
 	 */
 	sidebarPersonasStyle: string
@@ -7881,6 +7893,18 @@ export type TranslationFunctions = {
 	 * Pin personas you talk to at the top of the sidebar
 	 */
 	pinPersonasInSidebar: () => LocalizedString
+	/**
+	 * Answers font
+	 */
+	readingFont: () => LocalizedString
+	/**
+	 * Interface (Inter)
+	 */
+	readingFontInterface: () => LocalizedString
+	/**
+	 * Serif (Source Serif)
+	 */
+	readingFontSerif: () => LocalizedString
 	/**
 	 * Show personas as
 	 */

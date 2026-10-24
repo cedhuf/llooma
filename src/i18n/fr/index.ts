@@ -1022,6 +1022,9 @@ const fr = extendDictionary(en, {
 	fadeCompactedMessagesHelp:
 		'Les messages compactés restent affichés mais ne sont plus envoyés au modèle. Les estomper montre où commence le contexte actif ; survolez-en un pour le lire normalement.',
 	pinPersonasInSidebar: 'Épingler les personas avec qui vous discutez en haut de la barre latérale',
+	readingFont: 'Police des réponses',
+	readingFontInterface: 'Interface (Inter)',
+	readingFontSerif: 'Serif (Source Serif)',
 	sidebarPersonasStyle: 'Afficher les personas',
 	sidebarPersonasStack: 'En pile d’avatars',
 	sidebarPersonasList: 'Une ligne chacune',

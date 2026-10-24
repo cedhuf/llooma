@@ -244,11 +244,9 @@
 
 	/* An answer is set in the reading face; its reasoning, a compaction summary and
 	   tables stay in the interface's. */
-	/* Scaled to Inter's x-height, so an answer and the message it answers read at
-	   the same size whatever face the answer is set in. */
 	:global(.article--assistant) .markdown {
 		font-family: var(--font-reading);
-		font-size-adjust: 0.546;
+		font-size-adjust: var(--reading-size-adjust, none);
 	}
 
 	:global(.article--reasoning) .markdown,

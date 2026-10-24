@@ -258,6 +258,10 @@
 		const strength = ($settingsStore.surfaceTransparencyLevel ?? 50) / 50;
 		document.documentElement.style.setProperty('--surface-strength', String(on ? strength : 0));
 		document.documentElement.setAttribute('data-transparency', on ? 'on' : 'off');
+		document.documentElement.setAttribute(
+			'data-reading-font',
+			$settingsStore.readingFont === 'serif' ? 'serif' : 'interface'
+		);
 
 		// Drives the wallpaper's layer and the shadow that makes the columns read as
 		// panels on a picture rather than holes cut in it.

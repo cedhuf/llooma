@@ -4,7 +4,7 @@
 	--font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
 	/* What an answer is read in. */
-	--font-reading: 'Source Serif 4', ui-serif, Georgia, serif;
+	--font-reading: var(--font-sans);
 
 	/* The reading scale: an answer's text, and the asides around it (reasoning, a
 	   compaction summary), the aside a step larger from the `md` breakpoint up. */
@@ -32,6 +32,13 @@
 	--color-warning-muted: hsl(var(--hsl-warning-muted));
 	--color-negative: hsl(var(--hsl-negative));
 	--color-negative-muted: hsl(var(--hsl-negative-muted));
+}
+
+/* The serif a reader can choose for answers in the settings. Scaled to Inter's
+   x-height, so an answer reads at the size of the message it answers. */
+:root[data-reading-font='serif'] {
+	--font-reading: 'Source Serif 4', ui-serif, Georgia, serif;
+	--reading-size-adjust: 0.546;
 }
 
 @layer base {
