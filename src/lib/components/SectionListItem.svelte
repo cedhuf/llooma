@@ -120,11 +120,11 @@
 							onclick={() => void toggleSessionPin(id)}
 							title={pinned ? $LL.unpin() : $LL.pin()}
 							aria-label={pinned ? $LL.unpin() : $LL.pin()}
-							class="px-1.5 py-1 transition-colors {pinned
+							class="rounded-md p-1 transition-colors {pinned
 								? 'text-accent'
 								: 'text-muted hover:text-active hidden group-focus-within:block group-hover:block'}"
 						>
-							<Pin class="base-icon {pinned ? 'fill-accent' : ''}" />
+							<Pin class="h-3.5 w-3.5 {pinned ? 'fill-accent' : ''}" />
 						</button>
 					{/if}
 
