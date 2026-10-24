@@ -409,7 +409,7 @@
 			<ImageDrop
 				label={$LL.dropImagesHere()}
 				onImages={(images) => (attachments = [...attachments, ...images])}
-				class="surface-floating border-shade-3 focus-within:border-shade-5 overflow-hidden rounded-3xl border shadow-lg transition-[border-color,height] duration-150 ease-out"
+				class="surface-floating border-shade-3 focus-within:border-shade-5 overflow-hidden rounded-[1.125rem] border shadow-lg transition-[border-color,height] duration-150 ease-out"
 				style={cardHeight ? `height: ${cardHeight + 2}px` : undefined}
 			>
 				<div bind:offsetHeight={cardHeight}>
