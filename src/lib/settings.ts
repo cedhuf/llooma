@@ -77,7 +77,7 @@ export function effectiveSystemPrompt(
 	return [global, modelPrompt].filter(Boolean).join('\n\n');
 }
 
-export const SIDEBAR_WIDTH = { min: 240, default: 288, max: 480 } as const;
+export const SIDEBAR_WIDTH = { min: 240, default: 340, max: 480 } as const;
 
 export interface Settings {
 	models: Model[];
