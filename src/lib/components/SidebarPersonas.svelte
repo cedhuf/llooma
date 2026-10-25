@@ -67,8 +67,21 @@
 	}
 </script>
 
-{#snippet launcher(persona: Persona)}
+<!-- What a launcher's right-click offers, once it has a conversation. -->
+{#snippet personaMenu(persona: Persona)}
 	{@const session = sessionOf(persona)}
+	{#if session}
+		<SessionMenu
+			id={session.id}
+			pinned={session.pinned}
+			archived={session.archived}
+			onClose={() => endConversation(persona)}
+			onDelete={() => deleteConversation(persona)}
+		/>
+	{/if}
+{/snippet}
+
+{#snippet launcher(persona: Persona)}
 	<ContextMenu>
 		{#snippet trigger({ props })}
 			<button
@@ -92,15 +105,7 @@
 			</button>
 		{/snippet}
 
-		{#if session}
-			<SessionMenu
-				id={session.id}
-				pinned={session.pinned}
-				archived={session.archived}
-				onClose={() => endConversation(persona)}
-				onDelete={() => deleteConversation(persona)}
-			/>
-		{/if}
+		{@render personaMenu(persona)}
 	</ContextMenu>
 {/snippet}
 
@@ -149,7 +154,6 @@
 				     the click rather than after. -->
 				<div class="flex max-h-[60vh] flex-col gap-0.5 overflow-y-auto">
 					{#each personas as persona (persona.id)}
-						{@const session = sessionOf(persona)}
 						<ContextMenu>
 							{#snippet trigger({ props })}
 								<button
@@ -166,9 +170,9 @@
 									<span class="flex min-w-0 flex-1 flex-col">
 										<span class="flex items-baseline gap-2">
 											<span class="text-active truncate text-sm font-medium">{persona.name}</span>
-											{#if session?.updatedAt}
+											{#if sessionOf(persona)?.updatedAt}
 												<span class="text-muted ml-auto shrink-0 text-[11px]">
-													{formatTimestampToNow(session.updatedAt)}
+													{formatTimestampToNow(sessionOf(persona)?.updatedAt ?? '')}
 												</span>
 											{/if}
 										</span>
@@ -179,15 +183,7 @@
 								</button>
 							{/snippet}
 
-							{#if session}
-								<SessionMenu
-									id={session.id}
-									pinned={session.pinned}
-									archived={session.archived}
-									onClose={() => endConversation(persona)}
-									onDelete={() => deleteConversation(persona)}
-								/>
-							{/if}
+							{@render personaMenu(persona)}
 						</ContextMenu>
 					{/each}
 				</div>
@@ -200,7 +196,6 @@
 			<p class="text-muted px-2.5 pt-2 pb-1 text-xs font-medium">{$LL.personas()}</p>
 			<div class="flex flex-col gap-0.5">
 				{#each listed as persona (persona.id)}
-					{@const session = sessionOf(persona)}
 					<ContextMenu>
 						{#snippet trigger({ props })}
 							<button
@@ -223,15 +218,7 @@
 							</button>
 						{/snippet}
 
-						{#if session}
-							<SessionMenu
-								id={session.id}
-								pinned={session.pinned}
-								archived={session.archived}
-								onClose={() => endConversation(persona)}
-								onDelete={() => deleteConversation(persona)}
-							/>
-						{/if}
+						{@render personaMenu(persona)}
 					</ContextMenu>
 				{/each}
 			</div>

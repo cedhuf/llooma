@@ -509,7 +509,6 @@ const en = {
 	connected: 'Connected',
 	noServerConnected: 'No server connected',
 	untitled: 'Untitled',
-	moreOptions: 'More options',
 	installApp: 'Install the app',
 	offerInstall: 'Offer to install the app now and then',
 	offerInstallHelp:
@@ -1131,7 +1130,6 @@ const en = {
 	launch: 'Launch',
 	searchConversations: 'Search conversations',
 	searchConversationsPlaceholder: 'Search in every conversation...',
-	searchAllConversations: 'Search "{query:string}" in every conversation',
 	searchMatches: '{count:number} {{match|matches}}',
 	searchNavigate: 'Navigate',
 	searchOpen: 'Open',

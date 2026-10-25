@@ -507,7 +507,6 @@ const fr = extendDictionary(en, {
 	connected: 'Connecté',
 	noServerConnected: 'Aucun serveur connecté',
 	untitled: 'Sans titre',
-	moreOptions: 'Plus d’options',
 	installApp: 'Installer l’application',
 	offerInstall: 'Proposer d’installer l’application de temps en temps',
 	offerInstallHelp:
@@ -1161,7 +1160,6 @@ const fr = extendDictionary(en, {
 	launch: 'Lancer',
 	searchConversations: 'Rechercher dans les conversations',
 	searchConversationsPlaceholder: 'Rechercher dans toutes les conversations...',
-	searchAllConversations: 'Rechercher « {query:string} » dans toutes les conversations',
 	searchMatches: '{count:number} {{occurrence|occurrences}}',
 	searchNavigate: 'Parcourir',
 	searchOpen: 'Ouvrir',

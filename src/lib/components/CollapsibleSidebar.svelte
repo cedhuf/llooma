@@ -5,7 +5,7 @@
 	import { conversedPersonas } from '$lib/personas';
 	import { SIDEBAR_WIDTH } from '$lib/settings';
 	import { Sitemap } from '$lib/sitemap';
-	import { isDesktop, mobileDrawerOpen, setSidebarOpen } from '$lib/stores/sidebar';
+	import { isDesktop, mobileDrawerOpen } from '$lib/stores/sidebar';
 
 	import { generateNewUrl } from './ButtonNew';
 	import SidebarActions from './SidebarActions.svelte';

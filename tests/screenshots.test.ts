@@ -960,8 +960,7 @@ test.describe('screenshots', () => {
 		for (const themeMode of ['light', 'dark'] as const) {
 			const row: string[] = [];
 			for (const themeStyle of THEME_STYLES) {
-				// The flat bar, not the floating pill, which half-covers a line of text.
-				await configure(page, { themeStyle, themeMode, floatingChatHeader: false });
+				await configure(page, { themeStyle, themeMode });
 				await page.goto('/sessions/ab12cd');
 				await expect(page.locator('html')).toHaveAttribute('data-color-theme', themeMode);
 				await expect(page.getByText('Is self-hosting worth it')).toBeVisible();

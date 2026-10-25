@@ -39,9 +39,6 @@
 	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
 	const onImages = $derived(pathname.startsWith('/images'));
 
-	const item = sidebarItem;
-	const idle = sidebarItemIdle;
-	const current = sidebarItemCurrent;
 	const label = $derived(rail ? 'sr-only' : 'truncate');
 </script>
 
@@ -55,7 +52,7 @@
 					type="button"
 					onclick={() => openSearch()}
 					title={$LL.search()}
-					class="{item} {idle}"
+					class="{sidebarItem} {sidebarItemIdle}"
 				>
 					<Search class="text-muted h-4 w-4 shrink-0" />
 					<span class={label}>{$LL.search()}</span>
@@ -68,7 +65,7 @@
 								{...props}
 								type="button"
 								title={$LL.recentSessions()}
-								class="{item} {recentOpen ? current : idle}"
+								class="{sidebarItem} {recentOpen ? sidebarItemCurrent : sidebarItemIdle}"
 							>
 								<MessagesSquare class="text-muted h-4 w-4 shrink-0" />
 								<span class={label}>{$LL.recentSessions()}</span>
@@ -85,8 +82,8 @@
 								class="block truncate rounded-lg px-2 py-1.5 text-sm transition-colors {pathname.includes(
 									session.id
 								)
-									? current
-									: idle}"
+									? sidebarItemCurrent
+									: sidebarItemIdle}"
 							>
 								{resolveSessionTitle(session) || $LL.untitled()}
 							</a>
@@ -98,7 +95,7 @@
 			<a
 				href={resolve('/library')}
 				title={rail ? $LL.library() : undefined}
-				class="{item} {onLibrary ? current : idle}"
+				class="{sidebarItem} {onLibrary ? sidebarItemCurrent : sidebarItemIdle}"
 			>
 				<Library class="text-muted h-4 w-4 shrink-0" />
 				<span class={label}>{$LL.library()}</span>
@@ -108,7 +105,7 @@
 				<a
 					href={resolve('/images')}
 					title={rail ? $LL.images() : undefined}
-					class="{item} {onImages ? current : idle}"
+					class="{sidebarItem} {onImages ? sidebarItemCurrent : sidebarItemIdle}"
 				>
 					<ImageIcon class="text-muted h-4 w-4 shrink-0" />
 					<span class={label}>{$LL.images()}</span>

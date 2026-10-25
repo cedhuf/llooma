@@ -1887,10 +1887,6 @@ type RootTranslation = {
 	 */
 	untitled: string
 	/**
-	 * M​o​r​e​ ​o​p​t​i​o​n​s
-	 */
-	moreOptions: string
-	/**
 	 * I​n​s​t​a​l​l​ ​t​h​e​ ​a​p​p
 	 */
 	installApp: string
@@ -4057,11 +4053,6 @@ type RootTranslation = {
 	 * S​e​a​r​c​h​ ​i​n​ ​e​v​e​r​y​ ​c​o​n​v​e​r​s​a​t​i​o​n​.​.​.
 	 */
 	searchConversationsPlaceholder: string
-	/**
-	 * S​e​a​r​c​h​ ​"​{​q​u​e​r​y​}​"​ ​i​n​ ​e​v​e​r​y​ ​c​o​n​v​e​r​s​a​t​i​o​n
-	 * @param {string} query
-	 */
-	searchAllConversations: RequiredParams<'query'>
 	/**
 	 * {​c​o​u​n​t​}​ ​{​{​m​a​t​c​h​|​m​a​t​c​h​e​s​}​}
 	 * @param {number} count
@@ -6230,10 +6221,6 @@ export type TranslationFunctions = {
 	 */
 	untitled: () => LocalizedString
 	/**
-	 * More options
-	 */
-	moreOptions: () => LocalizedString
-	/**
 	 * Install the app
 	 */
 	installApp: () => LocalizedString
@@ -8357,10 +8344,6 @@ export type TranslationFunctions = {
 	 * Search in every conversation...
 	 */
 	searchConversationsPlaceholder: () => LocalizedString
-	/**
-	 * Search "{query}" in every conversation
-	 */
-	searchAllConversations: (arg: { query: string }) => LocalizedString
 	/**
 	 * {count} {{match|matches}}
 	 */
