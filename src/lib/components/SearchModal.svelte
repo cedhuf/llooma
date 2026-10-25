@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { CornerDownLeft, Layers, Search, X } from '@lucide/svelte';
+	import { Command } from 'bits-ui';
 	import { tick } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
@@ -26,23 +27,13 @@
 	let results = $state<ConversationResult[]>([]);
 	let loading = $state(false);
 	let failed = $state(false);
-	let selected = $state(0);
-	let input = $state<HTMLInputElement>();
-	let list = $state<HTMLDivElement>();
-
-	/** Every match as one flat sequence, so the arrows move between passages rather than conversations: the heading is a grouping, not a stop. */
-	const rows = $derived(
-		results.flatMap((result, resultIndex) =>
-			result.matches.map((match, matchIndex) => ({ result, match, resultIndex, matchIndex }))
-		)
-	);
+	let input = $state<HTMLInputElement | null>(null);
 
 	// Opening seeds from the sidebar and focuses; closing forgets, so the next open
 	// is a fresh search rather than a stale answer.
 	$effect(() => {
 		if (!open) return;
 		query = initialQuery;
-		selected = 0;
 		void tick().then(() => input?.focus());
 	});
 
@@ -81,63 +72,37 @@
 				failed = true;
 			} finally {
 				loading = false;
-				selected = 0;
 			}
 		}, DEBOUNCE_MS);
 
 		return () => clearTimeout(timer);
 	});
 
-	async function move(delta: number) {
-		if (!rows.length) return;
-		selected = (selected + delta + rows.length) % rows.length;
-		await tick();
-		list
-			?.querySelector<HTMLElement>('[data-selected="true"]')
-			?.scrollIntoView({ block: 'nearest' });
-	}
-
-	function openRow(index: number) {
-		const row = rows[index];
-		if (!row) return;
+	/** The arrows move between passages rather than conversations: the heading is a grouping, not a stop. */
+	function openMatch(sessionId: string, messageIndex: number) {
 		open = false;
 		// The message index rides in the URL, so the conversation scrolls to the passage
 		// that was chosen rather than to the conversation.
-		const target = new URL(
-			resolve('/sessions/[id]', { id: row.result.sessionId }),
-			window.location.origin
-		);
-		target.searchParams.set('m', String(row.match.messageIndex));
+		const target = new URL(resolve('/sessions/[id]', { id: sessionId }), window.location.origin);
+		target.searchParams.set('m', String(messageIndex));
 		// The route is resolved above; the rule only sees that in a literal argument and
 		// cannot follow a URL carrying a query parameter.
 		// eslint-disable-next-line svelte/no-navigation-without-resolve
 		void goto(target);
 	}
-
-	function onKeydown(event: KeyboardEvent) {
-		if (event.key === 'ArrowDown') {
-			event.preventDefault();
-			void move(1);
-		} else if (event.key === 'ArrowUp') {
-			event.preventDefault();
-			void move(-1);
-		} else if (event.key === 'Enter') {
-			event.preventDefault();
-			openRow(selected);
-		}
-	}
 </script>
 
 <Modal bind:open closeButton={false}>
-	<div class="flex h-full w-full flex-col">
+	<!-- The search runs on the server, so Command only keeps the keyboard and the
+	     highlight: `shouldFilter` off, the results arrive already chosen. -->
+	<Command.Root shouldFilter={false} loop class="flex h-full w-full flex-col">
 		<!-- The field is the title: a search dialog opening with anything else at the
 		     top makes you look for where to type. -->
 		<div class="border-shade-3 flex items-center gap-3 border-b px-4 py-3">
 			<Search class="text-muted h-4 w-4 shrink-0" />
-			<input
-				bind:this={input}
+			<Command.Input
+				bind:ref={input}
 				bind:value={query}
-				onkeydown={onKeydown}
 				type="text"
 				autocomplete="off"
 				spellcheck="false"
@@ -177,62 +142,56 @@
 			</button>
 		</div>
 
-		<div bind:this={list} class="flex-1 overflow-y-auto px-2 py-2" role="listbox" tabindex="-1">
+		<Command.List class="flex-1 overflow-y-auto px-2 py-2">
 			{#if !query.trim()}
 				<p class="text-muted px-3 py-8 text-center text-sm">{$LL.searchStart()}</p>
 			{:else if failed}
 				<p class="text-muted px-3 py-8 text-center text-sm">{$LL.genericError()}</p>
-			{:else if !loading && !rows.length}
+			{:else if !loading && !results.length}
 				<p class="text-muted px-3 py-8 text-center text-sm">{$LL.searchEmpty()}</p>
 			{:else}
-				{#each results as result, resultIndex (result.sessionId)}
-					<!-- Heading, then its passages: title and date on one line, so "which
+				{#each results as result (result.sessionId)}
+					<Command.Group value={result.sessionId} class="mt-3 first:mt-0">
+						<!-- Heading, then its passages: title and date on one line, so "which
 					     conversation, and when" is answered before the eye reaches the excerpts. -->
-					<div class="mt-3 mb-1 flex items-baseline gap-3 px-3 first:mt-0">
-						<span class="truncate text-sm font-semibold">
-							{result.title || $LL.untitled()}
-						</span>
-						<span class="text-muted ml-auto shrink-0 text-xs tabular-nums">
-							{result.updatedAt ? formatTimestampToNow(result.updatedAt) : ''}
-						</span>
-						<span class="text-muted shrink-0 text-xs">
-							{$LL.searchMatches({ count: result.matches.length })}
-						</span>
-					</div>
+						<Command.GroupHeading class="mb-1 flex items-baseline gap-3 px-3">
+							<span class="truncate text-sm font-semibold">
+								{result.title || $LL.untitled()}
+							</span>
+							<span class="text-muted ml-auto shrink-0 text-xs tabular-nums">
+								{result.updatedAt ? formatTimestampToNow(result.updatedAt) : ''}
+							</span>
+							<span class="text-muted shrink-0 text-xs">
+								{$LL.searchMatches({ count: result.matches.length })}
+							</span>
+						</Command.GroupHeading>
 
-					{#each result.matches as match, matchIndex (match.messageIndex)}
-						{@const index = rows.findIndex(
-							(row) => row.resultIndex === resultIndex && row.matchIndex === matchIndex
-						)}
-						<button
-							type="button"
-							role="option"
-							aria-selected={index === selected}
-							data-selected={index === selected}
-							onclick={() => openRow(index)}
-							onmouseenter={() => (selected = index)}
-							class="flex w-full gap-2 rounded-md px-3 py-1.5 text-left text-sm leading-relaxed transition-colors {index ===
-							selected
-								? 'bg-shade-2'
-								: 'hover:bg-shade-2/60'}"
-						>
-							<span class="text-muted w-16 shrink-0 truncate pt-0.5 text-[11px] uppercase">
-								{match.role === 'user' ? $LL.you() : $LL.assistant()}
-							</span>
-							<span class="text-muted line-clamp-2 min-w-0 flex-1">
-								<!-- The excerpt is message content, so it is only ever text nodes; the marks
+						<Command.GroupItems>
+							{#each result.matches as match (match.messageIndex)}
+								<Command.Item
+									value="{result.sessionId}:{match.messageIndex}"
+									onSelect={() => openMatch(result.sessionId, match.messageIndex)}
+									class="data-selected:bg-shade-2 flex w-full cursor-pointer gap-2 rounded-md px-3 py-1.5 text-left text-sm leading-relaxed transition-colors"
+								>
+									<span class="text-muted w-16 shrink-0 truncate pt-0.5 text-[11px] uppercase">
+										{match.role === 'user' ? $LL.you() : $LL.assistant()}
+									</span>
+									<span class="text-muted line-clamp-2 min-w-0 flex-1">
+										<!-- The excerpt is message content, so it is only ever text nodes; the marks
 								     come from the split, never from parsed markup. -->
-								{#each splitExcerpt(match.excerpt) as segment, segmentIndex (segmentIndex)}
-									{#if segment.match}
-										<mark class="text-active rounded-sm bg-yellow-400/30">{segment.text}</mark>
-									{:else}{segment.text}{/if}
-								{/each}
-							</span>
-						</button>
-					{/each}
+										{#each splitExcerpt(match.excerpt) as segment, segmentIndex (segmentIndex)}
+											{#if segment.match}
+												<mark class="text-active rounded-sm bg-yellow-400/30">{segment.text}</mark>
+											{:else}{segment.text}{/if}
+										{/each}
+									</span>
+								</Command.Item>
+							{/each}
+						</Command.GroupItems>
+					</Command.Group>
 				{/each}
 			{/if}
-		</div>
+		</Command.List>
 
 		<div
 			class="border-shade-3 text-muted flex items-center gap-4 border-t px-4 py-2 text-[11px]"
@@ -245,5 +204,5 @@
 			</span>
 			<span class="flex items-center gap-1"><Kbd>esc</Kbd>{$LL.searchClose()}</span>
 		</div>
-	</div>
+	</Command.Root>
 </Modal>
