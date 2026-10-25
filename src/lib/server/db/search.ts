@@ -1,5 +1,5 @@
 import { BOUNDARY_NOTE_KINDS } from '$lib/chat/notes';
-import { MATCH_CLOSE, MATCH_OPEN } from '$lib/conversationSearch';
+import { MATCH_CLOSE, MATCH_OPEN, plainExcerpt } from '$lib/conversationSearch';
 import type { Session } from '$lib/sessions';
 import { resolveSessionTitle } from '$lib/sessionShape';
 
@@ -122,7 +122,7 @@ export function searchSessions(userId: string, query: string, limit = 100): Sear
 		sessionId: row.session_id,
 		messageIndex: row.message_index,
 		role: row.role,
-		excerpt: row.excerpt
+		excerpt: plainExcerpt(row.excerpt)
 	}));
 }
 
