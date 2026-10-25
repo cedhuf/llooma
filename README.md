@@ -12,17 +12,12 @@ This is a fork of [Hollama](https://github.com/fmaclen/hollama) by [fmaclen](htt
 
 </div>
 
-> [!IMPORTANT]
-> **Local mode is gone**. If you were using it, export a backup from _Settings → Data → Backup & restore_ **before** you update, and restore it afterwards.
->
-> More details on why in [Discussions](https://github.com/cedhuf/llooma/discussions).
-
 ![Llooma on a desktop, with the phone interface beside it](static/screenshots/hero.png)
 
 > [!WARNING]
-> This project is an **early preview**. Not made for production use. Expect breaking changes, unfinished features, and rough edges. You are warned 😅
+> This project is an **early preview**. Expect breaking changes, unfinished features, and rough edges 😅
 >
-> I'm not a professional developer and I'm still learning. I've made use of AI assistance while trying to remain responsible. Any audit, suggestion or PR is more than welcome. If AI is not your thing, you can check the original project instead, or check [Similar projects].
+> I'm not a professional developer and I'm still learning. I've made use of AI assistance while trying to remain responsible.
 
 ## What it is
 
@@ -44,9 +39,13 @@ chat with them from an app that is yours.
   where it was. Switch it off in one click if you would rather nothing left the tab.
 - **Compaction.** When a conversation gets too long, `/compact` replaces what was said with a
   structured summary so it keeps fitting. Nothing is deleted, and one click puts it all back.
-- **Bot integrations.** Connect a bot account on a [Chatto](https://chatto.run/) server and
-  mention it in a room: your model answers, with your prompt and your tools. Nothing is stored on
-  the Llooma side, and nothing has to reach your instance from the outside.
+- **Bot integrations.** Connect a bot account on a [Chatto](https://github.com/chattocorp/chatto)
+  server and mention it in a room: your model answers, with your prompt and your tools, in a
+  conversation several people share. Nothing is stored on the Llooma side, and nothing has to reach
+  your instance from the outside.
+- **MCP tools.** Point Llooma at an MCP server over HTTP and its tools are offered to the model,
+  in your conversations and to your bots. [MCP Yard](https://github.com/cedhuf/mcpyard), a small hub
+  written alongside Llooma, puts all your MCP servers behind one address with a key per client.
 - **Full-text search** across every conversation, answering with the passage itself.
 - **Six themes**, each with a light and a dark ramp, English and French, installable as a PWA.
 
