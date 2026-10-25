@@ -719,6 +719,25 @@ const migrations: Migration[] = [
 				);
 			}
 		}
+	},
+	{
+		version: 26,
+		// Settings dropped from the interface: the sidebar's compact header and the
+		// floating conversation bar. Settings load over their defaults, so a key
+		// left in the stored copy would ride along in every save for good.
+		run: (db) => {
+			const rows = db.prepare('SELECT user_id, data FROM settings').all() as {
+				user_id: string;
+				data: string;
+			}[];
+			const update = db.prepare('UPDATE settings SET data = ? WHERE user_id = ?');
+			for (const row of rows) {
+				const settings = JSON.parse(row.data);
+				delete settings.compactSidebarHeader;
+				delete settings.floatingChatHeader;
+				update.run(JSON.stringify(settings), row.user_id);
+			}
+		}
 	}
 ];
 
