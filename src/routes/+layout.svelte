@@ -456,29 +456,33 @@
 	     The wallpaper is painted by this box's own backdrop layer and handed over as
 	     a custom property: a `filter` here would blur the application with it. -->
 		<div
-			class="app-shell bg-shade-1 lg:bg-shade-2 relative flex w-full overflow-hidden"
+			class="app-shell bg-shade-1 lg:bg-shade-3 relative flex w-full overflow-hidden lg:p-2"
 			style={wallpaper ? `--wallpaper: ${wallpaper}` : ''}
 		>
-			<CollapsibleSidebar />
-			<!-- The page runs the full height of the display. It owes the safe areas
+			<!-- On a desktop the sidebar and the page sit together in one rounded window,
+			     inset from the edges of the display. -->
+			<div class="relative flex min-w-0 flex-1 lg:overflow-hidden lg:rounded-xl lg:shadow-sm">
+				<CollapsibleSidebar />
+				<!-- The page runs the full height of the display. It owes the safe areas
 			     nothing: content is meant to pass under the status bar and the home
 			     indicator, and the bars over it hold themselves off the edge on their own
 			     account. -->
-			<div class="relative z-10 flex min-w-0 flex-1 flex-col">
-				<!-- Each route owns the sidebar toggle at its top-left, so there is no extra
+				<div class="relative z-10 flex min-w-0 flex-1 flex-col">
+					<!-- Each route owns the sidebar toggle at its top-left, so there is no extra
 				     top strip here. -->
-				<div class="relative min-h-0 min-w-0 flex-1">
-					{@render children()}
+					<div class="relative min-h-0 min-w-0 flex-1">
+						{@render children()}
+					</div>
+					<!-- Dims the page under the open drawer, and closes it on a tap. -->
+					{#if $mobileDrawerOpen}
+						<div
+							class="absolute inset-0 z-20 bg-black/30 lg:hidden"
+							transition:fade={{ duration: 150 }}
+							onclick={() => mobileDrawerOpen.set(false)}
+							role="presentation"
+						></div>
+					{/if}
 				</div>
-				<!-- Dims the page under the open drawer, and closes it on a tap. -->
-				{#if $mobileDrawerOpen}
-					<div
-						class="absolute inset-0 z-20 bg-black/30 lg:hidden"
-						transition:fade={{ duration: 150 }}
-						onclick={() => mobileDrawerOpen.set(false)}
-						role="presentation"
-					></div>
-				{/if}
 			</div>
 		</div>
 	{/if}
