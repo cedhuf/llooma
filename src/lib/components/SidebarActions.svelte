@@ -1,5 +1,14 @@
+<script lang="ts" module>
+	// `pl-4` inside `px-2` puts every icon on the folded column's centre line, so
+	// folding moves nothing. Shared with New chat, in the brand block.
+	export const sidebarItem =
+		'flex h-9 w-full items-center gap-3 rounded-lg pr-2 pl-4 text-sm transition-colors';
+	export const sidebarItemIdle = 'text-body hover:bg-shade-0 hover:text-active';
+	export const sidebarItemCurrent = 'bg-shade-0 text-active';
+</script>
+
 <script lang="ts">
-	import { ImageIcon, Library, MessagesSquare, Search, SquarePen } from '@lucide/svelte';
+	import { ImageIcon, Library, MessagesSquare, Search } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { resolve } from '$app/paths';
@@ -18,12 +27,9 @@
 		sessions: SessionSummary[];
 		/** The folded desktop column: the same entries, icons only. */
 		rail: boolean;
-		onNewChat: () => void;
-		/** The list has moved under New chat, which then draws its edge. */
-		scrolled: boolean;
 	}
 
-	let { personas, sessions, rail, onNewChat, scrolled }: Props = $props();
+	let { personas, sessions, rail }: Props = $props();
 
 	const RECENT_COUNT = 10;
 	const recent = $derived(sessions.filter((s) => !s.archived).slice(0, RECENT_COUNT));
@@ -33,37 +39,11 @@
 	const onLibrary = $derived(pathname.includes('/library') || pathname.includes('/knowledge'));
 	const onImages = $derived(pathname.startsWith('/images'));
 
-	// `pl-4` inside `px-2` puts every icon on the folded column's centre line, so
-	// folding moves nothing.
-	const item = 'flex h-9 w-full items-center gap-3 rounded-lg pr-2 pl-4 text-sm transition-colors';
-	const idle = 'text-body hover:bg-shade-0 hover:text-active';
-	const current = 'bg-shade-0 text-active';
+	const item = sidebarItem;
+	const idle = sidebarItemIdle;
+	const current = sidebarItemCurrent;
 	const label = $derived(rail ? 'sr-only' : 'truncate');
 </script>
-
-<!-- Two blocks laid straight into the column's scroller: New chat sticks under the
-     brand, the rest scrolls. The edge under New chat appears once something has
-     passed beneath it. -->
-<div
-	class="surface-column surface-sticky sticky top-[var(--app-header-h)] z-10 shrink-0 border-b-[0.5px] transition-colors duration-200 max-lg:top-[calc(var(--app-header-h)+var(--safe-top))] {scrolled
-		? 'border-shade-3'
-		: 'border-transparent'}"
->
-	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
-	<div class="w-[var(--column-w)] shrink-0">
-		<div class="px-2 pt-1 pb-1">
-			<button
-				type="button"
-				onclick={onNewChat}
-				title={rail ? $LL.newChat() : undefined}
-				class="{item} {idle} font-medium"
-			>
-				<SquarePen class="text-accent h-4 w-4 shrink-0" />
-				<span class={label}>{$LL.newChat()}</span>
-			</button>
-		</div>
-	</div>
-</div>
 
 <div>
 	<div class="w-[var(--column-w)] shrink-0">

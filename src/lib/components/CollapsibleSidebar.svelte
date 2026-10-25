@@ -128,9 +128,10 @@
 		     opening. Separated, each block paints out to the edge at every frame while
 		     its contents stay put. -->
 		<div class="flex h-full w-full flex-col">
-			<!-- One scroller from the top of the column, so its bar runs the full height;
-			     the brand and New chat stick inside it. Sideways overflow is hidden rather
-			     than scrolled, since while the column narrows it is wider than its frame. -->
+			<SidebarBrand rail={showRail} onNewChat={newChat} scrolled={scrolledFromTop} />
+
+			<!-- Sideways overflow is hidden rather than scrolled, since while the column
+			     narrows it is wider than its frame. -->
 			<div
 				bind:this={scroller}
 				onscroll={measureScroll}
@@ -138,14 +139,7 @@
 				style="overscroll-behavior-y: contain; overflow-x: hidden"
 			>
 				<div bind:this={scrollContent}>
-					<SidebarBrand rail={showRail} />
-					<SidebarActions
-						personas={personaLaunchers}
-						sessions={visibleSessions}
-						rail={showRail}
-						onNewChat={newChat}
-						scrolled={scrolledFromTop}
-					/>
+					<SidebarActions personas={personaLaunchers} sessions={visibleSessions} rail={showRail} />
 					{#if !showRail}
 						<SidebarSessions sessions={visibleSessions} {personaById} />
 					{/if}

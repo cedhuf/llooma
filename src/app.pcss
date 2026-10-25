@@ -1062,12 +1062,6 @@
 	 * Written as `:not([data-wallpaper='on'])` rather than `='off'` so the first
 	 * paint, before the attribute is set, is already the opaque one.
 	 */
-	/* A column surface the list scrolls under: tint alone over a picture lets the
-	   passing text show through, so it filters what is behind it. */
-	.surface-sticky {
-		backdrop-filter: blur(16px);
-	}
-
 	:root:not([data-wallpaper='on']) .surface-chrome,
 	:root:not([data-wallpaper='on']) .surface-column,
 	:root:not([data-wallpaper='on']) .surface-pane {
