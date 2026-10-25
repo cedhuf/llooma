@@ -45,7 +45,7 @@
      brand, the rest scrolls. The edge under New chat appears once something has
      passed beneath it. -->
 <div
-	class="surface-column sticky top-[var(--app-header-h)] z-10 shrink-0 border-b-[0.5px] transition-colors duration-200 max-lg:top-[calc(var(--app-header-h)+var(--safe-top))] {scrolled
+	class="surface-column surface-sticky sticky top-[var(--app-header-h)] z-10 shrink-0 border-b-[0.5px] transition-colors duration-200 max-lg:top-[calc(var(--app-header-h)+var(--safe-top))] {scrolled
 		? 'border-shade-3'
 		: 'border-transparent'}"
 >
