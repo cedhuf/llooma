@@ -28,14 +28,6 @@ const MOBILE_VIEWPORT = { width: MOBILE.width, height: MOBILE.height };
 const INSETS = { top: 54, bottom: 34 };
 const DESKTOP = { width: 1440, height: 900 };
 
-/** A banner rather than a window: slices of a 1440px viewport are too narrow. */
-const STRIP = { width: 1800, height: 760 };
-
-const THEME_STYLES = ['classic', 'dracula', 'catppuccin', 'gruvbox', 'nord', 'solarized'] as const;
-
-/** Slant of the cuts between two slices, in degrees off the vertical. */
-const SLICE_ANGLE = 7;
-
 const NOW = Date.now();
 const ago = (hours: number) => new Date(NOW - hours * 3600 * 1000).toISOString();
 
@@ -369,81 +361,9 @@ async function fontsReady(page: Page) {
 
 async function shoot(page: Page, name: string) {
 	await fontsReady(page);
-	// The wallpaper settles a frame or two after the route does.
+	// Transitions settle a frame or two after the route does.
 	await page.waitForTimeout(500);
 	await page.screenshot({ path: `${RAW}/${name}.png`, animations: 'disabled' });
-}
-
-/** One full screenshot, as a data URL, for the composites to layer. */
-async function capture(page: Page) {
-	await fontsReady(page);
-	const shot = await page.screenshot({ animations: 'disabled' });
-	return `data:image/png;base64,${shot.toString('base64')}`;
-}
-
-/**
- * Composites screenshots into rows cut by diagonal seams, in the browser, since
- * Playwright cannot. `gap` is the seam width in px, zero draws a hairline;
- * `focus` pans each slice so its content lands inside its band.
- */
-async function composeRows(
-	page: Page,
-	rows: string[][],
-	{ gap = 0, focus = [], name }: { gap?: number; focus?: number[]; name: string }
-) {
-	const width = STRIP.width;
-	const rowHeight = STRIP.height;
-	await page.setViewportSize({ width, height: rowHeight * rows.length });
-
-	// Half a seam's horizontal travel, as a share of the width.
-	const skew = ((Math.tan((SLICE_ANGLE * Math.PI) / 180) * rowHeight) / 2 / width) * 100;
-	const half = (gap / 2 / width) * 100;
-
-	const html = rows
-		.map((shots) => {
-			const layers = shots
-				.map((src, i) => {
-					// The outer edges run past the canvas so the slant never clips a corner.
-					const left = i === 0 ? -50 : (i / shots.length) * 100 + half;
-					const right = i === shots.length - 1 ? 150 : ((i + 1) / shots.length) * 100 - half;
-					const clip = `polygon(${left + skew}% 0, ${right + skew}% 0, ${right - skew}% 100%, ${left - skew}% 100%)`;
-					// The pan rides on the image: a transform on the clipped element drags its clip.
-					const pan = focus[i] === undefined ? 0 : ((i + 0.5) / shots.length) * width - focus[i];
-					return `<div style="clip-path:${clip}"><img src="${src}" style="transform:translateX(${pan}px)"></div>`;
-				})
-				.join('');
-			const seams = gap
-				? ''
-				: shots
-						.slice(1)
-						.map((_, i) => `<i style="left:${((i + 1) / shots.length) * 100}%"></i>`)
-						.join('');
-			return `<section>${layers}${seams}</section>`;
-		})
-		.join('');
-
-	await page.setContent(`
-		<style>
-			html, body { margin: 0; height: 100%; overflow: hidden; }
-			section { position: relative; width: 100%; height: ${rowHeight}px; }
-			div, img { position: absolute; inset: 0; width: 100%; height: 100%; }
-			i {
-				position: absolute;
-				top: 0;
-				height: 100%;
-				width: 1px;
-				margin-left: -0.5px;
-				background: rgba(127, 127, 127, 0.5);
-				transform: skewX(-${SLICE_ANGLE}deg);
-			}
-		</style>
-		${html}
-	`);
-
-	// Seams punched out of the alpha channel, so the strip suits either theme.
-	const png = await page.screenshot({ animations: 'disabled', omitBackground: gap > 0 });
-	await writeFile(`${OUT}/${name}.png`, png);
-	await writeFile(`${DOCS_OUT}/${name}.png`, png);
 }
 
 /**
@@ -457,7 +377,7 @@ const FRAMED_OUT = `${OUT}/framed`;
 const DOCS_FRAMES = new Set([
 	'desktop_conversation',
 	'desktop_library',
-	'desktop_wallpaper',
+	'desktop_search',
 	'phone_home',
 	'phone_voice'
 ]);
@@ -503,8 +423,8 @@ const PHONE_SIZE = {
 const WINDOW_SHOTS = [
 	'desktop_conversation',
 	'desktop_conversation_dark',
-	'desktop_wallpaper',
 	'desktop_library',
+	'desktop_search',
 	'desktop_settings',
 	'desktop_rail'
 ] as const;
@@ -790,12 +710,12 @@ async function framePhone(page: Page, name: string) {
 }
 
 /**
- * The README's picture: a window with a phone leaning on it, dark, over a
- * wallpaper. Both formats whole, on a transparent ground.
+ * The README's picture: a window with a phone leaning on it, in the default
+ * look. Both formats whole, on a transparent ground.
  */
 const HERO = {
 	/** The shot in the window, and the one in the phone. */
-	window: 'desktop_wallpaper',
+	window: 'desktop_conversation',
 	/** The phone interface, not the responsive layout at a phone's width: the README should show two interfaces, not one that shrinks. */
 	phone: 'phone_home',
 	/** How much smaller the phone is, so it reads as nearer rather than as huge. */
@@ -880,10 +800,9 @@ test.describe('screenshots', () => {
 	test('phone interface', async ({ page }) => {
 		await page.setViewportSize(MOBILE_VIEWPORT);
 		await seed(page);
-		await configure(page, { simplifiedMobileUI: true, themeStyle: 'dracula', themeMode: 'dark' });
+		await configure(page, { simplifiedMobileUI: true });
 
 		await page.goto('/m');
-		await expect(page.locator('html')).toHaveAttribute('data-color-theme', 'dark');
 		await expect(page.getByRole('heading', { name: /Hello/ })).toBeVisible();
 		// The orb and the card's light run on their own clocks.
 		await page.waitForTimeout(900);
@@ -917,93 +836,30 @@ test.describe('screenshots', () => {
 		await expect(page.getByText('Reading a sourdough starter')).toBeHidden();
 		await shoot(page, 'desktop_rail');
 
-		await configure(page, { sidebarExpanded: true, themeMode: 'dark' });
-		await page.goto('/sessions/ab12cd');
-		await expect(page.locator('html')).toHaveAttribute('data-color-theme', 'dark');
-		await shoot(page, 'desktop_conversation_dark');
-
+		await configure(page, { sidebarExpanded: true });
 		await page.goto('/library');
 		await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
 		await shoot(page, 'desktop_library');
 
-		// A wallpaper: the column translucent over it, the conversation opaque on top.
-		// Dark, because this is the hero's window on the README and the docs home.
-		// `configure` lays `BASE_SETTINGS` over what is stored, so the mode has to be
-		// said again rather than carried over from the shot above.
-		await configure(page, {
-			backgroundImage: 'pack:ocean',
-			surfaceTransparency: true,
-			themeMode: 'dark'
-		});
+		// Search across every conversation, answering with the passages.
 		await page.goto('/sessions/ab12cd');
-		await expect(page.locator('html')).toHaveAttribute('data-wallpaper', 'on');
-		await expect(page.locator('html')).toHaveAttribute('data-color-theme', 'dark');
-		await shoot(page, 'desktop_wallpaper');
+		await expect(page.getByText('Is self-hosting worth it')).toBeVisible();
+		await page.getByRole('button', { name: 'Search', exact: true }).first().click();
+		await page.getByRole('combobox', { name: 'Search conversations' }).fill('backup');
+		await expect(page.locator('[data-command-item]').first()).toBeVisible();
+		await shoot(page, 'desktop_search');
 
-		await configure(page, { backgroundImage: '', themeMode: 'light' });
+		await configure(page, { themeMode: 'dark' });
+		await page.goto('/sessions/ab12cd');
+		await expect(page.locator('html')).toHaveAttribute('data-color-theme', 'dark');
+		await shoot(page, 'desktop_conversation_dark');
+
+		await configure(page, { themeMode: 'light' });
 		await page.goto('/sessions');
 		await page.getByLabel('Settings', { exact: true }).click();
 		await page.getByRole('tab', { name: 'Interface' }).click();
 		await expect(page.getByText('Theme style')).toBeVisible();
 		await shoot(page, 'desktop_settings');
-	});
-
-	/**
-	 * Six palettes, light on top and dark below, same conversation at the same
-	 * scroll. Two rows: alternating showed each palette in only one of its halves.
-	 */
-	test('theme strip', async ({ page }) => {
-		await seed(page);
-		await page.setViewportSize(STRIP);
-
-		const rows: string[][] = [];
-		for (const themeMode of ['light', 'dark'] as const) {
-			const row: string[] = [];
-			for (const themeStyle of THEME_STYLES) {
-				await configure(page, { themeStyle, themeMode });
-				await page.goto('/sessions/ab12cd');
-				await expect(page.locator('html')).toHaveAttribute('data-color-theme', themeMode);
-				await expect(page.getByText('Is self-hosting worth it')).toBeVisible();
-				await page.waitForTimeout(250);
-				row.push(await capture(page));
-			}
-			rows.push(row);
-		}
-
-		await composeRows(page, rows, { name: 'themes' });
-	});
-
-	/** One palette, four parts of the app. Wide bands and a thin seam: a narrow band of a wide window is mostly the space between things. */
-	test('sections strip', async ({ page }) => {
-		await seed(page);
-		await page.setViewportSize(STRIP);
-
-		const shots: string[] = [];
-
-		await configure(page, { themeStyle: 'classic', themeMode: 'light' });
-		await page.goto('/sessions/ab12cd');
-		await expect(page.getByText('Is self-hosting worth it')).toBeVisible();
-		shots.push(await capture(page));
-
-		await page.goto('/library');
-		await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
-		shots.push(await capture(page));
-
-		await configure(page, { themeMode: 'dark' });
-		await page.goto('/sessions');
-		await page.getByLabel('Settings', { exact: true }).click();
-		await page.getByRole('tab', { name: 'Interface' }).click();
-		await expect(page.getByText('Theme style')).toBeVisible();
-		shots.push(await capture(page));
-
-		await configure(page, { backgroundImage: 'pack:ocean' });
-		await page.goto('/sessions/ab12cd');
-		await expect(page.locator('html')).toHaveAttribute('data-wallpaper', 'on');
-		await page.waitForTimeout(400);
-		shots.push(await capture(page));
-
-		// Where each section has something to show.
-		await composeRows(page, [shots], { gap: 6, focus: [260, 620, 900, 1150], name: 'sections' });
 	});
 
 	/** Last, and from disk, so a frame can never disagree with the picture it surrounds. */

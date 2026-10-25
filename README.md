@@ -79,14 +79,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), and
 
 ## Screenshots
 
-![Themes](static/screenshots/themes.png)
-
-_The six themes, left to right: Classic, Dracula, Catppuccin, Gruvbox, Nord and Solarized. Light
-ramps on the top row, dark on the bottom._
-
-| ![A conversation](static/screenshots/framed/desktop_conversation.png) | ![Dark mode](static/screenshots/framed/desktop_conversation_dark.png) | ![A wallpaper](static/screenshots/framed/desktop_wallpaper.png)   |
-| --------------------------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| ![Library](static/screenshots/framed/desktop_library.png)             | ![Interface settings](static/screenshots/framed/desktop_settings.png) | ![The collapsed rail](static/screenshots/framed/desktop_rail.png) |
+| ![A conversation](static/screenshots/framed/desktop_conversation.png) | ![Dark mode](static/screenshots/framed/desktop_conversation_dark.png)         | ![The collapsed sidebar](static/screenshots/framed/desktop_rail.png)  |
+| --------------------------------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| ![Library](static/screenshots/framed/desktop_library.png)             | ![Searching every conversation](static/screenshots/framed/desktop_search.png) | ![Interface settings](static/screenshots/framed/desktop_settings.png) |
 
 ### The phone interface
 
