@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { ImageIcon, Library, MessagesSquare, Search, SquarePen } from '@lucide/svelte';
-	import type { Snippet } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
 	import { resolve } from '$app/paths';
@@ -20,11 +19,11 @@
 		/** The folded desktop column: the same entries, icons only. */
 		rail: boolean;
 		onNewChat: () => void;
-		/** The conversation list, scrolling with the entries above it. */
-		children?: Snippet;
+		/** The list has moved under New chat, which then draws its edge. */
+		scrolled: boolean;
 	}
 
-	let { personas, sessions, rail, onNewChat, children }: Props = $props();
+	let { personas, sessions, rail, onNewChat, scrolled }: Props = $props();
 
 	const RECENT_COUNT = 10;
 	const recent = $derived(sessions.filter((s) => !s.archived).slice(0, RECENT_COUNT));
@@ -45,8 +44,14 @@
 	);
 </script>
 
-<!-- New chat stays put; everything under it scrolls as one list. -->
-<div class="surface-column shrink-0">
+<!-- Two blocks laid straight into the column's scroller: New chat sticks under the
+     brand, the rest scrolls. The edge under New chat appears once something has
+     passed beneath it. -->
+<div
+	class="surface-column sticky top-[var(--app-header-h)] z-10 shrink-0 border-b-[0.5px] transition-colors duration-200 max-lg:top-[calc(var(--app-header-h)+var(--safe-top))] {scrolled
+		? 'border-shade-3'
+		: 'border-transparent'}"
+>
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
 	<div class={layoutWidth}>
 		<div class="px-2 pt-1 pb-1">
@@ -63,12 +68,7 @@
 	</div>
 </div>
 
-<!-- Sideways overflow is hidden rather than scrolled, since while the column
-     narrows this box is wider than what holds it. -->
-<div
-	class="surface-column min-h-0 flex-1 overflow-y-auto"
-	style="overscroll-behavior-y: contain; overflow-x: hidden"
->
+<div>
 	<div class={layoutWidth}>
 		<div class="flex flex-col gap-0.5 px-2 pb-2">
 			<!-- Open, both live elsewhere: the search in the brand bar, the conversations
@@ -141,6 +141,4 @@
 
 		<SidebarPersonas {personas} {rail} />
 	</div>
-
-	{@render children?.()}
 </div>

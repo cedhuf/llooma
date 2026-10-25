@@ -8,9 +8,11 @@
 	interface Props {
 		/** The collapsed desktop rail keeps the avatar and drops the name. */
 		rail: boolean;
+		/** More of the list lies below, so the footer draws its edge. */
+		edge: boolean;
 	}
 
-	let { rail }: Props = $props();
+	let { rail, edge }: Props = $props();
 
 	// A connection that is enabled and has answered once. The providers an instance
 	// hands out arrive verified, so this reads as "is there anything to talk to".
@@ -71,7 +73,11 @@
 	</span>
 {/snippet}
 
-<div class="surface-column flex shrink-0">
+<div
+	class="surface-column flex shrink-0 border-t-[0.5px] transition-colors duration-200 {edge
+		? 'border-shade-3'
+		: 'border-transparent'}"
+>
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
 	<div
 		class="w-full shrink-0 p-2 max-lg:w-[var(--drawer-w)] max-lg:pb-[max(0.5rem,var(--safe-bottom))] {rail

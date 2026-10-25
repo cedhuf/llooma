@@ -85,6 +85,27 @@
 		$settingsStore.sidebarWidth = clampWidth(width + step);
 	}
 
+	// Where the list stands, for the edges above and below it: each shows only while
+	// something is hidden on its side.
+	let scroller: HTMLDivElement | undefined = $state();
+	let scrollContent: HTMLDivElement | undefined = $state();
+	let scrolledFromTop = $state(false);
+	let scrolledFromEnd = $state(false);
+	function measureScroll() {
+		if (!scroller) return;
+		const { scrollTop, scrollHeight, clientHeight } = scroller;
+		scrolledFromTop = scrollTop > 0;
+		scrolledFromEnd = scrollTop + clientHeight < scrollHeight - 1;
+	}
+	// The list grows and the column resizes without a scroll event.
+	$effect(() => {
+		if (!scroller || !scrollContent) return;
+		const observer = new ResizeObserver(measureScroll);
+		observer.observe(scroller);
+		observer.observe(scrollContent);
+		return () => observer.disconnect();
+	});
+
 	function newChat() {
 		goto(generateNewUrl(Sitemap.SESSIONS));
 	}
@@ -131,20 +152,31 @@
 		     opening. Separated, each block paints out to the edge at every frame while
 		     its contents stay put. -->
 		<div class="flex h-full w-full flex-col">
-			<SidebarBrand rail={showRail} onCollapse={collapseOrClose} onExpand={expandSidebar} />
-
-			<SidebarActions
-				personas={personaLaunchers}
-				sessions={visibleSessions}
-				rail={showRail}
-				onNewChat={newChat}
+			<!-- One scroller from the top of the column, so its bar runs the full height;
+			     the brand and New chat stick inside it. Sideways overflow is hidden rather
+			     than scrolled, since while the column narrows it is wider than its frame. -->
+			<div
+				bind:this={scroller}
+				onscroll={measureScroll}
+				class="surface-column min-h-0 flex-1 overflow-y-auto"
+				style="overscroll-behavior-y: contain; overflow-x: hidden"
 			>
-				{#if !showRail}
-					<SidebarSessions sessions={visibleSessions} {personaById} />
-				{/if}
-			</SidebarActions>
+				<div bind:this={scrollContent}>
+					<SidebarBrand rail={showRail} onCollapse={collapseOrClose} onExpand={expandSidebar} />
+					<SidebarActions
+						personas={personaLaunchers}
+						sessions={visibleSessions}
+						rail={showRail}
+						onNewChat={newChat}
+						scrolled={scrolledFromTop}
+					/>
+					{#if !showRail}
+						<SidebarSessions sessions={visibleSessions} {personaById} />
+					{/if}
+				</div>
+			</div>
 
-			<SidebarFooter rail={showRail} />
+			<SidebarFooter rail={showRail} edge={scrolledFromEnd} />
 		</div>
 	</div>
 
