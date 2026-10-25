@@ -5,7 +5,7 @@
 	import { conversedPersonas } from '$lib/personas';
 	import { SIDEBAR_WIDTH } from '$lib/settings';
 	import { Sitemap } from '$lib/sitemap';
-	import { isDesktop, setSidebarOpen } from '$lib/stores/sidebar';
+	import { isDesktop, mobileDrawerOpen, setSidebarOpen } from '$lib/stores/sidebar';
 
 	import { generateNewUrl } from './ButtonNew';
 	import SidebarActions from './SidebarActions.svelte';
@@ -89,28 +89,24 @@
 	}
 </script>
 
-<!-- The drawer is pinned to the viewport, so it spans the display top to bottom.
-     Only the side is its own business, in landscape where the sensor housing eats
-     into one edge; the top and bottom belong to the brand and the footer.
+<!-- Desktop: an in-flow rail or full column. Mobile: a drawer over the page,
+     sliding in from the left and out of reach (`inert`) once closed. It spans the
+     display top to bottom; only the side is its own business, in landscape where
+     the sensor housing eats into one edge.
 
-     Four blocks in the order they are read, as neighbours in a column rather
-     than layers, so what shows through them is whatever the column stands on.
-
-     The column paints nothing and blurs everything: a colour here would stand
-     between the materials and the wallpaper, and the blur has to be here rather
-     than on each block, or two stacked surfaces filter their own share of the
-     backdrop and leave a seam.
-
-     Mobile: a fixed drawer pinned under the page, which the page slides aside to
-     uncover. Desktop: an in-flow rail or full column. -->
+     The blocks inside lay themselves out at `--column-w`, the width the column is
+     going to, which is the drawer's on a phone and the chosen width or the rail's
+     on a desktop. -->
 <nav
 	bind:this={navEl}
 	style="--sidebar-w: {width}px"
 	class="[--column-w:var(--drawer-w)] {showRail
 		? 'lg:[--column-w:4rem]'
-		: 'lg:[--column-w:var(--sidebar-w)]'} fixed inset-y-0 left-0 h-full w-full shrink-0 ease-out motion-reduce:transition-none max-lg:pl-[var(--safe-left)] lg:relative lg:z-30 lg:max-w-none lg:translate-x-0
-		{dragWidth === null ? 'transition-[width] duration-300' : 'select-none'}
+		: 'lg:[--column-w:var(--sidebar-w)]'} app-drawer fixed inset-y-0 left-0 z-40 h-full w-[calc(var(--drawer-w)+var(--safe-left))] shrink-0 ease-out motion-reduce:transition-none max-lg:pl-[var(--safe-left)] lg:relative lg:z-30 lg:translate-x-0
+		{$mobileDrawerOpen ? 'max-lg:shadow-2xl' : 'max-lg:-translate-x-full'}
+		{dragWidth === null ? 'lg:transition-[width] lg:duration-300' : 'select-none'}
 		{$settingsStore.sidebarExpanded ? 'lg:w-[var(--sidebar-w)]' : 'lg:w-16'}"
+	inert={!$isDesktop && !$mobileDrawerOpen}
 	aria-label="Main navigation"
 	data-testid="sidebar"
 >
@@ -121,7 +117,7 @@
 	     laid out at the width the column is going to, so while it narrows there is a
 	     strip between them and the border: painted, that strip is the column still
 	     closing; bare, it was a lit window showing the wallpaper straight through. -->
-	<div class="border-shade-3 flex h-full overflow-hidden lg:border-r-[0.5px]">
+	<div class="border-shade-3 relative flex h-full overflow-hidden lg:border-r-[0.5px]">
 		<!-- The blocks fill this, each holding its contents at the width the column is
 		     going to.
 

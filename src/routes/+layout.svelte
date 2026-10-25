@@ -460,29 +460,17 @@
 			style={wallpaper ? `--wallpaper: ${wallpaper}` : ''}
 		>
 			<CollapsibleSidebar />
-			<!-- The card runs the full height of the display, so its corners round on the
-			     corners of the screen. It owes the safe areas nothing: content is meant to
-			     pass under the status bar and the home indicator, and the bars over it hold
-			     themselves off the edge on their own account.
-
-			     On mobile it is an opaque card sliding right to uncover the sidebar. The
-			     rounding and the shadow are painted only while it is open and travel with
-			     the slide, because a corner cut into a full-screen card shows the page's own
-			     background. Open, what the corner shows is the column: it paints the full
-			     width and lays its contents out to `--drawer-w`, so the card slides onto its
-			     own material. A no-op on desktop, where the sidebar lives in flow. -->
-			<div
-				class="app-card max-lg:bg-shade-1 relative z-10 flex min-w-0 flex-1 flex-col max-lg:overflow-hidden {$mobileDrawerOpen
-					? 'max-lg:translate-x-[var(--drawer-w)] max-lg:rounded-l-[1.75rem] max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0.25)]'
-					: 'max-lg:shadow-[-8px_0_24px_-2px_rgba(0,0,0,0)]'}"
-			>
+			<!-- The page runs the full height of the display. It owes the safe areas
+			     nothing: content is meant to pass under the status bar and the home
+			     indicator, and the bars over it hold themselves off the edge on their own
+			     account. -->
+			<div class="relative z-10 flex min-w-0 flex-1 flex-col">
 				<!-- Each route owns the sidebar toggle at its top-left, so there is no extra
 				     top strip here. -->
 				<div class="relative min-h-0 min-w-0 flex-1">
 					{@render children()}
 				</div>
-				<!-- Inside the sliding card, so it dims the page and never the revealed
-				     sidebar, and travels with it. -->
+				<!-- Dims the page under the open drawer, and closes it on a tap. -->
 				{#if $mobileDrawerOpen}
 					<div
 						class="absolute inset-0 z-20 bg-black/30 lg:hidden"
