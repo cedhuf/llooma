@@ -1013,9 +1013,6 @@ const en = {
 	yourImage: 'Your image',
 	maxImageSize: 'max. 3 MB',
 	imageTooLarge: 'That picture is over 3 MB. Choose a lighter one, or resize it first.',
-	floatingChatHeader: 'Floating conversation bar',
-	floatingChatHeaderHelp:
-		'A pill hovering over the conversation, matching the composer at the other end, with the text passing around both. Off, it goes back to being the top edge of the column, where a background image reaches it.',
 
 	// --- Settings > About ------------------------------------------------------
 	source: 'Source',

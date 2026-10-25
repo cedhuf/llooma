@@ -1040,9 +1040,6 @@ const fr = extendDictionary(en, {
 	yourImage: 'Votre image',
 	maxImageSize: '3 Mo maximum',
 	imageTooLarge: 'Cette image dépasse 3 Mo. Choisissez-en une plus légère, ou redimensionnez-la.',
-	floatingChatHeader: 'Barre de conversation flottante',
-	floatingChatHeaderHelp:
-		'Une pastille posée sur la conversation, assortie au composeur à l’autre bout, avec le texte qui passe autour des deux. Désactivée, elle redevient le bord haut de la colonne, où l’image d’arrière-plan l’atteint.',
 
 	// --- Paramètres > À propos -------------------------------------------------
 	source: 'Source',

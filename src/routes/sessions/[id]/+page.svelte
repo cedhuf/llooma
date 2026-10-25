@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowDown, MoreHorizontal, Settings2 } from '@lucide/svelte';
+	import { ArrowDown, Settings2 } from '@lucide/svelte';
 	import { onMount, tick, untrack } from 'svelte';
 	import { fly } from 'svelte/transition';
 
@@ -11,12 +11,10 @@
 	import ButtonConfirm from '$lib/components/ButtonConfirm.svelte';
 	import Head from '$lib/components/Head.svelte';
 	import Header from '$lib/components/Header.svelte';
-	import Menu from '$lib/components/Menu.svelte';
 	import ModelSelect from '$lib/components/ModelSelect.svelte';
 	import PersonaAvatar from '$lib/components/PersonaAvatar.svelte';
 	import RefusalDialog from '$lib/components/RefusalDialog.svelte';
-	import SessionMenu from '$lib/components/SessionMenu.svelte';
-	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
+	import { personasStore, sessionsStore } from '$lib/localStorage';
 	import { unbindPersonaSession } from '$lib/personas';
 	import { resolveSessionTitle } from '$lib/sessions';
 	import { parseModelRef } from '$lib/settings';
@@ -56,8 +54,6 @@
 		void goto(resolve('/sessions'));
 	}
 	let sessionModalOpen = $state(false);
-
-	const floatingHeader = $derived($settingsStore.floatingChatHeader !== false);
 
 	// The composer floats over the message list, so the scroll area reserves matching
 	// bottom space for the last message to clear it.
@@ -280,8 +276,8 @@
 	}
 </script>
 
-{#snippet topBar(floating: boolean)}
-	<Header {floating}>
+{#snippet topBar()}
+	<Header>
 		{#snippet headline()}
 			{#if persona}
 				<div class="flex min-w-0 items-center gap-2" title={persona.tagline}>
@@ -341,55 +337,6 @@
 				/>
 			{/if}
 		{/snippet}
-
-		<!-- The phone's two buttons. Deleting takes the pill over while it waits: there
-		     is nowhere else to ask. -->
-		{#snippet compact()}
-			{#if shouldConfirmDeletion}
-				<ButtonConfirm
-					bind:armed={shouldConfirmDeletion}
-					onConfirm={deleteSession}
-					label={$LL.deleteSession()}
-				/>
-			{:else}
-				<button
-					type="button"
-					class="text-muted hover:bg-shade-2 hover:text-active flex h-9 w-9 items-center justify-center rounded-full transition-colors"
-					onclick={() => (sessionModalOpen = true)}
-					aria-label={$LL.session()}
-				>
-					<Settings2 class="h-5 w-5" />
-				</button>
-
-				<Menu class="w-64" align="start">
-					{#snippet trigger({ props })}
-						<button
-							{...props}
-							type="button"
-							class="text-muted hover:bg-shade-2 hover:text-active flex h-9 w-9 items-center justify-center rounded-full transition-colors"
-							aria-label={$LL.moreOptions()}
-						>
-							<MoreHorizontal class="h-5 w-5" />
-						</button>
-					{/snippet}
-
-					<!-- The title has room here: two lines, fixed, cut with an ellipsis, so the menu
-					     never changes height with the conversation. -->
-					<p class="text-muted line-clamp-2 px-2 py-1.5 text-xs leading-snug">
-						{chat.editor.isNewSession ? $LL.newSession() : resolveSessionTitle(chat.session)}
-					</p>
-					<div class="bg-shade-3 my-1 h-px" role="none"></div>
-
-					{#if !chat.editor.isNewSession}
-						<SessionMenu
-							id={chat.session.id}
-							pinned={chat.session.pinned}
-							onDelete={() => (shouldConfirmDeletion = true)}
-						/>
-					{/if}
-				</Menu>
-			{/if}
-		{/snippet}
 	</Header>
 {/snippet}
 
@@ -416,30 +363,21 @@
 			$LL.sessions()
 		]}
 	/>
-	{#if !floatingHeader}
-		{@render topBar(false)}
-	{/if}
+	{@render topBar()}
 
 	<!-- The transcript and the button returning to its foot, in one box, so the
 	     button anchors to the conversation rather than to the column and needs no
 	     telling how tall the composer is.
 
 	     Its scrollbar gutter is reserved whether or not there is a scrollbar: the
-	     two floating bars live inside this box, and would otherwise shift sideways
-	     the moment a reply made the page overflow. -->
+	     composer lives inside this box, and would otherwise shift sideways the
+	     moment a reply made the page overflow. -->
 	<div class="relative flex min-h-0 flex-grow flex-col">
 		<div
 			class="session__history surface-pane flex flex-grow flex-col overflow-auto px-4 lg:px-6 xl:px-8"
 			style="scrollbar-gutter: stable"
 			bind:this={messagesWindow}
 		>
-			{#if floatingHeader}
-				<!-- The mirror of the composer below: sticky rather than laid on top, so it
-				     reserves its own room and never covers the first message. -->
-				<div class="sticky top-0 z-20 -mx-4 lg:-mx-6 xl:-mx-8">
-					{@render topBar(true)}
-				</div>
-			{/if}
 			<!-- Grows to fill whatever the conversation does not, which puts the composer at
 			     the foot of a short exchange rather than halfway up: a sticky element only
 			     sticks once there is something to scroll. -->

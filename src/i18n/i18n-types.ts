@@ -3643,14 +3643,6 @@ type RootTranslation = {
 	 */
 	imageTooLarge: string
 	/**
-	 * F​l​o​a​t​i​n​g​ ​c​o​n​v​e​r​s​a​t​i​o​n​ ​b​a​r
-	 */
-	floatingChatHeader: string
-	/**
-	 * A​ ​p​i​l​l​ ​h​o​v​e​r​i​n​g​ ​o​v​e​r​ ​t​h​e​ ​c​o​n​v​e​r​s​a​t​i​o​n​,​ ​m​a​t​c​h​i​n​g​ ​t​h​e​ ​c​o​m​p​o​s​e​r​ ​a​t​ ​t​h​e​ ​o​t​h​e​r​ ​e​n​d​,​ ​w​i​t​h​ ​t​h​e​ ​t​e​x​t​ ​p​a​s​s​i​n​g​ ​a​r​o​u​n​d​ ​b​o​t​h​.​ ​O​f​f​,​ ​i​t​ ​g​o​e​s​ ​b​a​c​k​ ​t​o​ ​b​e​i​n​g​ ​t​h​e​ ​t​o​p​ ​e​d​g​e​ ​o​f​ ​t​h​e​ ​c​o​l​u​m​n​,​ ​w​h​e​r​e​ ​a​ ​b​a​c​k​g​r​o​u​n​d​ ​i​m​a​g​e​ ​r​e​a​c​h​e​s​ ​i​t​.
-	 */
-	floatingChatHeaderHelp: string
-	/**
 	 * S​o​u​r​c​e
 	 */
 	source: string
@@ -7961,14 +7953,6 @@ export type TranslationFunctions = {
 	 * That picture is over 3 MB. Choose a lighter one, or resize it first.
 	 */
 	imageTooLarge: () => LocalizedString
-	/**
-	 * Floating conversation bar
-	 */
-	floatingChatHeader: () => LocalizedString
-	/**
-	 * A pill hovering over the conversation, matching the composer at the other end, with the text passing around both. Off, it goes back to being the top edge of the column, where a background image reaches it.
-	 */
-	floatingChatHeaderHelp: () => LocalizedString
 	/**
 	 * Source
 	 */

@@ -176,8 +176,6 @@ export interface Settings {
 
 	/** Off by default: both live in the right-click menu, where they cannot cover a title or be hit by accident. */
 	showListQuickActions: boolean;
-	/** A pill hovering over the conversation rather than the column's top edge. On: it matches the composer floating at the other end. */
-	floatingChatHeader: boolean;
 	/** Tint your own messages with the app's accent so they stand out from replies. */
 	accentUserMessages: boolean;
 	/** Show the time each message was sent, next to its role badge. */
@@ -329,7 +327,6 @@ export const DEFAULT_SETTINGS: Settings = {
 	sidebarPersonasStyle: 'stack',
 	readingFont: 'interface',
 	showListQuickActions: false,
-	floatingChatHeader: true,
 	accentUserMessages: true,
 	showMessageTimestamps: true,
 	fadeCompactedMessages: true,
