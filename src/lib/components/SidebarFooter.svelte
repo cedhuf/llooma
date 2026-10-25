@@ -79,11 +79,7 @@
 		: 'border-transparent'}"
 >
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
-	<div
-		class="w-full shrink-0 p-2 max-lg:w-[var(--drawer-w)] max-lg:pb-[max(0.5rem,var(--safe-bottom))] {rail
-			? 'lg:w-16'
-			: 'lg:w-[var(--sidebar-w)]'}"
-	>
+	<div class="w-[var(--column-w)] shrink-0 p-2 max-lg:pb-[max(0.5rem,var(--safe-bottom))]">
 		<!-- Labelled explicitly, or the accessible name is whatever its children happen
 		     to concatenate to, which announces badly and is unusable as a handle. -->
 		<button

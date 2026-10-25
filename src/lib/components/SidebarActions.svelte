@@ -39,9 +39,6 @@
 	const idle = 'text-body hover:bg-shade-0 hover:text-active';
 	const current = 'bg-shade-0 text-active';
 	const label = $derived(rail ? 'sr-only' : 'truncate');
-	const layoutWidth = $derived(
-		`w-full shrink-0 max-lg:w-[var(--drawer-w)] ${rail ? 'lg:w-16' : 'lg:w-[var(--sidebar-w)]'}`
-	);
 </script>
 
 <!-- Two blocks laid straight into the column's scroller: New chat sticks under the
@@ -53,7 +50,7 @@
 		: 'border-transparent'}"
 >
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
-	<div class={layoutWidth}>
+	<div class="w-[var(--column-w)] shrink-0">
 		<div class="px-2 pt-1 pb-1">
 			<button
 				type="button"
@@ -69,7 +66,7 @@
 </div>
 
 <div>
-	<div class={layoutWidth}>
+	<div class="w-[var(--column-w)] shrink-0">
 		<div class="flex flex-col gap-0.5 px-2 pb-2">
 			<!-- Open, both live elsewhere: the search in the brand bar, the conversations
 			     in the list below. -->

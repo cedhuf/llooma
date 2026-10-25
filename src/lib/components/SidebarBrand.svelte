@@ -6,17 +6,16 @@
 	import { APP_NAME } from '$lib/brand';
 	import { modKey } from '$lib/platform';
 	import { openSearch } from '$lib/stores/modal';
+	import { setSidebarOpen } from '$lib/stores/sidebar';
 
 	import Logo from './Logo.svelte';
 
 	interface Props {
 		/** The collapsed desktop rail keeps the mark, which becomes the way back out. */
 		rail: boolean;
-		onCollapse: () => void;
-		onExpand: () => void;
 	}
 
-	let { rail, onCollapse, onExpand }: Props = $props();
+	let { rail }: Props = $props();
 
 	const iconButton =
 		'text-muted hover:bg-shade-0 hover:text-active flex h-10 w-10 items-center justify-center rounded-lg transition-colors';
@@ -31,9 +30,7 @@
 	     is still narrowing; laid out at the frame's width, it re-wraps itself sixty
 	     times a second on the way there. -->
 	<div
-		class="flex h-full w-full shrink-0 items-center px-3 max-lg:w-[var(--drawer-w)] max-lg:pt-[var(--safe-top)] {rail
-			? 'lg:w-16'
-			: 'lg:w-[var(--sidebar-w)]'}"
+		class="flex h-full w-[var(--column-w)] shrink-0 items-center px-3 max-lg:pt-[var(--safe-top)]"
 	>
 		<!-- The mark keeps one box, size and colour in both states. Folded, it gives way
 		     to the sidebar icon under the pointer and opens the column, in the same 40px
@@ -41,7 +38,7 @@
 		{#if rail}
 			<button
 				type="button"
-				onclick={onExpand}
+				onclick={() => setSidebarOpen(true)}
 				aria-label={$LL.expandSidebar()}
 				title={$LL.expandSidebar()}
 				class="group hover:bg-shade-0 relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors"
@@ -72,7 +69,7 @@
 				</button>
 				<button
 					type="button"
-					onclick={onCollapse}
+					onclick={() => setSidebarOpen(false)}
 					class={iconButton}
 					aria-label={$LL.collapseSidebar()}
 					title={$LL.collapseSidebar()}

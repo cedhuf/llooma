@@ -2,7 +2,7 @@
 	import { PanelLeft } from '@lucide/svelte';
 
 	import LL from '$i18n/i18n-svelte';
-	import { mobileDrawerOpen } from '$lib/stores/sidebar';
+	import { setSidebarOpen } from '$lib/stores/sidebar';
 
 	interface Props {
 		/**
@@ -23,7 +23,7 @@
      every page so the control never roams. Hidden on desktop. -->
 <button
 	type="button"
-	onclick={() => mobileDrawerOpen.set(true)}
+	onclick={() => setSidebarOpen(true)}
 	aria-label={$LL.expandSidebar()}
 	class={variant === 'floating'
 		? 'surface-floating border-shade-3 text-muted hover:text-active pointer-events-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full border shadow-lg transition-colors [--surface-tint:66%] lg:hidden'

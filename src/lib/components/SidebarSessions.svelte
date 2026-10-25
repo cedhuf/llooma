@@ -50,7 +50,7 @@
 <!-- Inside the actions' scroller: see `SidebarActions`. -->
 <div>
 	<!-- Full width for the material, fixed width for the layout: see `SidebarBrand`. -->
-	<div class="w-full px-2 py-2 max-lg:w-[var(--drawer-w)] lg:w-[var(--sidebar-w)]">
+	<div class="w-[var(--column-w)] px-2 py-2">
 		{#each groups as group (group.key)}
 			<div class="mb-2">
 				<p class="text-muted px-2.5 pt-2 pb-1 text-xs font-medium">

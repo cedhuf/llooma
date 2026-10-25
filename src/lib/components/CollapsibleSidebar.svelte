@@ -1,12 +1,11 @@
 <script lang="ts">
 	import LL from '$i18n/i18n-svelte';
-	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { personasStore, sessionsStore, settingsStore } from '$lib/localStorage';
 	import { conversedPersonas } from '$lib/personas';
 	import { SIDEBAR_WIDTH } from '$lib/settings';
 	import { Sitemap } from '$lib/sitemap';
-	import { mobileDrawerOpen } from '$lib/stores/sidebar';
+	import { isDesktop, setSidebarOpen } from '$lib/stores/sidebar';
 
 	import { generateNewUrl } from './ButtonNew';
 	import SidebarActions from './SidebarActions.svelte';
@@ -32,29 +31,8 @@
 		Object.fromEntries(($personasStore ?? []).map((persona) => [persona.id, persona]))
 	);
 
-	// The mobile drawer is transient and starts closed; the desktop rail is the
-	// persisted `sidebarExpanded`. Separate, so the drawer never persists and the
-	// two modes do not fight over one boolean.
-	let isMobile = $state(false);
-	$effect(() => {
-		if (!browser) return;
-		const mq = window.matchMedia('(max-width: 1023px)');
-		const sync = () => (isMobile = mq.matches);
-		sync();
-		mq.addEventListener('change', sync);
-		return () => mq.removeEventListener('change', sync);
-	});
-
 	// The desktop icon rail only exists when collapsed on desktop; mobile is always the full drawer.
-	const showRail = $derived(!isMobile && !$settingsStore.sidebarExpanded);
-
-	function expandSidebar() {
-		$settingsStore.sidebarExpanded = true;
-	}
-	function collapseOrClose() {
-		if (isMobile) mobileDrawerOpen.set(false);
-		else $settingsStore.sidebarExpanded = false;
-	}
+	const showRail = $derived($isDesktop && !$settingsStore.sidebarExpanded);
 	// Followed locally while dragging and saved once on release: the settings go to
 	// the server, which should not hear about every pixel.
 	let dragWidth = $state<number | null>(null);
@@ -128,7 +106,9 @@
 <nav
 	bind:this={navEl}
 	style="--sidebar-w: {width}px"
-	class="fixed inset-y-0 left-0 h-full w-full shrink-0 ease-out motion-reduce:transition-none max-lg:pl-[var(--safe-left)] lg:relative lg:z-30 lg:max-w-none lg:translate-x-0
+	class="[--column-w:var(--drawer-w)] {showRail
+		? 'lg:[--column-w:4rem]'
+		: 'lg:[--column-w:var(--sidebar-w)]'} fixed inset-y-0 left-0 h-full w-full shrink-0 ease-out motion-reduce:transition-none max-lg:pl-[var(--safe-left)] lg:relative lg:z-30 lg:max-w-none lg:translate-x-0
 		{dragWidth === null ? 'transition-[width] duration-300' : 'select-none'}
 		{$settingsStore.sidebarExpanded ? 'lg:w-[var(--sidebar-w)]' : 'lg:w-16'}"
 	aria-label="Main navigation"
@@ -162,7 +142,7 @@
 				style="overscroll-behavior-y: contain; overflow-x: hidden"
 			>
 				<div bind:this={scrollContent}>
-					<SidebarBrand rail={showRail} onCollapse={collapseOrClose} onExpand={expandSidebar} />
+					<SidebarBrand rail={showRail} />
 					<SidebarActions
 						personas={personaLaunchers}
 						sessions={visibleSessions}
@@ -182,7 +162,7 @@
 
 	<!-- Over the border, wider than it so it can be caught. A focusable separator
 	     is a widget in ARIA, which Svelte's check does not know. -->
-	{#if !showRail && !isMobile}
+	{#if !showRail && $isDesktop}
 		<!-- svelte-ignore a11y_no_noninteractive_tabindex, a11y_no_noninteractive_element_interactions -->
 		<div
 			role="separator"
