@@ -129,15 +129,13 @@
 		     its contents stay put. -->
 		<div class="flex h-full w-full flex-col">
 			<!-- One scroller from the top of the column, so its bar runs the full height;
-			     the brand and New chat stick inside it. No rubber band: pulled past the top,
-			     it opened a strip of the bare column above the sticky blocks, a shade
-			     lighter than they are. Sideways overflow is hidden rather than scrolled,
-			     since while the column narrows it is wider than its frame. -->
+			     the brand and New chat stick inside it. Sideways overflow is hidden rather
+			     than scrolled, since while the column narrows it is wider than its frame. -->
 			<div
 				bind:this={scroller}
 				onscroll={measureScroll}
 				class="surface-column min-h-0 flex-1 overflow-y-auto"
-				style="overscroll-behavior-y: none; overflow-x: hidden"
+				style="overscroll-behavior-y: contain; overflow-x: hidden"
 			>
 				<div bind:this={scrollContent}>
 					<SidebarBrand rail={showRail} />

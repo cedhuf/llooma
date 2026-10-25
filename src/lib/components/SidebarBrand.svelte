@@ -22,7 +22,7 @@
 </script>
 
 <div
-	class="surface-column surface-sticky sticky top-0 z-10 flex h-[var(--app-header-h)] shrink-0 max-lg:h-[calc(var(--app-header-h)+var(--safe-top))]"
+	class="sidebar-brand surface-column surface-sticky sticky top-0 z-10 flex h-[var(--app-header-h)] shrink-0 max-lg:h-[calc(var(--app-header-h)+var(--safe-top))]"
 >
 	<!-- The block paints out to the frame's edge; its contents stop at the width the
 	     column is going to. Two jobs that used to be one and had to be separated: laid
@@ -80,3 +80,18 @@
 		{/if}
 	</div>
 </div>
+
+<style>
+	/* The rubber band pulls the column down past its top, and the strip it opens
+	   would show the bare column, a shade lighter than this bar. The bar carries its
+	   own material up into that strip instead. */
+	.sidebar-brand::before {
+		content: '';
+		position: absolute;
+		inset-inline: 0;
+		bottom: 100%;
+		height: 100vh;
+		background: inherit;
+		backdrop-filter: inherit;
+	}
+</style>
