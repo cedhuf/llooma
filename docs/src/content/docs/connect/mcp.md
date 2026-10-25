@@ -23,9 +23,11 @@ sandbox, which is a project of its own. HTTP is also where the protocol has been
 useful is given up.
 
 If the server you want speaks only stdio, run a gateway in front of it. That is the case
-[MCPHub](https://github.com/samanhappy/mcphub) and [MCPJungle](https://github.com/mcpjungle/MCPJungle)
-are built for: both are self-hosted, both sit in front of several MCP servers, stdio ones included,
-and both expose the lot behind a single HTTP endpoint. From Llooma's side that is one address, one
+[MCP Yard](https://cedhuf.github.io/mcpyard/), [MCPHub](https://github.com/samanhappy/mcphub) and
+[MCPJungle](https://github.com/mcpjungle/MCPJungle) are built for: all three are self-hosted, sit in
+front of several MCP servers, stdio ones included, and expose the lot behind a single HTTP endpoint.
+MCP Yard is the one written alongside Llooma, with one key per client limited to the servers and tools
+it may reach. From Llooma's side that is one address, one
 token, one card in the settings, and the fleet behind it is the gateway's business. It is a better
 arrangement than a list of servers here in any case: what may be reached, and by whom, is decided in
 one place instead of per account.
