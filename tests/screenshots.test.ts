@@ -58,17 +58,6 @@ If the answer is *nothing much*, self-host it and enjoy it. Photos, files, notes
 
 If the answer involves someone else's job, a payment failing or a message not arriving, pay a professional. Not because you could not do it, but because at three in the morning you will not want to.`
 			},
-			{ role: 'user', content: 'Where would you start?' },
-			{
-				role: 'assistant',
-				content: `Files and photos, in that order.
-
-1. **Files.** You already own them, the failure mode is inconvenience rather than loss, and they teach you backups on the day you care least about the outcome.
-2. **Photos.** The same shape with more emotional weight, so you will actually test the restore.
-3. **Notes and bookmarks.** Small, and they make the whole thing feel worth it every day.
-
-Leave mail until last. It is the one where a bad afternoon costs you a job offer.`
-			},
 			{ role: 'user', content: 'How do I check a backup actually restores?' },
 			{
 				role: 'assistant',
@@ -170,6 +159,108 @@ The float test is popular and unreliable: a starter can float on gas it made yes
 		options: {},
 		systemPrompt: { role: 'system', content: '' },
 		messages: [{ role: 'user', content: 'One stone or three?' }]
+	},
+	{
+		id: 'lis01',
+		title: 'Planning four days in Lisbon',
+		updatedAt: ago(3),
+		model: MODEL,
+		options: {},
+		systemPrompt: { role: 'system', content: '' },
+		messages: [
+			{ role: 'user', content: 'Four days in Lisbon in May, what would you not skip?' },
+			{
+				role: 'assistant',
+				content:
+					'Belém early, before the coaches. An afternoon in Alfama with no plan at all. A tram ride you take for the view rather than the destination, and one long lunch at a tasca where the menu is a sheet of paper.'
+			}
+		]
+	},
+	{
+		id: 'dns01',
+		title: 'Explaining DNS to my dad',
+		updatedAt: ago(5),
+		model: MODEL_B,
+		options: {},
+		systemPrompt: { role: 'system', content: '' },
+		messages: [
+			{ role: 'user', content: 'How do I explain DNS to my dad without losing him?' },
+			{
+				role: 'assistant',
+				content:
+					'Call it the phone book of the internet. He types a name, the computer looks up the number, then calls it. When a site "is down" for him alone, it is often the phone book that is out of date, not the site.'
+			}
+		]
+	},
+	{
+		id: 'tap01',
+		title: 'Fixing a dripping tap',
+		updatedAt: ago(30),
+		model: MODEL,
+		options: {},
+		systemPrompt: { role: 'system', content: '' },
+		messages: [
+			{ role: 'user', content: 'The kitchen tap drips. Washer or cartridge?' },
+			{
+				role: 'assistant',
+				content:
+					'Lever taps have a cartridge, the older two-handle kind have washers. Turn the water off under the sink first, and take a photo of the parts in order before you lift them out.'
+			}
+		]
+	},
+	{
+		id: 'job01',
+		title: 'Comparing two job offers',
+		updatedAt: ago(60),
+		model: MODEL_B,
+		options: {},
+		systemPrompt: { role: 'system', content: '' },
+		messages: [
+			{
+				role: 'user',
+				content: 'Two offers, one pays more, the other is remote. How do I compare them?'
+			},
+			{
+				role: 'assistant',
+				content:
+					'Put a price on the commute in hours, not only in money, and compare what each leaves you on a Wednesday evening. The salary gap usually shrinks once the hours are counted.'
+			}
+		]
+	},
+	{
+		id: 'book01',
+		title: 'Notes for the book club',
+		updatedAt: ago(200),
+		model: MODEL,
+		options: {},
+		systemPrompt: { role: 'system', content: '' },
+		messages: [
+			{
+				role: 'user',
+				content: 'Three questions to start the discussion on a novel nobody finished?'
+			},
+			{
+				role: 'assistant',
+				content:
+					'Which character would you have stopped reading for? What did the first chapter promise that the rest did not keep? And the safe one: where did you put it down, and why there?'
+			}
+		]
+	},
+	{
+		id: 'go01',
+		title: 'Learning Go after Python',
+		updatedAt: ago(400),
+		model: MODEL_B,
+		options: {},
+		systemPrompt: { role: 'system', content: '' },
+		messages: [
+			{ role: 'user', content: 'What surprises a Python developer most in Go?' },
+			{
+				role: 'assistant',
+				content:
+					'How little there is. No classes, explicit errors on every call, and a formatter that ends every style argument. The first week feels verbose, the second week feels calm.'
+			}
+		]
 	}
 ];
 
@@ -178,6 +269,31 @@ The float test is popular and unreliable: a starter can float on gas it made yes
  * voice screen is photographed on it, so it shows a face and a greeting rather
  * than an orb on an empty page.
  */
+function personaSession(
+	id: string,
+	persona: string,
+	hours: number,
+	greeting: string,
+	user: string,
+	reply: string
+) {
+	return {
+		id,
+		title: persona.charAt(0).toUpperCase() + persona.slice(1),
+		personaId: `seed-persona-${persona}`,
+		updatedAt: ago(hours),
+		model: MODEL,
+		options: {},
+		systemPrompt: { role: 'system', content: '' },
+		systemPromptEdited: true,
+		messages: [
+			{ role: 'assistant', content: greeting },
+			{ role: 'user', content: user },
+			{ role: 'assistant', content: reply }
+		]
+	};
+}
+
 const PERSONA_SESSION = {
 	id: 'nova01',
 	title: 'Nova',
@@ -190,9 +306,47 @@ const PERSONA_SESSION = {
 	messages: [{ role: 'assistant', content: 'Nova here. What are we untangling?' }]
 };
 
+/** A conversation for each persona, so the sidebar shows them as people you talk to. */
+const PERSONA_SESSIONS = [
+	PERSONA_SESSION,
+	personaSession(
+		'atlas01',
+		'atlas',
+		4,
+		'Atlas. Keep it short and I will too.',
+		'Rent or buy, in one line?',
+		'Rent if you might move within five years. Buy if you would stay ten.'
+	),
+	personaSession(
+		'wren01',
+		'wren',
+		26,
+		'Wren speaking. Take your time.',
+		'Is this opening too long? "It was, in many ways, a year of many changes."',
+		'Two "many" in one line, and the sentence says nothing yet. Start with the change itself.'
+	),
+	personaSession(
+		'juno01',
+		'juno',
+		50,
+		'Juno. Where to, and for how long?',
+		'A weekend with two kids, two hours from Lyon?',
+		'Annecy. The lake path is flat for small legs, and the old town is a short walk from the water.'
+	),
+	personaSession(
+		'basil01',
+		'basil',
+		90,
+		'Basil here. What is in the fridge?',
+		'Eggs, a leek, some cheese.',
+		'A leek and cheese omelette. Soften the leek slowly in butter first, it does all the work.'
+	)
+];
+
 const PERSONAS = [
 	{
 		id: 'seed-persona-nova',
+		sessionId: 'nova01',
 		name: 'Nova',
 		tagline: 'Explains things twice, without sighing',
 		systemPrompt: 'You are Nova, a patient explainer.',
@@ -202,6 +356,7 @@ const PERSONAS = [
 	},
 	{
 		id: 'seed-persona-atlas',
+		sessionId: 'atlas01',
 		name: 'Atlas',
 		tagline: 'Short answers, no preamble',
 		systemPrompt: 'You are Atlas, blunt and quick.',
@@ -211,12 +366,55 @@ const PERSONAS = [
 	},
 	{
 		id: 'seed-persona-wren',
+		sessionId: 'wren01',
 		name: 'Wren',
 		tagline: 'Reads a draft properly before saying anything',
 		systemPrompt: 'You are Wren, careful with words.',
 		greeting: 'Wren speaking. Take your time.',
 		avatarColor: '#D85A30',
 		params: {}
+	},
+	{
+		id: 'seed-persona-juno',
+		sessionId: 'juno01',
+		name: 'Juno',
+		tagline: 'Plans trips that fit the people going',
+		systemPrompt: 'You are Juno, a practical travel planner.',
+		greeting: 'Juno. Where to, and for how long?',
+		avatarColor: '#0EA5E9',
+		params: {}
+	},
+	{
+		id: 'seed-persona-basil',
+		sessionId: 'basil01',
+		name: 'Basil',
+		tagline: 'Cooks with what you already have',
+		systemPrompt: 'You are Basil, a home cook who hates waste.',
+		greeting: 'Basil here. What is in the fridge?',
+		avatarColor: '#84CC16',
+		params: {}
+	}
+];
+
+/** A little written down, so the library is not only personas. */
+const KNOWLEDGE = [
+	{
+		id: 'seed-k-home',
+		name: 'Home network',
+		content: 'Router in the hallway cupboard. Guest Wi-Fi is "Garden". The NAS backs up at 2am.',
+		updatedAt: ago(48)
+	},
+	{
+		id: 'seed-k-style',
+		name: 'How I like answers',
+		content: 'Short first, details after. Metric units. No bullet points unless I ask.',
+		updatedAt: ago(120)
+	},
+	{
+		id: 'seed-k-family',
+		name: 'Family allergies',
+		content: 'Léa: peanuts. Tom: none. Grandma: lactose.',
+		updatedAt: ago(300)
 	}
 ];
 
@@ -293,6 +491,7 @@ async function seed(page: Page, patch: Record<string, unknown> = {}) {
 
 	await page.request.put('/api/data/sessions', { data: sessionsFor(models) });
 	await page.request.put('/api/data/personas', { data: PERSONAS });
+	await page.request.put('/api/data/knowledge', { data: KNOWLEDGE });
 	await configure(page, patch);
 }
 
@@ -301,7 +500,7 @@ const models: { name: string; serverId: string }[] = [];
 
 /** The fixtures, pointed at the connections this instance actually made. */
 function sessionsFor(resolved: { name: string; serverId: string }[]) {
-	return [...SESSIONS, PERSONA_SESSION].map((session) => ({
+	return [...SESSIONS, ...PERSONA_SESSIONS].map((session) => ({
 		...session,
 		model: resolved.find((model) => model.name === session.model.name) ?? session.model
 	}));
@@ -379,7 +578,7 @@ const DOCS_FRAMES = new Set([
 	'desktop_library',
 	'desktop_search',
 	'phone_home',
-	'phone_voice'
+	'phone_library'
 ]);
 
 const docsCopy = (name: string) => (DOCS_FRAMES.has(name) ? `${DOCS_OUT}/${name}.png` : undefined);
@@ -436,7 +635,7 @@ const PHONE_SHOTS = [
 	'mobile_library',
 	'phone_home',
 	'phone_conversation',
-	'phone_voice'
+	'phone_library'
 ] as const;
 
 async function readShot(name: string) {
@@ -772,6 +971,8 @@ test.beforeAll(async () => {
 test.describe('screenshots', () => {
 	// Wiped first: a stale capture frames cleanly and ships.
 	test.skip(!process.env.SCREENSHOTS, 'run with `pnpm run screenshots`');
+	// Captured at a retina density, as the app is seen on the screens that show it.
+	test.use({ deviceScaleFactor: 2 });
 	test.describe.configure({ timeout: 120_000 });
 
 	test('mobile', async ({ page }) => {
@@ -813,12 +1014,12 @@ test.describe('screenshots', () => {
 		await page.waitForTimeout(600);
 		await shootPhone(page, 'phone_conversation');
 
-		// Opened on somebody, so the screen has a face, a name and a greeting.
-		await page.goto(`/m/voice?session=${PERSONA_SESSION.id}`);
-		// The greeting is drawn one letter per element, so no text query matches it.
-		await expect(page.getByRole('link', { name: /Nova/ })).toBeVisible();
-		await page.waitForTimeout(900);
-		await shootPhone(page, 'phone_voice');
+		// Not the voice screen: it needs a live speech provider, and without one it
+		// photographs as an error.
+		await page.goto('/m/library');
+		await expect(page.getByText('Atlas').first()).toBeVisible();
+		await page.waitForTimeout(400);
+		await shootPhone(page, 'phone_library');
 	});
 
 	test('desktop', async ({ page }) => {

@@ -89,8 +89,8 @@ What a phone gets by default: one column, a tab bar where a thumb already is, an
 over to talking rather than typing. It is a different product from the one above, not the same one
 narrower.
 
-| ![The home screen](static/screenshots/framed/phone_home.png) | ![A conversation](static/screenshots/framed/phone_conversation.png) | ![Talking to a persona](static/screenshots/framed/phone_voice.png) |
-| ------------------------------------------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| ![The home screen](static/screenshots/framed/phone_home.png) | ![A conversation](static/screenshots/framed/phone_conversation.png) | ![The library](static/screenshots/framed/phone_library.png) |
+| ------------------------------------------------------------ | ------------------------------------------------------------------- | ----------------------------------------------------------- |
 
 ### The responsive interface, on a phone
 
