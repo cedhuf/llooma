@@ -16,6 +16,7 @@
 		Wrench,
 		X
 	} from '@lucide/svelte';
+	import { Tabs } from 'bits-ui';
 	import type { Component } from 'svelte';
 
 	import LL from '$i18n/i18n-svelte';
@@ -46,20 +47,27 @@
 		id: string;
 		label: string;
 		icon: Component<{ class?: string }>;
+		panel: Component;
 		visible?: boolean;
 	}
 
 	const tabs = $derived<Tab[]>(
 		[
-			{ id: 'profile', label: $LL.profile(), icon: User },
-			{ id: 'servers', label: $LL.servers(), icon: Server },
-			{ id: 'admin', label: 'Admin', icon: Shield, visible: isAdmin },
+			{ id: 'profile', label: $LL.profile(), icon: User, panel: Profile },
+			{ id: 'servers', label: $LL.servers(), icon: Server, panel: ServerConnections },
+			{ id: 'admin', label: 'Admin', icon: Shield, panel: Admin, visible: isAdmin },
 			// Beside Admin and gated the same way, because it is the other half of running
 			// an instance: Admin is how it behaves, this is who is on it. Unlike Admin, it
 			// goes away where nobody signs in.
-			{ id: 'users', label: $LL.users(), icon: UsersRound, visible: $hasAccounts && isAdmin },
-			{ id: 'chat', label: 'Chat', icon: MessageSquare },
-			{ id: 'tools', label: 'Tools', icon: Wrench },
+			{
+				id: 'users',
+				label: $LL.users(),
+				icon: UsersRound,
+				panel: Users,
+				visible: $hasAccounts && isAdmin
+			},
+			{ id: 'chat', label: 'Chat', icon: MessageSquare, panel: Chat },
+			{ id: 'tools', label: 'Tools', icon: Wrench, panel: Tools },
 			// Beside Tools rather than inside it: a bot answering on another server is not a
 			// capability of a conversation, it is a place this instance answers from.
 			//
@@ -69,39 +77,27 @@
 				id: 'bots',
 				label: $LL.botIntegrations(),
 				icon: Bot,
+				panel: BotIntegrations,
 				visible: $integrationsConfig.canManage
 			},
 			// Its own tab for the same reason Prompts has one: two models, each with a
 			// switch and a voice, the language and the parameters still to come, and the
 			// loop's own behaviour underneath.
-			{ id: 'voice', label: $LL.voiceTab(), icon: Mic },
+			{ id: 'voice', label: $LL.voiceTab(), icon: Mic, panel: Voice },
 			// Its own tab rather than a section of Tools: twenty prompts folded into one
 			// dropdown at the bottom of a long scroll is a feature nobody finds.
-			{ id: 'prompts', label: $LL.promptsTab(), icon: MessageSquareQuote },
-			{ id: 'interface', label: $LL.interface(), icon: Settings2 },
-			{ id: 'data', label: 'Data', icon: Database },
-			{ id: 'version', label: 'About', icon: Info }
+			{ id: 'prompts', label: $LL.promptsTab(), icon: MessageSquareQuote, panel: Prompts },
+			{ id: 'interface', label: $LL.interface(), icon: Settings2, panel: Interface },
+			{ id: 'data', label: 'Data', icon: Database, panel: DataManagement },
+			{ id: 'version', label: 'About', icon: Info, panel: Version }
 		].filter((t) => t.visible !== false)
 	);
 
-	let tabEls: Record<string, HTMLButtonElement> = {};
-
-	// Roving arrow-key navigation across the tab list.
-	function onTablistKeydown(e: KeyboardEvent) {
-		const keys = ['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft'];
-		if (!keys.includes(e.key)) return;
-		e.preventDefault();
-		const idx = tabs.findIndex((t) => t.id === activeTab);
-		if (idx < 0) return;
-		const step = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : -1;
-		const next = tabs[(idx + step + tabs.length) % tabs.length];
-		activeTab = next.id;
-		tabEls[next.id]?.focus();
-	}
+	const Panel = $derived(tabs.find((tab) => tab.id === activeTab)?.panel);
 </script>
 
 <Modal bind:open={$settingsModalOpen} closeButton={false}>
-	<div class="flex w-full flex-col sm:flex-row">
+	<Tabs.Root bind:value={activeTab} orientation="vertical" class="flex w-full flex-col sm:flex-row">
 		<div
 			class="border-shade-2 bg-shade-0 flex shrink-0 flex-col border-b sm:w-48 sm:border-r sm:border-b-0"
 		>
@@ -124,30 +120,22 @@
 				</button>
 			</div>
 
-			<div
-				role="tablist"
+			<Tabs.List
 				aria-label={$LL.settings()}
-				tabindex={-1}
-				onkeydown={onTablistKeydown}
 				class="flex touch-pan-x gap-1 overflow-x-auto p-2 sm:flex-1 sm:touch-auto sm:flex-col sm:overflow-visible sm:p-3"
 			>
 				{#each tabs as tab (tab.id)}
 					{@const Icon = tab.icon}
 					{@const active = activeTab === tab.id}
-					<button
-						bind:this={tabEls[tab.id]}
-						role="tab"
-						aria-selected={active}
-						aria-controls="settings-panel"
-						tabindex={active ? 0 : -1}
-						onclick={() => (activeTab = tab.id)}
+					<Tabs.Trigger
+						value={tab.id}
 						class="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors {active
 							? 'bg-accent/10 text-accent font-medium'
 							: 'hover:bg-shade-2 text-body'}"
 					>
 						<Icon class="h-4 w-4 shrink-0" />
 						{tab.label}
-					</button>
+					</Tabs.Trigger>
 				{/each}
 
 				{#if $hasAccounts}
@@ -162,7 +150,7 @@
 						</button>
 					</form>
 				{/if}
-			</div>
+			</Tabs.List>
 		</div>
 
 		<!-- Matching-height header carrying the close, aligned with the sidebar title.
@@ -201,33 +189,9 @@
 					<X class="h-4 w-4" />
 				</button>
 			</div>
-			<div id="settings-panel" role="tabpanel" class="flex-1 overflow-auto p-4">
-				{#if activeTab === 'servers'}
-					<ServerConnections />
-				{:else if activeTab === 'admin'}
-					<Admin />
-				{:else if activeTab === 'users'}
-					<Users />
-				{:else if activeTab === 'chat'}
-					<Chat />
-				{:else if activeTab === 'bots'}
-					<BotIntegrations />
-				{:else if activeTab === 'tools'}
-					<Tools />
-				{:else if activeTab === 'voice'}
-					<Voice />
-				{:else if activeTab === 'prompts'}
-					<Prompts />
-				{:else if activeTab === 'interface'}
-					<Interface />
-				{:else if activeTab === 'profile'}
-					<Profile />
-				{:else if activeTab === 'data'}
-					<DataManagement />
-				{:else if activeTab === 'version'}
-					<Version />
-				{/if}
-			</div>
+			<Tabs.Content value={activeTab} class="flex-1 overflow-auto p-4 outline-none">
+				<Panel />
+			</Tabs.Content>
 		</div>
-	</div>
+	</Tabs.Root>
 </Modal>
