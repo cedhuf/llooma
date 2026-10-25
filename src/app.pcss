@@ -1063,9 +1063,8 @@
 	 * paint, before the attribute is set, is already the opaque one.
 	 */
 	/* A column surface the list scrolls under: tint alone over a picture lets the
-	   passing text show through, so it filters what is behind it like a floating
-	   card does. Opaque without a picture, where there is nothing to filter. */
-	:root[data-wallpaper='on']:not([data-transparency='off']) .surface-sticky {
+	   passing text show through, so it filters what is behind it. */
+	.surface-sticky {
 		backdrop-filter: blur(16px);
 	}
 
