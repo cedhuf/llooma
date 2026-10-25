@@ -987,9 +987,8 @@ test.describe('screenshots', () => {
 		await expect(page.getByText('Reading a sourdough starter')).toBeVisible();
 		await shootPhone(page, 'mobile_sidebar');
 
-		await configure(page, { themeMode: 'dark' });
 		await page.goto('/sessions');
-		await expect(page.locator('html')).toHaveAttribute('data-color-theme', 'dark');
+		await expect(page.getByRole('heading', { name: /Good/ })).toBeVisible();
 		await shootPhone(page, 'mobile_home');
 
 		await page.goto('/library');

@@ -79,9 +79,16 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), and
 
 ## Screenshots
 
-| ![A conversation](static/screenshots/framed/desktop_conversation.png) | ![Dark mode](static/screenshots/framed/desktop_conversation_dark.png)         | ![The collapsed sidebar](static/screenshots/framed/desktop_rail.png)  |
-| --------------------------------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| ![Library](static/screenshots/framed/desktop_library.png)             | ![Searching every conversation](static/screenshots/framed/desktop_search.png) | ![Interface settings](static/screenshots/framed/desktop_settings.png) |
+<p align="center">
+	<img src="static/screenshots/framed/desktop_conversation.png" alt="A conversation" width="32%">
+	<img src="static/screenshots/framed/desktop_conversation_dark.png" alt="Dark mode" width="32%">
+	<img src="static/screenshots/framed/desktop_rail.png" alt="The collapsed sidebar" width="32%">
+</p>
+<p align="center">
+	<img src="static/screenshots/framed/desktop_library.png" alt="Library" width="32%">
+	<img src="static/screenshots/framed/desktop_search.png" alt="Searching every conversation" width="32%">
+	<img src="static/screenshots/framed/desktop_settings.png" alt="Interface settings" width="32%">
+</p>
 
 ### The phone interface
 
@@ -89,16 +96,22 @@ What a phone gets by default: one column, a tab bar where a thumb already is, an
 over to talking rather than typing. It is a different product from the one above, not the same one
 narrower.
 
-| ![The home screen](static/screenshots/framed/phone_home.png) | ![A conversation](static/screenshots/framed/phone_conversation.png) | ![The library](static/screenshots/framed/phone_library.png) |
-| ------------------------------------------------------------ | ------------------------------------------------------------------- | ----------------------------------------------------------- |
+<p align="center">
+	<img src="static/screenshots/framed/phone_home.png" alt="The home screen" width="28%">
+	<img src="static/screenshots/framed/phone_conversation.png" alt="A conversation" width="28%">
+	<img src="static/screenshots/framed/phone_library.png" alt="The library" width="28%">
+</p>
 
 ### The responsive interface, on a phone
 
 The same layout a desktop gets, narrower. Still there for anyone who prefers it, one switch away in
 _Settings, Chat_.
 
-| ![A conversation](static/screenshots/framed/mobile_conversation.png) | ![Your conversations](static/screenshots/framed/mobile_sidebar.png) | ![The home screen](static/screenshots/framed/mobile_home.png) |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------- |
+<p align="center">
+	<img src="static/screenshots/framed/mobile_conversation.png" alt="A conversation" width="28%">
+	<img src="static/screenshots/framed/mobile_sidebar.png" alt="Your conversations" width="28%">
+	<img src="static/screenshots/framed/mobile_home.png" alt="The home screen" width="28%">
+</p>
 
 ## Similar projects
 
