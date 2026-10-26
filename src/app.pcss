@@ -14,9 +14,10 @@
 	--text-aside--line-height: 1rem;
 	--text-aside-lg: 0.875rem;
 	--text-aside-lg--line-height: 1.25rem;
-	/* An answer's line length, as `max-w-read`. In `ch` so it follows the face and size:
-	   about 97 characters a line in Inter. */
-	--container-read: 72ch;
+	/* An answer's line length, as `max-w-read`: about 91 characters in either face.
+	   In `em` rather than `ch`, since the width of a "0" differs between faces far more
+	   than the width of an average letter does. */
+	--container-read: 45em;
 
 	--color-accent: hsl(var(--hsl-primary));
 	--color-shade-0: hsl(var(--hsl-shade-0));
