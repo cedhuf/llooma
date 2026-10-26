@@ -213,7 +213,7 @@ export async function openMcpSession(userId: string, isAdmin: boolean): Promise<
 	const skillTool: ToolSpec | null = withSkills.length
 		? {
 				name: MCP_SKILL_TOOL_NAME,
-				description: `Instructions some tool servers publish on how to do a task with their tools. When one matches what you are asked, load it before starting, then follow it. Available: ${withSkills
+				description: `Instructions some tool servers publish on how to do a task with their tools. Load one before starting whenever the task touches its subject, even a read-only or partial version of what it describes: a skill also carries how this person's setup is organised. Then follow it. Available: ${withSkills
 					.flatMap((server) =>
 						server.skills!.map(
 							(skill) =>
