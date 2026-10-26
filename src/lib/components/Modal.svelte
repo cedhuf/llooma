@@ -8,9 +8,11 @@
 		children: Snippet;
 		/** Show the built-in close (X). Disable when the content renders its own. */
 		closeButton?: boolean;
+		/** `large` for the dialogs that hold whole panels (settings, store); it only grows from `lg` up. */
+		size?: 'default' | 'large';
 	}
 
-	let { open = $bindable(false), children, closeButton = true }: Props = $props();
+	let { open = $bindable(false), children, closeButton = true, size = 'default' }: Props = $props();
 </script>
 
 <Dialog.Root bind:open>
@@ -32,7 +34,10 @@
 		     No height of its own on a phone: `inset-0` already spans the window, and a
 		     height in viewport units can disagree with it. -->
 		<Dialog.Content
-			class="modal-content bg-shade-1 sm:modal-panel fixed inset-0 z-50 flex w-screen overflow-clip max-sm:pt-[var(--safe-top)] max-sm:pb-[var(--safe-bottom)] sm:m-auto sm:h-[600px] sm:max-h-[85vh] sm:w-[90vw] sm:max-w-3xl sm:rounded-xl"
+			class="modal-content bg-shade-1 sm:modal-panel fixed inset-0 z-50 flex w-screen overflow-clip max-sm:pt-[var(--safe-top)] max-sm:pb-[var(--safe-bottom)] sm:m-auto sm:h-[600px] sm:max-h-[85vh] sm:w-[90vw] sm:max-w-3xl sm:rounded-xl {size ===
+			'large'
+				? 'lg:h-[680px] lg:max-w-4xl xl:h-[720px] xl:max-w-5xl'
+				: ''}"
 		>
 			{#if closeButton}
 				<!-- An absolutely positioned box is laid out against the padding box, which the

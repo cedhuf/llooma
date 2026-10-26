@@ -253,7 +253,7 @@
 	{/if}
 {/snippet}
 
-<Modal bind:open closeButton={false}>
+<Modal bind:open closeButton={false} size="large">
 	<div class="flex h-full w-full flex-col">
 		<div class="border-shade-2 flex h-12 shrink-0 items-center justify-between gap-2 border-b px-4">
 			<span class="text-active truncate text-sm font-semibold">{title}</span>

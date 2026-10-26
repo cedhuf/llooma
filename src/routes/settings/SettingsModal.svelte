@@ -96,7 +96,7 @@
 	const Panel = $derived(tabs.find((tab) => tab.id === activeTab)?.panel);
 </script>
 
-<Modal bind:open={$settingsModalOpen} closeButton={false}>
+<Modal bind:open={$settingsModalOpen} closeButton={false} size="large">
 	<Tabs.Root bind:value={activeTab} orientation="vertical" class="flex w-full flex-col sm:flex-row">
 		<div
 			class="border-shade-2 bg-shade-0 flex shrink-0 flex-col border-b sm:w-48 sm:border-r sm:border-b-0"
