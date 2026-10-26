@@ -942,6 +942,7 @@ const en = {
 	mcpConnected: 'Connected. {count:number} tool{{s}} found.',
 	mcpUpdateTools: 'Update tools',
 	mcpUngrouped: 'Other tools',
+	mcpSkills: 'Skills',
 	mcpNoTools: 'This server offers no tools.',
 	mcpToolsAsOf: 'As this server answered on {date:string}.',
 	mcpToolsFound: '{count:number} tool{{s}}',

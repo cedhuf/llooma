@@ -94,6 +94,25 @@
 	}
 </script>
 
+{#snippet toggle(label: string, count: number, on: boolean, onToggle: (on: boolean) => void)}
+	<label class="flex cursor-pointer items-center justify-between gap-2">
+		<span class="text-active min-w-0 truncate text-xs font-medium">
+			{label}
+			<span class="text-muted font-normal">· {count}</span>
+		</span>
+		<input
+			type="checkbox"
+			checked={on}
+			onchange={(e) => onToggle(e.currentTarget.checked)}
+			aria-label={label}
+			class="peer sr-only"
+		/>
+		<span
+			class="bg-shade-3 peer-checked:bg-accent peer-focus-visible:ring-accent relative h-5 w-9 shrink-0 rounded-full transition-colors peer-focus-visible:ring-2 after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-4"
+		></span>
+	</label>
+{/snippet}
+
 <SettingsCard
 	bind:open
 	label={$LL.mcpServerOptions()}
@@ -215,22 +234,9 @@
 		>
 			{#each groups as { group, tools } (group)}
 				<div class="flex flex-col gap-1.5">
-					<label class="flex cursor-pointer items-center justify-between gap-2">
-						<span class="text-active min-w-0 truncate text-xs font-medium">
-							{group || $LL.mcpUngrouped()}
-							<span class="text-muted font-normal">· {tools.length}</span>
-						</span>
-						<input
-							type="checkbox"
-							checked={isOn(group)}
-							onchange={(e) => setGroup(group, e.currentTarget.checked)}
-							aria-label={group || $LL.mcpUngrouped()}
-							class="peer sr-only"
-						/>
-						<span
-							class="bg-shade-3 peer-checked:bg-accent peer-focus-visible:ring-accent relative h-5 w-9 shrink-0 rounded-full transition-colors peer-focus-visible:ring-2 after:absolute after:top-0.5 after:left-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-transform peer-checked:after:translate-x-4"
-						></span>
-					</label>
+					{@render toggle(group || $LL.mcpUngrouped(), tools.length, isOn(group), (on) =>
+						setGroup(group, on)
+					)}
 
 					<!-- The names, for reading rather than choosing: what the switch above covers.
 					     Faded when it is off, since none of them is being offered to anything. -->
@@ -247,6 +253,27 @@
 			{:else}
 				<span class="text-muted text-xs">{$LL.mcpNoTools()}</span>
 			{/each}
+
+			<!-- Instructions the server publishes, read by the model when a task matches
+			     one. Their own switch: text from a server is not the same thing as its tools. -->
+			{#if server.skills.length}
+				<div class="flex flex-col gap-1.5">
+					{@render toggle($LL.mcpSkills(), server.skills.length, server.skillsEnabled, (on) => {
+						server.skillsEnabled = on;
+						onChange();
+					})}
+					<div class="flex flex-wrap gap-1.5 {server.skillsEnabled ? '' : 'opacity-40'}">
+						{#each server.skills as skill, index (index)}
+							<span
+								title={skill.description}
+								class="bg-shade-2 text-muted max-w-[15rem] truncate rounded-full px-2 py-0.5 text-xs"
+							>
+								{skill.name}
+							</span>
+						{/each}
+					</div>
+				</div>
+			{/if}
 
 			<span class="text-muted text-xs leading-snug">
 				{$LL.mcpToolsAsOf({ date: new Date(server.toolsAt).toLocaleString() })}

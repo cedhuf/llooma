@@ -99,6 +99,7 @@
 					url: server.url,
 					enabled: server.enabled,
 					disabledGroups: server.disabledGroups,
+					skillsEnabled: server.skillsEnabled,
 					// Omitted keeps the stored one. Sent only when somebody typed.
 					...(secret ? { secret } : {})
 				});

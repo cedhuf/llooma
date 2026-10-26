@@ -15,7 +15,12 @@ import {
 } from '$lib/chat/tools';
 import { formatCurrentDateTime } from '$lib/currentDate';
 import { resolvePrompt } from '$lib/defaultPrompts';
-import { isMcpToolName, MCP_DISCOVERY_TOOL_NAME, type McpApprovalRequest } from '$lib/mcp';
+import {
+	isMcpToolName,
+	MCP_DISCOVERY_TOOL_NAME,
+	MCP_SKILL_TOOL_NAME,
+	type McpApprovalRequest
+} from '$lib/mcp';
 import {
 	indexLine,
 	MEMORY_LIMITS,
@@ -573,15 +578,20 @@ export async function runTurn(
 				return runMemoryCall(call.name, args);
 			}
 
-			if (mcp && call.name === MCP_DISCOVERY_TOOL_NAME) {
-				// Not put to the person: asking what a server offers reads a list this turn
-				// already holds. The calls that follow are each approved as usual.
+			if (mcp && (call.name === MCP_DISCOVERY_TOOL_NAME || call.name === MCP_SKILL_TOOL_NAME)) {
+				// Not put to the person: one lists what this turn already holds, the other
+				// reads text a server publishes, and nothing in a skill runs. The calls it
+				// leads to are each approved as usual.
 				const outcome = await mcp.call(call.name, args);
 				emit({
 					type: 'trace',
 					step: {
 						type: 'mcp',
-						mcp: { server: outcome.server, tool: '', ...(outcome.failed ? { failed: true } : {}) }
+						mcp: {
+							server: outcome.server,
+							tool: call.name === MCP_SKILL_TOOL_NAME ? outcome.tool : '',
+							...(outcome.failed ? { failed: true } : {})
+						}
 					}
 				});
 				return outcome.text;

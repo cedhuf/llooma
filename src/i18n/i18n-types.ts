@@ -3387,6 +3387,10 @@ type RootTranslation = {
 	 */
 	mcpUngrouped: string
 	/**
+	 * S​k​i​l​l​s
+	 */
+	mcpSkills: string
+	/**
 	 * T​h​i​s​ ​s​e​r​v​e​r​ ​o​f​f​e​r​s​ ​n​o​ ​t​o​o​l​s​.
 	 */
 	mcpNoTools: string
@@ -7692,6 +7696,10 @@ export type TranslationFunctions = {
 	 * Other tools
 	 */
 	mcpUngrouped: () => LocalizedString
+	/**
+	 * Skills
+	 */
+	mcpSkills: () => LocalizedString
 	/**
 	 * This server offers no tools.
 	 */

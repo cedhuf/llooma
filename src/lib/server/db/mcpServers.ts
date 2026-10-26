@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { normaliseMcpUrl, slugify, type McpServerView } from '$lib/mcp';
+import { normaliseMcpUrl, slugify, type McpServerView, type McpSkillSummary } from '$lib/mcp';
 import { decrypt, encrypt } from '$lib/server/crypto';
 
 import { getDb } from './index';
@@ -27,6 +27,8 @@ export interface McpServerRow {
 	tools: string | null;
 	tools_at: string | null;
 	disabled_groups: string | null;
+	skills: string | null;
+	skills_off: number;
 }
 
 export interface McpServerRecord {
@@ -45,6 +47,9 @@ export interface McpServerRecord {
 	toolsAt: string | null;
 	/** Groups this account has switched off, by name. A group is a server behind a gateway. */
 	disabledGroups: string[];
+	/** The skills it last listed, with the tools. */
+	skills: McpSkillSummary[];
+	skillsEnabled: boolean;
 }
 
 function toRecord(row: McpServerRow): McpServerRecord {
@@ -60,8 +65,25 @@ function toRecord(row: McpServerRow): McpServerRecord {
 		createdAt: row.created_at,
 		tools: parseTools(row.tools),
 		toolsAt: row.tools_at,
-		disabledGroups: parseTools(row.disabled_groups)
+		disabledGroups: parseTools(row.disabled_groups),
+		skills: parseSkills(row.skills),
+		skillsEnabled: !row.skills_off
 	};
+}
+
+function parseSkills(raw: string | null): McpSkillSummary[] {
+	if (!raw) return [];
+	try {
+		const parsed: unknown = JSON.parse(raw);
+		return Array.isArray(parsed)
+			? parsed.filter(
+					(skill): skill is McpSkillSummary =>
+						typeof skill?.name === 'string' && typeof skill?.description === 'string'
+				)
+			: [];
+	} catch {
+		return [];
+	}
 }
 
 /** A stored catalogue, or none. A row that will not parse is a row nobody has asked yet. */
@@ -90,7 +112,9 @@ export function toMcpServerView(record: McpServerRecord): McpServerView {
 		createdAt: record.createdAt,
 		tools: record.tools,
 		toolsAt: record.toolsAt,
-		disabledGroups: record.disabledGroups
+		disabledGroups: record.disabledGroups,
+		skills: record.skills,
+		skillsEnabled: record.skillsEnabled
 	};
 }
 
@@ -178,6 +202,7 @@ export function updateMcpServer(
 		secret?: string | null;
 		enabled?: boolean;
 		disabledGroups?: string[];
+		skillsEnabled?: boolean;
 	}
 ): McpServerRecord | null {
 	const current = getMcpServer(id);
@@ -209,6 +234,10 @@ export function updateMcpServer(
 		sets.push('disabled_groups = ?');
 		values.push(JSON.stringify(input.disabledGroups.filter((name) => typeof name === 'string')));
 	}
+	if (input.skillsEnabled !== undefined) {
+		sets.push('skills_off = ?');
+		values.push(input.skillsEnabled ? 0 : 1);
+	}
 	if (!sets.length) return current;
 
 	getDb()
@@ -225,10 +254,10 @@ export function setMcpServerBlocked(id: string, blocked: boolean): void {
 }
 
 /** Names only, replaced wholesale rather than merged: a tool that has gone from the catalogue has to disappear from ours, and a union of every list ever seen keeps it forever. */
-export function setMcpServerTools(id: string, tools: string[]): void {
+export function setMcpServerTools(id: string, tools: string[], skills: McpSkillSummary[]): void {
 	getDb()
-		.prepare('UPDATE mcp_servers SET tools = ?, tools_at = ? WHERE id = ?')
-		.run(JSON.stringify(tools), new Date().toISOString(), id);
+		.prepare('UPDATE mcp_servers SET tools = ?, skills = ?, tools_at = ? WHERE id = ?')
+		.run(JSON.stringify(tools), JSON.stringify(skills), new Date().toISOString(), id);
 }
 
 export function deleteMcpServer(id: string): void {

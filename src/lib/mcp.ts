@@ -37,6 +37,16 @@ export interface McpServerView {
 	 * rather than the kept ones, so a tool appearing later follows its group.
 	 */
 	disabledGroups: string[];
+	/** The skills it last listed, for the settings. Stored with the tools, by the same refresh. */
+	skills: McpSkillSummary[];
+	/** Whether a turn offers them at all. */
+	skillsEnabled: boolean;
+}
+
+/** A skill as the settings show it: what its `SKILL.md` frontmatter says it is. */
+export interface McpSkillSummary {
+	name: string;
+	description: string;
 }
 
 /** The bounds a turn holds an MCP server to. All of them are about a server that is slow, enormous or hostile. */
@@ -58,6 +68,8 @@ export const MCP_LIMITS = {
 	warnAboveTools: 100,
 	/** How much of one result reaches the model, in characters. */
 	resultChars: 20_000,
+	/** The same for one skill file. Higher, since a skill cut halfway is a set of instructions without its end. */
+	skillChars: 60_000,
 	/** Listing a catalogue, which happens once per turn per server. */
 	listTimeoutMs: 10_000,
 	/** One call. Generous: an MCP tool may be doing real work at the other end. */
@@ -134,6 +146,9 @@ export function mcpToolName(slug: string, tool: string): string {
  * one used constantly, which is why it is a switch.
  */
 export const MCP_DISCOVERY_TOOL_NAME = 'mcp_tools';
+
+/** The one tool that loads a skill a server serves, or one of its files. Its description carries the catalogue. */
+export const MCP_SKILL_TOOL_NAME = 'mcp_skill';
 
 /** Whether a name the model called belongs to an MCP server at all. */
 export function isMcpToolName(name: string): boolean {

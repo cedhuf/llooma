@@ -36,7 +36,8 @@ export async function PUT(event) {
 			// "no token".
 			secret: body.secret,
 			enabled: body.enabled,
-			disabledGroups: Array.isArray(body.disabledGroups) ? body.disabledGroups : undefined
+			disabledGroups: Array.isArray(body.disabledGroups) ? body.disabledGroups : undefined,
+			skillsEnabled: typeof body.skillsEnabled === 'boolean' ? body.skillsEnabled : undefined
 		});
 	} catch (cause) {
 		throw error(400, cause instanceof Error ? cause.message : 'Could not be saved');

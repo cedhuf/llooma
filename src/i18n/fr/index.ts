@@ -969,6 +969,7 @@ const fr = extendDictionary(en, {
 	mcpConnected: 'Connecté. {count:number} outil{{s}} trouvé{{s}}.',
 	mcpUpdateTools: 'Mettre à jour les outils',
 	mcpUngrouped: 'Autres outils',
+	mcpSkills: 'Skills',
 	mcpNoTools: 'Ce serveur ne propose aucun outil.',
 	mcpToolsAsOf: 'Tel que ce serveur a répondu le {date:string}.',
 	mcpToolsFound: '{count:number} outil{{s}}',

@@ -738,6 +738,16 @@ const migrations: Migration[] = [
 				update.run(JSON.stringify(settings), row.user_id);
 			}
 		}
+	},
+	{
+		version: 27,
+		up: `
+			-- The skills a server last listed, beside its tools, and the switch that
+			-- keeps them out of a turn. Off is the stored value so a new column reads
+			-- as on.
+			ALTER TABLE mcp_servers ADD COLUMN skills TEXT;
+			ALTER TABLE mcp_servers ADD COLUMN skills_off INTEGER NOT NULL DEFAULT 0;
+		`
 	}
 ];
 

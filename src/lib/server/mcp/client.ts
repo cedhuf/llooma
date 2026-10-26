@@ -1,4 +1,5 @@
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
+import { SkillsClient, type Skill } from '@modelcontextprotocol/client/ext/skills';
 
 import { env } from '$env/dynamic/private';
 import { APP_SLUG } from '$lib/brand';
@@ -112,6 +113,39 @@ export async function listMcpTools(client: Client): Promise<McpTool[]> {
 		}));
 
 	return tools;
+}
+
+/** A server without the extension answers with none. Invalid entries are dropped rather than failing the listing, and `"dynamic"` skills too: nothing checks their content. */
+export async function listMcpSkills(client: Client): Promise<Skill[]> {
+	const skills = new SkillsClient(client, { skipInvalid: true });
+	if (!skills.supported) return [];
+	try {
+		const listed = await skills.list(undefined, { timeout: MCP_LIMITS.listTimeoutMs });
+		return listed.skills.filter((skill) => Array.isArray(skill.resources));
+	} catch (cause) {
+		throw new McpError(reason(cause));
+	}
+}
+
+/** A skill named by URI rather than found in the listing, which a server may leave partial. */
+export async function getMcpSkill(client: Client, uri: string): Promise<Skill> {
+	try {
+		return (await new SkillsClient(client).get(uri, { timeout: MCP_LIMITS.listTimeoutMs })).skill;
+	} catch (cause) {
+		throw new McpError(reason(cause));
+	}
+}
+
+/** One file of a skill, `SKILL.md` by default, checked against the entry by the SDK. Throws `McpError` when it is not what the listing promised. */
+export async function readMcpSkill(client: Client, skill: Skill, file?: string): Promise<string> {
+	try {
+		const read = await new SkillsClient(client).read(skill, file, {
+			timeout: MCP_LIMITS.callTimeoutMs
+		});
+		return read.body ?? read.text ?? '[a binary file, which cannot be read here]';
+	} catch (cause) {
+		throw new McpError(reason(cause));
+	}
 }
 
 /** One call, and what the model should read back from it. */
