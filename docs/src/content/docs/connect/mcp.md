@@ -89,6 +89,22 @@ server switched on rather than per server: what costs is the size of a request, 
 the lot. Two hundred by default. Past a hundred the setting warns that all of it rides along in every request
 of every turn, which is the moment a gateway's groups start being the cheaper answer.
 
+## Skills
+
+A server can also publish skills: instructions on how to do a task with its tools, such as "triage
+the inbox: invoices to this folder, newsletters to that one". Llooma reads them through the MCP
+skills extension, and a server that does not offer any changes nothing.
+
+**Update tools** lists them alongside the tools, and they appear under the card's **advanced
+settings** with a switch of their own. In a turn, the model gets one extra tool listing every skill
+by name and description. It loads one when a task matches, and the files the skill refers to after
+that. Every file is checked against the server's listing before the model sees it.
+
+A skill is text the server wrote, and it reaches the model labelled that way: it is a set of
+instructions to weigh, not an order from you. A skill reads files only from its own server, never
+from another one. Nothing in it runs, since Llooma has no tool that executes code. Loading a skill
+is not put to you, but the calls it leads to are, like any other.
+
 ## Every call is put to you first
 
 A turn that wants to call an MCP tool stops and asks. The card shows which
