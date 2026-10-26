@@ -297,9 +297,12 @@
 	<article
 		id={anchorId}
 		class:folded
-		class="article article--{message.role} mx-auto mb-4 flex w-full max-w-[80ch] flex-col gap-y-2 last:mb-0 md:mb-6 {isUserRole
-			? 'items-end'
-			: ''} {message.role === 'system' ? 'border-shade-3 rounded-md border p-3 md:p-4' : ''}"
+		class="article article--{message.role} mb-4 flex w-full flex-col gap-y-2 last:mb-0 md:mb-6 {message.role ===
+		'assistant'
+			? 'mr-auto ml-[max(0px,calc((100%-80ch)/2))] max-w-[calc(80ch+4rem)]'
+			: 'mx-auto max-w-[80ch]'} {isUserRole ? 'items-end' : ''} {message.role === 'system'
+			? 'border-shade-3 rounded-md border p-3 md:p-4'
+			: ''}"
 	>
 		<!-- Identity only: who spoke and when. Mirrored for the user, so the badge hugs
 		     the message's outer edge on both sides. -->
