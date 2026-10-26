@@ -246,7 +246,6 @@
 	   tables stay in the interface's. */
 	:global(.article--assistant) .markdown {
 		font-family: var(--font-reading);
-		font-size-adjust: var(--reading-size-adjust, none);
 	}
 
 	:global(.article--reasoning) .markdown,
