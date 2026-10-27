@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	// The shared shell for every settings tab: centred, width-capped, consistent
-	// vertical rhythm between sections. Keeps all tabs visually aligned.
+	// The shared shell for every settings tab: the dialog's full width, with one
+	// vertical rhythm between sections so every tab lines up.
 	let { children }: { children: Snippet } = $props();
 </script>
 
-<div class="mx-auto flex w-full max-w-[60ch] flex-col gap-6">
+<div class="flex w-full flex-col gap-6">
 	{@render children()}
 </div>
