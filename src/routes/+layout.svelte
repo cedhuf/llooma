@@ -37,6 +37,7 @@
 	import { applyMcpConfig } from '$lib/mcpConfig';
 	import { applyServerPersonas } from '$lib/personasConfig';
 	import { applyServerPlaybooks } from '$lib/playbooksConfig';
+	import { dialogHost } from '$lib/portal.svelte';
 	import { applyServerSearch } from '$lib/search';
 	import { fetchServerConfig } from '$lib/serverConfig';
 	import { currentRole, currentUser } from '$lib/stores/auth';
@@ -461,7 +462,12 @@
 		>
 			<!-- On a desktop the sidebar and the page sit together in one rounded window,
 			     inset from the edges of the display. -->
-			<div class="relative flex min-w-0 flex-1 lg:overflow-hidden lg:rounded-xl lg:shadow-sm">
+			<!-- Also where the dialogs open: `contain` makes it the box a `fixed` overlay
+			     fills, and its clip rounds the overlay's corners with its own. -->
+			<div
+				bind:this={dialogHost.window}
+				class="relative flex min-w-0 flex-1 lg:overflow-hidden lg:rounded-xl lg:shadow-sm lg:[contain:layout]"
+			>
 				<CollapsibleSidebar />
 				<!-- The page runs the full height of the display. It owes the safe areas
 			     nothing: content is meant to pass under the status bar and the home

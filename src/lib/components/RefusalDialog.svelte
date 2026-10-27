@@ -3,6 +3,7 @@
 	import { AlertDialog } from 'bits-ui';
 
 	import LL from '$i18n/i18n-svelte';
+	import { dialogHost } from '$lib/portal.svelte';
 	import { instanceConfig } from '$lib/stores/instance';
 
 	/**
@@ -27,7 +28,7 @@
 </script>
 
 <AlertDialog.Root bind:open>
-	<AlertDialog.Portal>
+	<AlertDialog.Portal to={dialogHost.window ?? 'body'}>
 		<AlertDialog.Overlay class="modal-overlay modal-scrim fixed inset-0 z-40" />
 		<AlertDialog.Content
 			class="modal-content bg-shade-1 modal-panel fixed inset-0 z-50 m-auto flex h-fit w-[92vw] max-w-sm flex-col gap-3 rounded-2xl p-5"

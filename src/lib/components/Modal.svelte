@@ -3,6 +3,8 @@
 	import { Dialog } from 'bits-ui';
 	import type { Snippet } from 'svelte';
 
+	import { dialogHost } from '$lib/portal.svelte';
+
 	interface Props {
 		open: boolean;
 		children: Snippet;
@@ -16,7 +18,7 @@
 </script>
 
 <Dialog.Root bind:open>
-	<Dialog.Portal>
+	<Dialog.Portal to={dialogHost.window ?? 'body'}>
 		<!-- Blurred, not just dimmed: the page behind stays recognisable as context
 		     while losing enough detail to stop competing with the dialog. -->
 		<Dialog.Overlay class="modal-overlay modal-scrim fixed inset-0 z-40" />

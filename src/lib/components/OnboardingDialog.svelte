@@ -3,6 +3,8 @@
 	import { Dialog } from 'bits-ui';
 	import type { Snippet } from 'svelte';
 
+	import { dialogHost } from '$lib/portal.svelte';
+
 	/** The shared shell for every onboarding flow: the modal, the step indicator and the dismiss. Flows supply their own step content and footer. */
 	interface Props {
 		open: boolean;
@@ -34,7 +36,7 @@
 		if (!o) onDismiss();
 	}}
 >
-	<Dialog.Portal>
+	<Dialog.Portal to={dialogHost.window ?? 'body'}>
 		<Dialog.Overlay class="modal-overlay modal-scrim fixed inset-0 z-40" />
 		<Dialog.Content
 			class="modal-content bg-shade-1 modal-panel fixed inset-0 z-50 m-auto flex h-fit max-h-[88vh] w-[92vw] max-w-lg flex-col overflow-hidden rounded-2xl"
