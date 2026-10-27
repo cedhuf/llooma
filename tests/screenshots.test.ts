@@ -995,13 +995,16 @@ async function composeSocial(browser: Browser) {
 		<style>${FRAME_CSS}${fonts}
 			body {
 				width: ${SOCIAL.width}px; height: ${SOCIAL.height}px; position: relative; overflow: hidden;
-				background: radial-gradient(ellipse 60% 70% at 0% 0%, rgba(236, 108, 69, .22), transparent 70%), #17171a;
+				background:
+					radial-gradient(ellipse 60% 70% at 0% 0%, rgba(236, 108, 69, .22), transparent 70%),
+					radial-gradient(ellipse 55% 75% at 100% 0%, rgba(190, 80, 170, .34), transparent 70%),
+					#17171a;
 				font-family: Inter, sans-serif; color: #fafafa;
 			}
 			.pitch { position: absolute; left: 76px; top: 82px; width: 600px; }
 			.brand { display: flex; align-items: center; gap: 16px; font: 600 30px/1 Inter; }
 			.brand img { width: 50px; height: 50px; }
-			h1 { margin: 68px 0 0; font: 700 60px/1.12 Inter; letter-spacing: -1.5px; }
+			h1 { margin: 48px 0 0; font: 700 60px/1.12 Inter; letter-spacing: -1.5px; }
 			h1 em { font-style: normal; color: #ec6c45; }
 			p { margin: 30px 0 0; width: 540px; font: 400 21px/1.55 Inter; color: #a1a1aa; }
 			.tags { display: flex; gap: 10px; margin-top: 30px; }
@@ -1019,7 +1022,7 @@ async function composeSocial(browser: Browser) {
 		${windowHtml(
 			windowSrc,
 			windowEdges,
-			`top:110px;left:700px;transform:scale(${SOCIAL.window});--drop:0 26px 64px rgba(0,0,0,.5)`
+			`top:110px;left:765px;transform:scale(${SOCIAL.window});--drop:0 26px 64px rgba(0,0,0,.5)`
 		)}
 		${phoneHtml(
 			phoneSrc,
