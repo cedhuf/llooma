@@ -1,5 +1,5 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Browser, type Page } from '@playwright/test';
 
 /**
  * The app's own pictures of itself: drives it to known states and photographs
@@ -959,6 +959,79 @@ async function composeHero(page: Page) {
 	});
 }
 
+/**
+ * The social preview: the README's first picture and the docs' `og:image`, at the
+ * 1280x640 GitHub asks for. The dark window and phone on the right, the pitch on
+ * the left. One pixel per pixel: GitHub refuses a preview over 1 MB.
+ */
+const SOCIAL = { width: 1280, height: 640, window: 0.62, phone: 0.53 };
+
+const fontFace = async (weight: number, file: string) =>
+	`@font-face{font-family:Inter;font-weight:${weight};src:url(data:font/woff2;base64,${(
+		await readFile(`static/fonts/inter/${file}`)
+	).toString('base64')}) format('woff2')}`;
+
+async function composeSocial(browser: Browser) {
+	const context = await browser.newContext({ deviceScaleFactor: 1 });
+	const page = await context.newPage();
+
+	const windowSrc = await readShot('desktop_conversation_dark');
+	const phoneSrc = await readShot('phone_home_dark');
+	await page.setContent('<body></body>');
+	const windowEdges = await edges(page, windowSrc);
+	const phoneEdges = await edges(page, phoneSrc);
+	const logo = `data:image/png;base64,${(await readFile('static/logo-mark-dark.png')).toString('base64')}`;
+	const fonts = (
+		await Promise.all([
+			fontFace(400, 'Inter-Regular.woff2'),
+			fontFace(500, 'Inter-Medium.woff2'),
+			fontFace(600, 'Inter-SemiBold.woff2'),
+			fontFace(700, 'Inter-Bold.woff2')
+		])
+	).join('');
+
+	await page.setViewportSize({ width: SOCIAL.width, height: SOCIAL.height });
+	await page.setContent(`
+		<style>${FRAME_CSS}${fonts}
+			body {
+				width: ${SOCIAL.width}px; height: ${SOCIAL.height}px; position: relative; overflow: hidden;
+				background: radial-gradient(ellipse 60% 70% at 0% 0%, rgba(236, 108, 69, .22), transparent 70%), #17171a;
+				font-family: Inter, sans-serif; color: #fafafa;
+			}
+			.pitch { position: absolute; left: 76px; top: 82px; width: 600px; }
+			.brand { display: flex; align-items: center; gap: 16px; font: 600 30px/1 Inter; }
+			.brand img { width: 50px; height: 50px; }
+			h1 { margin: 68px 0 0; font: 700 60px/1.12 Inter; letter-spacing: -1.5px; }
+			h1 em { font-style: normal; color: #ec6c45; }
+			p { margin: 30px 0 0; width: 540px; font: 400 21px/1.55 Inter; color: #a1a1aa; }
+			.tags { display: flex; gap: 10px; margin-top: 30px; }
+			.tags span {
+				padding: 9px 17px; border-radius: 999px; font: 500 18px/1 Inter; color: #e4e4e7;
+				background: rgba(255, 255, 255, .07); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12);
+			}
+		</style>
+		<div class="pitch">
+			<div class="brand"><img src="${logo}">Llooma</div>
+			<h1>Every model you use,<br><em>in an app you host.</em></h1>
+			<p>Ollama under your desk or a provider you already pay for. Your chats, personas and keys, on your server.</p>
+			<div class="tags"><span>Ollama</span><span>OpenAI-compatible</span><span>Self-hosted</span></div>
+		</div>
+		${windowHtml(
+			windowSrc,
+			windowEdges,
+			`top:110px;left:700px;transform:scale(${SOCIAL.window});--drop:0 26px 64px rgba(0,0,0,.5)`
+		)}
+		${phoneHtml(
+			phoneSrc,
+			phoneEdges,
+			`top:72px;left:702px;transform:scale(${SOCIAL.phone});--drop:0 40px 90px rgba(0,0,0,.6)`
+		)}
+	`);
+	await settle(page);
+	await writeFile('docs/public/og.png', await page.screenshot({ animations: 'disabled' }));
+	await context.close();
+}
+
 test.beforeAll(async () => {
 	// Astro's image pipeline reads its own folder, not `static/`.
 	await rm(RAW, { recursive: true, force: true });
@@ -1008,6 +1081,14 @@ test.describe('screenshots', () => {
 		await page.waitForTimeout(900);
 		await shootPhone(page, 'phone_home');
 
+		// For the social banner, which is dark.
+		await configure(page, { simplifiedMobileUI: true, themeMode: 'dark' });
+		await page.goto('/m');
+		await expect(page.locator('html')).toHaveAttribute('data-color-theme', 'dark');
+		await page.waitForTimeout(900);
+		await shootPhone(page, 'phone_home_dark');
+
+		await configure(page, { simplifiedMobileUI: true });
 		await page.goto('/m/sessions/ab12cd');
 		await expect(page.getByText('Is self-hosting worth it')).toBeVisible();
 		await page.waitForTimeout(600);
@@ -1063,9 +1144,10 @@ test.describe('screenshots', () => {
 	});
 
 	/** Last, and from disk, so a frame can never disagree with the picture it surrounds. */
-	test('frames', async ({ page }) => {
+	test('frames', async ({ page, browser }) => {
 		for (const name of WINDOW_SHOTS) await frameWindow(page, name);
 		for (const name of PHONE_SHOTS) await framePhone(page, name);
 		await composeHero(page);
+		await composeSocial(browser);
 	});
 });
