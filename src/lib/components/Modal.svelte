@@ -19,8 +19,6 @@
 
 <Dialog.Root bind:open>
 	<Dialog.Portal to={dialogHost.window ?? 'body'}>
-		<!-- Blurred, not just dimmed: the page behind stays recognisable as context
-		     while losing enough detail to stop competing with the dialog. -->
 		<Dialog.Overlay class="modal-overlay modal-scrim fixed inset-0 z-40" />
 		<!-- Full screen on phones, a floating card from `sm` up. 90vw by 85vh left a 5%
 		     gutter of unreachable page around a dialog that needed every pixel. These
