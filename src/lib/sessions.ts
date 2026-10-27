@@ -3,6 +3,7 @@ import { get } from 'svelte/store';
 import type { ConversationNote } from '$lib/chat/notes';
 import type { OllamaOptions } from '$lib/chat/ollama';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
+import type { ChatToolValues } from '$lib/chatTools';
 import { modelLabel, type Server } from '$lib/connections';
 import { repository } from '$lib/data';
 import { sessionsStore, settingsStore } from '$lib/localStorage';
@@ -132,6 +133,8 @@ export interface Session {
 	pinned?: boolean;
 	/** The middle answer between keeping a conversation in the way and deleting it. Archived ones keep everything and are reachable from the foot of the list. */
 	archived?: boolean;
+	/** The composer's switches as this conversation last had them. Absent until it does, which reads as the settings' defaults. */
+	tools?: Partial<ChatToolValues>;
 }
 
 export interface Editor {
@@ -143,7 +146,7 @@ export interface Editor {
 	webSearch?: boolean;
 	/** Read the pages the message links to, in full, instead of searching around them. */
 	webFetch?: boolean;
-	/** Per-conversation tool toggles, seeded from the global settings each time a session loads. */
+	/** The composer's switches mirror `session.tools`, falling back to the settings' defaults. */
 	interactiveChoices?: boolean;
 	sendCurrentDate?: boolean;
 	/** Allow native model reasoning (Ollama). Default on (auto-detected); off never requests it. */

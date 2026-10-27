@@ -12,7 +12,7 @@
 	} from '$lib/chat/commands';
 	import { mentionPrefix, splitMentions } from '$lib/chat/mentions';
 	import { chatDefaultsConfig } from '$lib/chatDefaults';
-	import { buildChatTools, toolLabels } from '$lib/chatTools';
+	import { buildChatTools, toolLabels, type ChatToolValues } from '$lib/chatTools';
 	import Button from '$lib/components/Button.svelte';
 	import ImageDrop from '$lib/components/ImageDrop.svelte';
 	import { supportsReasoningToggle } from '$lib/connections';
@@ -70,6 +70,8 @@
 		canCompact: boolean;
 		/** Answers the MCP call the turn is stopped on. */
 		onApproveTool: (allow: boolean) => void;
+		/** Flips one composer switch, which the conversation keeps. */
+		setTool: (key: keyof ChatToolValues, value: boolean) => void;
 	}
 
 	let {
@@ -84,7 +86,8 @@
 		contextThreshold,
 		canCompact,
 		canClear,
-		onApproveTool
+		onApproveTool,
+		setTool
 	}: Props = $props();
 
 	// --- slash commands -------------------------------------------------------
@@ -243,7 +246,7 @@
 				thinking: editor.thinking !== false,
 				mcp: editor.mcp !== false
 			},
-			(key, value) => (editor[key] = value),
+			setTool,
 			{
 				webSearch: searchAvailable,
 				webFetch: $webFetchConfig.available,

@@ -354,6 +354,7 @@
 		canClear={chat.canClear}
 		contextThreshold={chat.compactConfig.compactThreshold}
 		onApproveTool={chat.approveTool}
+		setTool={chat.setTool}
 	/>
 {/snippet}
 

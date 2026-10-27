@@ -6,6 +6,7 @@ import { effectivePrompts } from '$lib/appPrompts';
 import { formatAskAnswer } from '$lib/askChoice';
 import { mergeSampling, type SamplingOptions } from '$lib/chat/options';
 import { chatDefaultsConfig } from '$lib/chatDefaults';
+import type { ChatToolValues } from '$lib/chatTools';
 import type { Server } from '$lib/connections';
 import { repository } from '$lib/data';
 import { resolvePrompt } from '$lib/defaultPrompts';
@@ -115,14 +116,7 @@ export class Conversation implements RunSurface {
 			isCompletionInProgress: false,
 			shouldFocusTextarea: false,
 			isNewSession: true,
-			webSearch: this.searchAvailable && this.#settings.current.webSearchByDefault,
-			webFetch: this.#webFetch.current.available && this.#settings.current.webFetchByDefault,
-			interactiveChoices: this.#settings.current.interactiveChoices,
-			sendCurrentDate: this.#settings.current.sendCurrentDate,
-			thinking: true,
-			// On, like every other tool switch: what makes MCP safe is the question asked
-			// before each call, not a switch somebody has to find first.
-			mcp: this.#settings.current.mcpByDefault,
+			...this.#toolsFor(session),
 			// Declared rather than left undefined: Svelte refuses `bind:` against a prop
 			// with a fallback when the bound value is undefined, and reattaching to a run
 			// in progress hit that before the first turn had set it.
@@ -196,10 +190,7 @@ export class Conversation implements RunSurface {
 			? { serverId: session.model.serverId, name: session.model.name }
 			: null;
 		this.editor.isNewSession = !session?.messages?.length;
-		this.editor.interactiveChoices = this.#settings.current.interactiveChoices;
-		this.editor.sendCurrentDate = this.#settings.current.sendCurrentDate;
-		this.editor.thinking = true;
-		this.editor.mcp = this.#settings.current.mcpByDefault;
+		Object.assign(this.editor, this.#toolsFor(session));
 		this.editor.pendingApproval = undefined;
 		if (entry.atBottom !== false) void this.#view.scrollToBottom();
 
@@ -207,11 +198,8 @@ export class Conversation implements RunSurface {
 		const boundPersona = this.session.personaId
 			? this.#personas.current.find((p) => p.id === this.session.personaId)
 			: null;
-		if (boundPersona) {
-			this.editor.webSearch = this.searchAvailable && !!boundPersona.webSearch;
-			// Heal the model if it wasn't resolvable when the conversation was created.
-			if (!this.session.model && boundPersona.model) this.model = boundPersona.model;
-		}
+		// Heal the model if it wasn't resolvable when the conversation was created.
+		if (boundPersona && !this.session.model && boundPersona.model) this.model = boundPersona.model;
 
 		if (entry.pending) {
 			await this.#submitHandover(entry.pending);
@@ -277,6 +265,37 @@ export class Conversation implements RunSurface {
 		await tick();
 		this.submit();
 	}
+
+	/**
+	 * The composer's switches for `session`: what it last had, over the settings'
+	 * defaults, over a persona's own web-search preference. A tool this instance no
+	 * longer offers reads as off, whatever was stored.
+	 */
+	#toolsFor(session: Session): ChatToolValues {
+		const settings = this.#settings.current;
+		const persona = session.personaId
+			? this.#personas.current.find((p) => p.id === session.personaId)
+			: null;
+		const tools: ChatToolValues = {
+			webSearch: persona ? !!persona.webSearch : settings.webSearchByDefault,
+			webFetch: settings.webFetchByDefault,
+			interactiveChoices: settings.interactiveChoices,
+			sendCurrentDate: settings.sendCurrentDate,
+			thinking: true,
+			mcp: settings.mcpByDefault,
+			...session.tools
+		};
+		tools.webSearch &&= this.searchAvailable;
+		tools.webFetch &&= this.#webFetch.current.available;
+		return tools;
+	}
+
+	/** One switch flipped in the composer. Written into the conversation, and saved unless it has not been started yet: the first message saves it. */
+	setTool = (key: keyof ChatToolValues, value: boolean): void => {
+		this.editor[key] = value;
+		this.session.tools = { ...this.session.tools, [key]: value };
+		if (!this.editor.isNewSession) this.save();
+	};
 
 	/** Called by whoever draws it, so this class keeps no effects of its own. */
 	rememberDraft = (): void => {
@@ -482,6 +501,17 @@ export class Conversation implements RunSurface {
 		}
 
 		try {
+			// What the turn ran with is what the conversation reopens with, including
+			// switches handed over from the home page.
+			this.session.tools = {
+				webSearch: !!this.editor.webSearch,
+				webFetch: !!this.editor.webFetch,
+				interactiveChoices: !!this.editor.interactiveChoices,
+				sendCurrentDate: !!this.editor.sendCurrentDate,
+				thinking: this.editor.thinking !== false,
+				mcp: !!this.editor.mcp
+			};
+			this.save();
 			// The server reads the conversation to write into it, so everything this tab
 			// has to say must have landed. Ordinary saves are coalesced, which is wrong for
 			// the message the turn is about to answer.
