@@ -13,6 +13,7 @@
 	import { generateRandomId } from '$lib/utils';
 
 	import Messages from '../../../sessions/[id]/Messages.svelte';
+	import ToolApproval from '../../../sessions/[id]/ToolApproval.svelte';
 	import Composer from './Composer.svelte';
 
 	/**
@@ -89,7 +90,6 @@
 				handleRetry={chat.retry}
 				chooseAnswer={chat.answerChoice}
 				pendingChoice={chat.pendingChoice}
-				onApproveTool={chat.approveTool}
 				isCompacting={chat.isCompacting}
 				onCancelCompaction={chat.cancelCompaction}
 				onAddMention={chat.addMention}
@@ -101,6 +101,13 @@
 		<!-- Inside the sheet, above the tab bar, in the flow: it reserves its own room,
 		     so the thread scrolls to a foot it can reach. -->
 		<div class="shrink-0 px-3 pb-[calc(var(--safe-bottom)+5.5rem)]">
+			{#if chat.editor.pendingApproval}
+				{#key chat.editor.pendingApproval.id}
+					<div class="mb-2">
+						<ToolApproval request={chat.editor.pendingApproval} onDecide={chat.approveTool} />
+					</div>
+				{/key}
+			{/if}
 			<Composer
 				bind:editor={chat.editor}
 				onSubmit={chat.submit}

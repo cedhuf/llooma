@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Check, Plug, X } from '@lucide/svelte';
 	import { quadOut } from 'svelte/easing';
-	import { fly } from 'svelte/transition';
+	import { slide } from 'svelte/transition';
 
 	import LL from '$i18n/i18n-svelte';
 	import type { McpApprovalRequest } from '$lib/mcp';
@@ -18,8 +18,9 @@
 	 * yes without reading, and that moves the responsibility without moving the
 	 * decision.
 	 *
-	 * One component for every surface, at the foot of the thread, just above the
-	 * composer where the eye already is.
+	 * A drawer opening out of the composer's top edge, on every surface: answering is
+	 * the person's move, so it sits where their hand already is. Narrower than the
+	 * composer, so it reads as belonging to it rather than replacing it.
 	 */
 	let {
 		request,
@@ -46,10 +47,11 @@
 	}
 </script>
 
+<!-- Tucked under the composer's top edge by the gap between them, so the two read
+     as one object. -->
 <div
-	class="approval border-accent/40 bg-shade-0 flex flex-col gap-3 rounded-xl border p-3"
-	in:fly={{ y: 12, duration: 220, easing: quadOut }}
-	out:fly={{ y: 6, duration: 140, easing: quadOut }}
+	class="border-accent/40 bg-shade-0 mx-4 -mb-2 flex flex-col gap-3 rounded-t-xl border border-b-0 p-3 pb-5"
+	transition:slide={{ duration: 220, easing: quadOut }}
 	role="alertdialog"
 	aria-label={$LL.mcpApprovalTitle()}
 >
@@ -106,27 +108,3 @@
 	     not stand forever, and running out counts as no. -->
 	<p class="text-muted text-[11px]">{$LL.mcpApprovalTimeoutHint()}</p>
 </div>
-
-<style lang="postcss">
-	/* A ring that fades once, on arrival: enough to pull the eye to a card that
-	   appeared while the answer was being written, and then out of the way. Not a
-	   pulse: something that keeps moving under a decision is pressure. */
-	.approval {
-		animation: approval-arrive 900ms ease-out 1;
-	}
-
-	@keyframes approval-arrive {
-		from {
-			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 45%, transparent);
-		}
-		to {
-			box-shadow: 0 0 0 10px transparent;
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.approval {
-			animation: none;
-		}
-	}
-</style>

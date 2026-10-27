@@ -32,6 +32,7 @@
 	import MentionMenu from './MentionMenu.svelte';
 	import PromptAttachments from './PromptAttachments.svelte';
 	import SlashMenu from './SlashMenu.svelte';
+	import ToolApproval from './ToolApproval.svelte';
 
 	const searchAvailable = $derived($searchConfig.available);
 
@@ -67,6 +68,8 @@
 		canClear: boolean;
 		/** False while a compaction is already running, or when there is nothing to compact. */
 		canCompact: boolean;
+		/** Answers the MCP call the turn is stopped on. */
+		onApproveTool: (allow: boolean) => void;
 	}
 
 	let {
@@ -80,7 +83,8 @@
 		runCommand,
 		contextThreshold,
 		canCompact,
-		canClear
+		canClear,
+		onApproveTool
 	}: Props = $props();
 
 	// --- slash commands -------------------------------------------------------
@@ -375,6 +379,11 @@
 	class="prompt-editor pointer-events-auto w-full px-4 pt-2 pb-[max(1rem,var(--safe-bottom))] lg:px-6 lg:pb-4 xl:px-8"
 >
 	<div class="prompt-editor__form mx-auto flex h-full min-h-0 w-full max-w-[84ch] flex-col gap-y-2">
+		{#if editor.pendingApproval}
+			{#key editor.pendingApproval.id}
+				<ToolApproval request={editor.pendingApproval} onDecide={onApproveTool} />
+			{/key}
+		{/if}
 		{#if pendingChoice?.choices && !choiceBypassed}
 			{@const choice = pendingChoice}
 			<!-- A quick-choice temporarily takes over the composer: one question at a time,
