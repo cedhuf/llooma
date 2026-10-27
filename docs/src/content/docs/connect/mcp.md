@@ -168,6 +168,9 @@ The composer's lightning menu carries an **MCP tools** switch, off by default. I
 is one switch for all your servers rather than one per server, and what it
 decides is whether the catalogues are sent at all: a conversation with no use for
 forty tool definitions should not be paying for them in every request it makes.
+The conversation keeps it, like the menu's other switches: a reload or a trip to
+another conversation leaves it as you set it, and a new conversation starts from
+the default in _Settings → Tools_.
 
 Off is the default on purpose, and it is a narrowing rather than a saving. Sending
 the catalogues is what makes a call possible at all, so a conversation that never
