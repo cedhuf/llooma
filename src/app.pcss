@@ -330,15 +330,11 @@
 /*
  * What a dialog puts between itself and the page: flat black, no blur, which is
  * what shadcn and most systems settle on. A blurred page reads as a smear rather
- * than as something that stepped back. Black on both themes, since a theme colour
- * would lighten a dark one.
+ * than as something that stepped back. One black for both themes, since a theme
+ * colour would lighten a dark one.
  */
 @utility modal-scrim {
-	background-color: rgb(0 0 0 / 0.4);
-
-	&:where([data-color-theme='dark'], [data-color-theme='dark'] *) {
-		background-color: rgb(0 0 0 / 0.6);
-	}
+	background-color: rgb(0 0 0 / 0.5);
 }
 
 /* The toast stack recedes rather than stopping dead.
