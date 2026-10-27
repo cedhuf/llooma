@@ -86,6 +86,9 @@ export function applyRunEvent(
 
 		case 'trace':
 			editor.reasoningTrace = [...(editor.reasoningTrace ?? []), event.step];
+			// The round's thinking now lives in the timeline; kept live as well, it showed
+			// twice for as long as the round's tool calls took, an approval included.
+			if (event.step.type === 'reasoning') editor.reasoning = '';
 			return;
 
 		case 'searching':
